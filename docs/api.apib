@@ -1,0 +1,122 @@
+FORMAT: 1A
+
+# Changelog
+
+  - <2021-11-25 Thu> :: init draft
+
+# General
+
+## Structure
+
+All requests and responses should be `Content-Type: application/json`.
+
+## Supported platforms for proofing
+
+See [README.md](./README.md)
+
+# Group Proof
+
+## Query a proof payload to signature [POST /proof/payload]
+
++ Request (application/json)
+
+  + Attributes (object)
+
+    + action (string, required) - Action (`create` / `delete`)
+    + platform (string, required) - Target platform. See table above for all available platforms. See table in [README.md](./README.md) for all available values.
+    + identity (string, required) - Identity in target platform to proof. Usually a "username" or "screen name". See [README.md](./README.md).
+    + public_key (string, required) - Public key of NextID Persona to connect to. Should be secp256k1 curve (for now), 65-bytes long (which means uncompressed) and stringified into hex form (`/^0x[0-9a-f]{130}$/`).
+
+  + Body
+
+        {
+          "action": "create",
+          "platform": "twitter",
+          "identity": "my_twitter_screen_name",
+          "public_key": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575"
+        }
+
++ Response 200 (application/json)
+
+  + Attributes (object)
+
+    + payload (string, required) - Raw string to be sent to `personal_sign`
+
+  + Body
+
+        {
+          "payload": "{\"action\":\"add\",\"created_at\":1638863332,\"identity\":\"my_twitter_screen_name\",\"platform\":\"twitter\",\"prev\":null}"
+        }
+
+## Create a proof modification [POST /proof]
+
++ Request (application/json)
+
+  + Attributes (object)
+
+    + action (string, required) - Action (`create` / `delete`)
+    + platform (string, required) - Target platform. See table above for all available platforms. See table above for all available values.
+    + identity (string, required) - Identity in target platform to proof. Usually a "username" or "screen name". See [README.md](./README.md).
+    + proof_location (string, optional) - Location where public-accessable proof post is set. See [README.md](./README.md).
+    + public_key (string, required) - Public key of NextID Persona to connect to. Should be secp256k1 curve (for now), 65-bytes long (uncompressed) and stringified into hex form (`0x[0-9a-f]{130}`).
+
+  + Body
+
+        {
+          "action": "create",
+          "platform": "twitter",
+          "identity": "my_twitter_screen_name",
+          "proof_location": "1415362679095635970",
+          "public_key": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575"
+        }
+
++ Response 201 (application/json)
+
+    + Attributes
+
+      + success (boolean, required) - Server proceeded this request successfully or not.
+      + reason (string, required) - If failed, hopefully this will contains some info you need. Empty string if succeeded.
+
+    + Body
+
+        {
+          "success": false,
+          "reason": "Tweet author is not the same as given identity."
+        }
+
+## Query an existed binding [GET /proof]
+
++ Request
+
+    + Parameters
+
+      + platform (string, required) - Proof platform
+      + identity (string, required) - Identity on target platform
+
+    + Example
+
+      `GET /proof?platform=twitter&identity=my_twitter_screen_name`
+
++ Response 200 (application/json)
+
+  + Attributes
+
+    + ids (array[object], required) - All IDs found under same Persona binding. Will be empty array if not found.
+      + platform (string, required) - Platform (incl. `NextID`)
+      + identity (string, required) - Identity on that platform (incl. public key in `NextID`)
+      + proof_location (string, required) - Proof location
+
+  + Body
+
+        {
+          "ids": [{
+            "platform": "NextID",
+            "identity": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575"
+          }, {
+            "platform": "twitter",
+            "identity": "my_twitter_screen_name"
+          }, {
+            "platform": "facebook",
+            "identity": "my_facebook_username"
+          }]
+        }

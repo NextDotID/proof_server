@@ -1,0 +1,15 @@
+version: "3.7"
+services:
+  postgres:
+    image: postgres:13-alpine
+    ports:
+    - 127.0.0.1:5433:5432
+    environment:
+      POSTGRES_USER: proof_server
+      POSTGRES_PASSWORD: iehohp6iep5eez5fai3eechohdieQuee
+      POSTGRES_DB: proof_server_dev
+    volumes:
+    - proof_server_db:/var/lib/postgresql/data
+
+volumes:
+  proof_server_db: {}
