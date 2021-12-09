@@ -1,7 +1,7 @@
 {
   "db": {
     "host": "localhost",
-    "port": "5433",
+    "port": 5433,
     "user": "proof_server",
     "password": "iehohp6iep5eez5fai3eechohdieQuee",
     "db_name": "proof_server_dev",

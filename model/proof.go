@@ -4,34 +4,22 @@ import (
 	"time"
 
 	"golang.org/x/xerrors"
-	"gorm.io/gorm"
+
+	"github.com/nextdotid/proof-server/types"
 )
-
-type Platform string
-
-// PlatformAvailable is a list of all current supported platforms, DO NOT MODIFY IT IN RUNTIME.
-var PlatformAvailable = struct {
-	Twitter  Platform
-	Keybase  Platform
-	Ethereum Platform
-}{
-	Twitter:  "twitter",
-	Keybase:  "keybase",
-	Ethereum: "ethereum",
-}
 
 type Proof struct {
 	ID        uint `gorm:"primarykey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	PreviousProof uint     `gorm:"index;not null"`
+	PreviousProof uint `gorm:"index;not null"`
 	// Persona is public key of user persona (string, /0x[0-9a-f]{130}/)
-	Persona       string   `gorm:"index;not null"`
-	Platform      Platform `gorm:"index;not null"`
-	Identity      string   `gorm:"index;not null"`
-	Link          string   `gorm:"not null"`
-	Signature     string   `gorm:"not null"`
+	Persona   string         `gorm:"index;not null"`
+	Platform  types.Platform `gorm:"index;not null"`
+	Identity  string         `gorm:"index;not null"`
+	Link      string         `gorm:"not null"`
+	Signature string         `gorm:"not null"`
 }
 
 func (Proof) TableName() string {

@@ -27,7 +27,7 @@ func Init()  {
 	}
 
 	DB.AutoMigrate(
-		// TODO
+		&Proof{},
 	)
 	l.Info("database initialized")
 }
