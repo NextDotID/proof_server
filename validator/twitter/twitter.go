@@ -108,7 +108,7 @@ func (twitter *Twitter) validateText() bool {
 		return false
 	}
 	sigHex := common.Bytes2Hex(sigBytes)
-	return util.ValidateSignature(twitter.GenerateSignPayload(), sigHex, pubkeyHex)
+	return util.ValidatePersonalSignature(twitter.GenerateSignPayload(), sigHex, pubkeyHex)
 }
 
 func initClient() {
