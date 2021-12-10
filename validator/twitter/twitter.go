@@ -5,13 +5,12 @@ import (
 	"encoding/json"
 	"regexp"
 	"strconv"
-	"time"
 
 	t "github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nextdotid/proof-server/config"
-	"github.com/nextdotid/proof-server/util"
+	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/sirupsen/logrus"
 
 	"github.com/nextdotid/proof-server/types"
@@ -31,7 +30,7 @@ type Twitter struct {
 }
 
 const (
-	TEMPLATE = "^Prove myself: I'm (0x[0-9a-f]{130}) on NextID. Signature: (.*)$"
+	TEMPLATE = "^Prove myself: I'm 0x([0-9a-f]{66}) on NextID. Signature: (.*)$"
 )
 
 var (
@@ -41,14 +40,11 @@ var (
 )
 
 func (twitter *Twitter) GenerateSignPayload() (payload string) {
-	now := time.Now().Unix()
-
 	var payloadStruct map[string]interface{}
 	payloadStruct = map[string]interface{}{
 		"action":     string(twitter.Action),
 		"platform":   "twitter",
 		"identity":   twitter.Identity,
-		"created_at": now,
 		"prev":       nil,
 	}
 	if twitter.Previous != "" {
@@ -82,8 +78,9 @@ func (twitter *Twitter) Validate() (result bool) {
 		return false
 	}
 
-	twitter.TweetText = tweet.Text
-	l.Debugf("Tweet text for %s: %s", twitter.ProofLocation, twitter.TweetText)
+	twitter.TweetText = tweet.FullText
+	l.Debugf("Tweet: %+v", tweet)
+
 
 	return twitter.validateText()
 }
@@ -107,8 +104,7 @@ func (twitter *Twitter) validateText() bool {
 		l.Warnf("Error when decoding signature %s: %s", sigBase64, err.Error())
 		return false
 	}
-	sigHex := common.Bytes2Hex(sigBytes)
-	return util.ValidatePersonalSignature(twitter.GenerateSignPayload(), sigHex, pubkeyHex)
+	return mycrypto.ValidatePersonalSignature(twitter.GenerateSignPayload(), sigBytes, pubkeyHex)
 }
 
 func initClient() {

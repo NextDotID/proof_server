@@ -1,4 +1,4 @@
-package util
+package crypto
 
 import (
 	"crypto/ecdsa"
@@ -11,8 +11,9 @@ import (
 )
 
 // ValidatePersonalSignature checks whether (eth.personal.sign) signature,
-// payload and pubkey are matched.  Pubkey should be "0x...." string.
-func ValidatePersonalSignature(payload, signature, pubkey string) bool {
+// payload and pubkey are matched.
+// Pubkey and signature should be without "0x".
+func ValidatePersonalSignature(payload string, signature []byte, pubkey string) bool {
 	pubkeyGiven, err := crypto.UnmarshalPubkey(common.Hex2Bytes(pubkey))
 	if err != nil {
 		logrus.Warnf("Error when converting pubkey: %s", err.Error())
@@ -20,20 +21,26 @@ func ValidatePersonalSignature(payload, signature, pubkey string) bool {
 	}
 
 	// Recover pubkey from signature
-	signBytes := common.Hex2Bytes(signature)
-	if signBytes[64] != 27 && signBytes[64] != 28 {
-		logrus.Warn("Error: Signature Recovery ID not supported")
+	if len(signature) != 65 {
+		logrus.Warnf("Error: Signature length invalid: %d instead of 65", len(signature))
 		return false
 	}
-	signBytes[64] -= 27
+	if signature[64] == 27 || signature[64] == 28 {
+		signature[64] -= 27
+	}
 
-	pubkeyRecovered, err := crypto.SigToPub(signPersonalHash([]byte(payload)), signBytes)
+	if signature[64] != 0 && signature[64] != 1 {
+		logrus.Warnf("Error: Signature Recovery ID not supported: %d", signature[64])
+		return false
+	}
+
+	pubkeyRecovered, err := crypto.SigToPub(signPersonalHash([]byte(payload)), signature)
 	if err != nil {
 		logrus.Warnf("Error when recovering pubkey from signature: %s", err.Error())
 		return false
 	}
 
-	return pubkeyGiven.Equal(&pubkeyRecovered)
+	return crypto.PubkeyToAddress(*pubkeyGiven) == crypto.PubkeyToAddress(*pubkeyRecovered)
 }
 
 // GenerateKeypair generates a keypair.

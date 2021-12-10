@@ -6,6 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/types"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,13 +14,14 @@ var (
 	tweet = Twitter{
 		Previous:      "",
 		Action:        types.Actions.Create,
-		Pubkey:        common.HexToHash("0x1234"),
-		Identity:      "846kizuQ",
-		ProofLocation: "1466752395921477633",
+		Pubkey:        common.HexToHash("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3"),
+		Identity:      "yeiwb",
+		ProofLocation: "1469221200140574721",
 	}
 )
 
 func before_each(t *testing.T)  {
+	logrus.SetLevel(logrus.DebugLevel)
 	config.Init("../../config/config.test.json")
 	// model.Init()
 }
@@ -29,7 +31,7 @@ func Test_Validate(t *testing.T) {
 		before_each(t)
 
 		newTweet := tweet
-		assert.False(t, newTweet.Validate())
+		assert.True(t, newTweet.Validate())
 		assert.Greater(t, len(newTweet.TweetText), 10)
 		assert.Empty(t, tweet.TweetText)
 	})
