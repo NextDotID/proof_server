@@ -9,6 +9,7 @@ import (
 	t "github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/nextdotid/proof-server/config"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/sirupsen/logrus"
@@ -42,10 +43,10 @@ var (
 func (twitter *Twitter) GenerateSignPayload() (payload string) {
 	var payloadStruct map[string]interface{}
 	payloadStruct = map[string]interface{}{
-		"action":     string(twitter.Action),
-		"platform":   "twitter",
-		"identity":   twitter.Identity,
-		"prev":       nil,
+		"action":   string(twitter.Action),
+		"platform": "twitter",
+		"identity": twitter.Identity,
+		"prev":     nil,
 	}
 	if twitter.Previous != "" {
 		payloadStruct["prev"] = twitter.Previous
@@ -68,7 +69,9 @@ func (twitter *Twitter) Validate() (result bool) {
 		return false
 	}
 
-	tweet, _, err := client.Statuses.Show(tweetID, nil)
+	tweet, _, err := client.Statuses.Show(tweetID, &t.StatusShowParams{
+		TweetMode: "extended",
+	})
 	if err != nil {
 		l.Warnf("Error when getting tweet %s: %s", twitter.ProofLocation, err.Error())
 		return false
@@ -79,9 +82,6 @@ func (twitter *Twitter) Validate() (result bool) {
 	}
 
 	twitter.TweetText = tweet.FullText
-	l.Debugf("Tweet: %+v", tweet)
-
-
 	return twitter.validateText()
 }
 
@@ -94,7 +94,13 @@ func (twitter *Twitter) validateText() bool {
 	}
 
 	pubkeyHex := matched[1]
-	if twitter.Pubkey.Hex() != pubkeyHex {
+	pubkeyRecovered, err := crypto.DecompressPubkey(common.Hex2Bytes(pubkeyHex))
+	if err != nil {
+		l.Warnf("Pubkey recover failed")
+		return false
+	}
+	if twitter.Pubkey.Hex() != ("0x" + common.Bytes2Hex(crypto.CompressPubkey(pubkeyRecovered))) {
+		l.Warnf("pubkey mismatch")
 		return false
 	}
 
