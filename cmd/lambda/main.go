@@ -1,5 +1,99 @@
 package main
 
-func main() {
+import (
+	"context"
+	"encoding/json"
+	"os"
 
+	"github.com/akrylysov/algnhsa"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
+	myconfig "github.com/nextdotid/proof-server/config"
+	"github.com/nextdotid/proof-server/controller"
+	"github.com/nextdotid/proof-server/model"
+	"github.com/sirupsen/logrus"
+)
+
+var (
+	initialized = false
+)
+
+func initDB(cfg aws.Config) {
+	model.Init()
+}
+
+func init() {
+	cfg, err := config.LoadDefaultConfig(
+		context.Background(),
+		// TODO: change region
+		config.WithRegion("ap-east-1"),
+	)
+	if err != nil {
+		logrus.Fatalf("Unable to load AWS config: %s", err)
+	}
+	initConfigFromAwsSecret()
+	logrus.SetLevel(logrus.WarnLevel)
+
+	initDB(cfg)
+	controller.Init()
+}
+
+func main() {
+	algnhsa.ListenAndServe(controller.Engine, nil)
+}
+
+func initConfigFromAwsSecret() {
+	if initialized {
+		return
+	}
+	secret_name := getE("SECRET_NAME", "")
+	region := getE("SECRET_REGION", "")
+
+	// Create a Secrets Manager client
+	cfg, err := config.LoadDefaultConfig(
+		context.Background(),
+		config.WithRegion(region),
+	)
+	if err != nil {
+		logrus.Fatalf("Unable to load SDK config: %v", err)
+	}
+
+	client := secretsmanager.NewFromConfig(cfg)
+	input := secretsmanager.GetSecretValueInput{
+		SecretId:     aws.String(secret_name),
+		VersionStage: aws.String("AWSCURRENT"),
+	}
+	result, err := client.GetSecretValue(context.Background(), &input)
+	if err != nil {
+		logrus.Fatalf("Error occured: %s", err.Error())
+	}
+
+	// Decrypts secret using the associated KMS CMK.
+	// Depending on whether the secret is a string or binary, one of these fields will be populated.
+	if result.SecretString == nil {
+		logrus.Fatalf("cannot get secret string")
+	}
+	secret_string := *result.SecretString
+
+	err = json.Unmarshal([]byte(secret_string), myconfig.C)
+	if err != nil {
+		logrus.Fatalf("Error during parsing config JSON: %v", err)
+	}
+	initialized = true
+}
+
+func getE(env_key, default_value string) string {
+	result := os.Getenv(env_key)
+	if len(result) == 0 {
+		if len(default_value) > 0 {
+			return default_value
+		} else {
+			logrus.Fatalf("ENV %s must be given! Abort.", env_key)
+			return ""
+		}
+
+	} else {
+		return result
+	}
 }

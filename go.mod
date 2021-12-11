@@ -3,18 +3,31 @@ module github.com/nextdotid/proof-server
 go 1.17
 
 require (
+	github.com/aws/aws-sdk-go-v2 v1.11.2
+	github.com/aws/aws-sdk-go-v2/config v1.11.0
+	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.10.2
 	github.com/dghubble/go-twitter v0.0.0-20211115160449-93a8679adecb
 	github.com/dghubble/oauth1 v0.7.0
+	github.com/gin-gonic/gin v1.7.7
 	github.com/sirupsen/logrus v1.8.1
 )
 
 require (
+	github.com/aws/aws-lambda-go v1.9.0 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.6.4 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.8.2 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.2 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.0.2 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.5.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.6.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.11.1 // indirect
+	github.com/aws/smithy-go v1.9.0 // indirect
 	github.com/btcsuite/btcd v0.20.1-beta // indirect
 	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dghubble/sling v1.4.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/gin-gonic/gin v1.7.7 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
@@ -45,6 +58,7 @@ require (
 )
 
 require (
+	github.com/akrylysov/algnhsa v0.12.1
 	github.com/ethereum/go-ethereum v1.10.13
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
