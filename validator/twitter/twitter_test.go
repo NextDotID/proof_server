@@ -28,7 +28,6 @@ func before_each(t *testing.T)  {
 		panic(err)
 	}
 	tweet.Pubkey = pubkey
-	// model.Init()
 }
 
 func Test_Validate(t *testing.T) {

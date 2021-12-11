@@ -9,7 +9,6 @@ import (
 
 	t "github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/nextdotid/proof-server/config"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
