@@ -1,6 +1,7 @@
 package twitter
 
 import (
+	"crypto/ecdsa"
 	"encoding/base64"
 	"encoding/json"
 	"regexp"
@@ -21,7 +22,7 @@ type Twitter struct {
 	// Previous signature hex ("0x.....")
 	Previous string
 	Action   types.Action
-	Pubkey   common.Hash
+	Pubkey   *ecdsa.PublicKey
 	// Twitter screen name
 	Identity string
 	// TweetID
@@ -94,13 +95,13 @@ func (twitter *Twitter) validateText() bool {
 	}
 
 	pubkeyHex := matched[1]
-	pubkeyRecovered, err := crypto.DecompressPubkey(common.Hex2Bytes(pubkeyHex))
+	pubkeyRecovered, err := mycrypto.StringToPubkey(pubkeyHex)
 	if err != nil {
-		l.Warnf("Pubkey recover failed")
+		l.Warnf("Pubkey recover failed: %s", err.Error())
 		return false
 	}
-	if twitter.Pubkey.Hex() != ("0x" + common.Bytes2Hex(crypto.CompressPubkey(pubkeyRecovered))) {
-		l.Warnf("pubkey mismatch")
+	if crypto.PubkeyToAddress(*twitter.Pubkey) != crypto.PubkeyToAddress(*pubkeyRecovered) {
+		l.Warnf("Pubkey mismatch")
 		return false
 	}
 
@@ -110,7 +111,7 @@ func (twitter *Twitter) validateText() bool {
 		l.Warnf("Error when decoding signature %s: %s", sigBase64, err.Error())
 		return false
 	}
-	return mycrypto.ValidatePersonalSignature(twitter.GenerateSignPayload(), sigBytes, pubkeyHex)
+	return mycrypto.ValidatePersonalSignature(twitter.GenerateSignPayload(), sigBytes, pubkeyRecovered)
 }
 
 func initClient() {

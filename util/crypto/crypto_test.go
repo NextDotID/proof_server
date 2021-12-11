@@ -3,9 +3,6 @@ package crypto
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +13,7 @@ func Test_SignVerify(t *testing.T) {
 		signature, err := SignPersonal([]byte(payload), sk)
 		assert.Nil(t, err)
 
-		result := ValidatePersonalSignature(payload, signature, common.Bytes2Hex(crypto.FromECDSAPub(pk)))
+		result := ValidatePersonalSignature(payload, signature, pk)
 		assert.True(t, result)
 	})
 
@@ -26,7 +23,7 @@ func Test_SignVerify(t *testing.T) {
 		signature, _ := SignPersonal([]byte(payload), sk)
 
 		new_pk, _ := GenerateKeypair()
-		result := ValidatePersonalSignature(payload, signature, common.Bytes2Hex(crypto.FromECDSAPub(new_pk)))
+		result := ValidatePersonalSignature(payload, signature, new_pk)
 		assert.False(t, result)
 	})
 
@@ -35,7 +32,7 @@ func Test_SignVerify(t *testing.T) {
 		pk, sk := GenerateKeypair()
 		signature, _ := SignPersonal([]byte(payload), sk)
 
-		result := ValidatePersonalSignature("foobar", signature, common.Bytes2Hex(crypto.FromECDSAPub(pk)))
+		result := ValidatePersonalSignature("foobar", signature, pk)
 		assert.False(t, result)
 	})
 
@@ -43,7 +40,7 @@ func Test_SignVerify(t *testing.T) {
 		pk, sk := GenerateKeypair()
 		signature, _ := SignPersonal([]byte("foobar"), sk)
 
-		result := ValidatePersonalSignature("test123", signature, common.Bytes2Hex(crypto.FromECDSAPub(pk)))
+		result := ValidatePersonalSignature("test123", signature, pk)
 		assert.False(t, result)
 	})
 }

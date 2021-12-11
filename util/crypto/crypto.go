@@ -3,6 +3,7 @@ package crypto
 import (
 	"crypto/ecdsa"
 	"fmt"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -13,13 +14,7 @@ import (
 // ValidatePersonalSignature checks whether (eth.personal.sign) signature,
 // payload and pubkey are matched.
 // Pubkey and signature should be without "0x".
-func ValidatePersonalSignature(payload string, signature []byte, pubkey string) bool {
-	pubkeyGiven, err := crypto.UnmarshalPubkey(common.Hex2Bytes(pubkey))
-	if err != nil {
-		logrus.Warnf("Error when converting pubkey: %s", err.Error())
-		return false
-	}
-
+func ValidatePersonalSignature(payload string, signature []byte, pubkey *ecdsa.PublicKey) bool {
 	// Recover pubkey from signature
 	if len(signature) != 65 {
 		logrus.Warnf("Error: Signature length invalid: %d instead of 65", len(signature))
@@ -40,7 +35,7 @@ func ValidatePersonalSignature(payload string, signature []byte, pubkey string) 
 		return false
 	}
 
-	return crypto.PubkeyToAddress(*pubkeyGiven) == crypto.PubkeyToAddress(*pubkeyRecovered)
+	return crypto.PubkeyToAddress(*pubkey) == crypto.PubkeyToAddress(*pubkeyRecovered)
 }
 
 // GenerateKeypair generates a keypair.
@@ -66,4 +61,29 @@ func SignPersonal(payload []byte, sk *ecdsa.PrivateKey) (signature []byte, err e
 func signPersonalHash(data []byte) []byte {
 	messsage := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(data), data)
 	return crypto.Keccak256([]byte(messsage))
+}
+
+// StringToPubkey is compatible with comressed / uncompressed pubkey
+// hex, and with / without '0x' head.
+func StringToPubkey(pk_str string) (*ecdsa.PublicKey, error) {
+	pk_str_parsed := strings.TrimPrefix(pk_str, "0x")
+	pk_str_parsed = strings.ToLower(pk_str_parsed)
+	pk_bytes := common.Hex2Bytes(pk_str_parsed)
+	return BytesToPubKey(pk_bytes)
+}
+
+// BytesToPubKey is compatible with comressed / uncompressed pubkey
+// bytes.
+func BytesToPubKey(pk_bytes []byte) (*ecdsa.PublicKey, error) {
+	var result *ecdsa.PublicKey
+	var err error
+	if len(pk_bytes) == 33 { // compressed
+		result, err = crypto.DecompressPubkey(pk_bytes)
+	} else {
+		result, err = crypto.UnmarshalPubkey(pk_bytes)
+	}
+	if err != nil {
+		return nil, xerrors.Errorf("%w", err)
+	}
+	return result, nil
 }
