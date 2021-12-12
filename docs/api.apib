@@ -22,7 +22,7 @@ See [README.md](./README.md)
 
 # Group Proof
 
-## Query a proof payload to signature and to post [POST /proof/payload]
+## Query a proof payload to signature and to post [POST /v1/proof/payload]
 
 + Request (application/json)
 
@@ -56,7 +56,7 @@ See [README.md](./README.md)
           "sign_payload": "{\"action\":\"add\",\"identity\":\"my_twitter_screen_name\",\"platform\":\"twitter\",\"prev\":null}"
         }
 
-## Create a proof modification [POST /proof]
+## Create a proof modification [POST /v1/proof]
 
 + Request (application/json)
 
@@ -97,7 +97,7 @@ Request failed.
            "message": "Tweet author is not the same as given identity."
         }
 
-## Query an existed binding [GET /proof]
+## Query an existed binding [GET /v1/proof]
 
 + Request
 
