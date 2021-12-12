@@ -6,19 +6,18 @@ import (
 
 	"github.com/nextdotid/proof-server/config"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
-	"github.com/nextdotid/proof-server/validator"
+	"github.com/nextdotid/proof-server/types"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
 	kb = Keybase{
-		Base: validator.Base{
-			Previous: "",
-			Action:   "create",
-			Pubkey:   nil,
-			Identity: "nykma",
-		},
+		Previous: "",
+		Action:   "create",
+		Pubkey:   nil,
+		Identity: "nykma",
+		Platform: types.Platforms.Keybase,
 	}
 )
 
@@ -49,6 +48,6 @@ func Test_Validate(t *testing.T) {
 
 		newKB := kb
 		assert.Nil(t, newKB.Validate())
-		assert.Greater(t, len(newKB.ProofText), 10)
+		assert.Greater(t, len(newKB.Text), 10)
 	})
 }

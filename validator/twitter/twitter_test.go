@@ -7,21 +7,19 @@ import (
 	"github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/types"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
-	"github.com/nextdotid/proof-server/validator"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
 	tweet = Twitter{
-		Base: validator.Base{
-			Previous:      "",
-			Action:        types.Actions.Create,
-			Pubkey:        nil,
-			Identity:      "yeiwb",
-			ProofLocation: "1469221200140574721",
-		},
-		TweetText: "",
+		Platform:      types.Platforms.Twitter,
+		Previous:      "",
+		Action:        types.Actions.Create,
+		Pubkey:        nil,
+		Identity:      "yeiwb",
+		ProofLocation: "1469221200140574721",
+		Text:          "",
 	}
 )
 
@@ -52,8 +50,8 @@ func Test_Validate(t *testing.T) {
 
 		newTweet := tweet
 		assert.Nil(t, newTweet.Validate())
-		assert.Greater(t, len(newTweet.TweetText), 10)
-		assert.Empty(t, tweet.TweetText)
+		assert.Greater(t, len(newTweet.Text), 10)
+		assert.Empty(t, tweet.Text)
 	})
 
 	t.Run("should return identity error", func(t *testing.T) {

@@ -18,12 +18,7 @@ import (
 	"github.com/nextdotid/proof-server/validator"
 )
 
-type Twitter struct {
-	validator.Base
-
-	// Filled when tweet fetched successfully.
-	TweetText string
-}
+type Twitter validator.Base
 
 const (
 	MATCH_TEMPLATE = "^Prove myself: I'm 0x([0-9a-f]{66}) on NextID. Signature: (.*)$"
@@ -78,12 +73,12 @@ func (twitter *Twitter) Validate() (err error) {
 		return xerrors.Errorf("Screen name mismatch: expect %s - actual %s", twitter.Identity, tweet.User.ScreenName)
 	}
 
-	twitter.TweetText = tweet.FullText
+	twitter.Text = tweet.FullText
 	return twitter.validateText()
 }
 
 func (twitter *Twitter) validateText() (err error) {
-	matched := re.FindStringSubmatch(twitter.TweetText)
+	matched := re.FindStringSubmatch(twitter.Text)
 	if len(matched) < 3 {
 		return xerrors.Errorf("Tweet struct mismatch. Found: %+v", matched)
 	}
@@ -102,6 +97,7 @@ func (twitter *Twitter) validateText() (err error) {
 	if err != nil {
 		return xerrors.Errorf("Error when decoding signature %s: %s", sigBase64, err.Error())
 	}
+	twitter.Signature = sigBytes
 	return mycrypto.ValidatePersonalSignature(twitter.GenerateSignPayload(), sigBytes, pubkeyRecovered)
 }
 

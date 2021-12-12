@@ -56,32 +56,27 @@ func proofPayload(c *gin.Context) {
 		previous_signature = previous_proof.Signature
 	}
 
+	v := validator.Base{
+		Platform: req.Platform,
+		Previous: previous_signature,
+		Action:   req.Action,
+		Pubkey:   parsed_pubkey,
+		Identity: req.Identity,
+	}
+
 	switch req.Platform {
 	case types.Platforms.Twitter:
-		tweet := twitter.Twitter{
-			Base: validator.Base{
-				Previous: previous_signature,
-				Action:   req.Action,
-				Pubkey:   parsed_pubkey,
-				Identity: req.Identity,
-			},
-		}
+		// FIXME: ??????????????????????????
+		v_performer := twitter.Twitter(v)
 		c.JSON(http.StatusOK, ProofPayloadResponse{
-			PostContent: tweet.GeneratePostPayload(),
-			SignPayload: tweet.GenerateSignPayload(),
+			PostContent: v_performer.GeneratePostPayload(),
+			SignPayload: v_performer.GenerateSignPayload(),
 		})
 	case types.Platforms.Keybase:
-		kb := keybase.Keybase{
-			Base:      validator.Base{
-				Previous:      previous_signature,
-				Action:        req.Action,
-				Pubkey:        parsed_pubkey,
-				Identity:      req.Identity,
-			},
-		}
+		v_performer := keybase.Keybase(v)
 		c.JSON(http.StatusOK, ProofPayloadResponse{
-			PostContent: kb.GeneratePostPayload(),
-			SignPayload: kb.GenerateSignPayload(),
+			PostContent: v_performer.GeneratePostPayload(),
+			SignPayload: v_performer.GenerateSignPayload(),
 		})
 	default:
 		errorResp(c, http.StatusBadRequest, xerrors.New("unknown platform"))

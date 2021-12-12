@@ -11,7 +11,6 @@ import (
 	"github.com/nextdotid/proof-server/validator"
 	"github.com/nextdotid/proof-server/validator/keybase"
 	"github.com/nextdotid/proof-server/validator/twitter"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
 
@@ -42,89 +41,63 @@ func proofUpload(c *gin.Context) {
 		return
 	}
 
-	if err := validateProof(req, proof, pubkey); err != nil {
-		errorResp(c, 400 , xerrors.Errorf("%w", err))
+	validator, err := validateProof(req, proof, pubkey)
+	if err != nil {
+		errorResp(c, 400, xerrors.Errorf("%w", err))
 		return
 	}
 
-	if err := applyUpload(req, proof, pubkey); err != nil {
-		errorResp(c, 400 , xerrors.Errorf("%w", err))
+	if err := applyUpload(req, proof, &validator); err != nil {
+		errorResp(c, 400, xerrors.Errorf("%w", err))
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{})
 }
 
-
-func validateProof(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.PublicKey) error {
+func validateProof(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.PublicKey) (validator.Base, error) {
 	proof_signature := ""
 	if prev != nil {
 		proof_signature = prev.Signature
 	}
+	base := validator.Base{
+		Platform:      req.Platform,
+		Previous:      proof_signature,
+		Action:        req.Action,
+		Pubkey:        pubkey,
+		Identity:      req.Identity,
+		ProofLocation: req.ProofLocation,
+	}
 
 	switch req.Platform {
 	case types.Platforms.Twitter:
-		tweet := twitter.Twitter{
-			Base: validator.Base{
-				Previous:      proof_signature,
-				Action:        req.Action,
-				Pubkey:        pubkey,
-				Identity:      req.Identity,
-				ProofLocation: req.ProofLocation,
-			},
-		}
-		return tweet.Validate()
+		v_performer := twitter.Twitter(base)
+		return base, v_performer.Validate()
 	case types.Platforms.Keybase:
-		kb := keybase.Keybase{
-			Base: validator.Base{
-				Previous:      proof_signature,
-				Action:        req.Action,
-				Pubkey:        pubkey,
-				Identity:      req.Identity,
-			},
-		}
-		return kb.Validate()
+		v_performer := keybase.Keybase(base)
+		return base, v_performer.Validate()
 	default:
-		return xerrors.Errorf("platform not supported: %s", string(req.Platform))
+		return validator.Base{}, xerrors.Errorf("platform not supported: %s", string(req.Platform))
 	}
 }
 
-func applyUpload(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.PublicKey) error {
+func applyUpload(req ProofUploadRequest, prev *model.Proof, validator *validator.Base) error {
 	switch req.Action {
 	case types.Actions.Create:
-		return generateProof(req, prev, pubkey)
+		return generateProof(req, prev, validator)
 	case types.Actions.Delete:
-		return deleteProof(req, prev, pubkey)
+		return deleteProof(req, prev, validator)
 	default:
 		return xerrors.Errorf("Unknown action: %s", string(req.Action))
 	}
 }
 
-func generateProof(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.PublicKey) error {
-	prev_id := uint(0)
-	if prev != nil {
-		prev_id = prev.ID
-	}
-	// FIXME: Proof creation should be an instance method
-	proof := model.Proof{
-		PreviousProof: prev_id,
-		Persona:       "0x" + crypto.CompressedPubkeyHex(pubkey),
-		Platform:      req.Platform,
-		Identity:      req.Identity,
-		Location:      req.ProofLocation,
-		// FIXME: Signature handling logic
-		Signature:     "test123",
-	}
-	logrus.Warnf("%+v", proof)
-	tx := model.DB.Create(&proof)
-	logrus.Warnf("TX: %+v", tx)
-	if tx.Error != nil {
-		return xerrors.Errorf("%w", tx.Error)
-	}
-	return nil
+func generateProof(req ProofUploadRequest, prev *model.Proof, validator *validator.Base) error {
+	_, err := model.ProofCreateFromValidator(validator)
+	return err
 }
 
-func deleteProof(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.PublicKey) error {
+func deleteProof(req ProofUploadRequest, prev *model.Proof, validator *validator.Base) error {
 	// FIXME: impelement this
 	return nil
 }

@@ -23,6 +23,7 @@ func Init()  {
 	})
 	Engine.POST("/v1/proof/payload", proofPayload)
 	Engine.POST("/v1/proof", proofUpload)
+	Engine.GET("/v1/proof", proofQuery)
 }
 
 func errorResp(c *gin.Context, error_code int, err error) {

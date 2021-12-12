@@ -16,11 +16,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type Keybase struct {
-	validator.Base
-
-	ProofText string
-}
+type Keybase validator.Base
 
 const (
 	VALIDATE_TEMPLATE = "^Prove myself: I'm 0x([0-9a-f]{66}) on NextID. Signature: (.*)"
@@ -73,14 +69,14 @@ func (kb *Keybase) Validate() (err error) {
 	if err != nil {
 		return xerrors.Errorf("Error when getting resp body")
 	}
-	kb.ProofText = strings.TrimSpace(string(body))
+	kb.Text = strings.TrimSpace(string(body))
 	return kb.validateBody()
 }
 
 func (kb *Keybase) validateBody() error {
 	l := l.WithFields(logrus.Fields{"function": "validateBody", "keybase": kb.Identity})
-	matched := re.FindStringSubmatch(kb.ProofText)
-	l.Debugf("Body: \"%s\"", kb.ProofText)
+	matched := re.FindStringSubmatch(kb.Text)
+	l.Debugf("Body: \"%s\"", kb.Text)
 	if len(matched) < 3 {
 		return xerrors.Errorf("Proof text struct mismatch.")
 	}
@@ -99,5 +95,6 @@ func (kb *Keybase) validateBody() error {
 	if err != nil {
 		return xerrors.Errorf("Error when decoding signature: %s", err.Error())
 	}
+	kb.Signature = sigBytes
 	return mycrypto.ValidatePersonalSignature(kb.GenerateSignPayload(), sigBytes, pubkeyRecovered)
 }

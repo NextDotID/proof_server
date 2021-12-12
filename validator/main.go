@@ -17,9 +17,12 @@ type IValidator interface {
 }
 
 type Base struct {
+	Platform      types.Platform
 	Previous      string
 	Action        types.Action
 	Pubkey        *ecdsa.PublicKey
 	Identity      string
 	ProofLocation string
+	Signature     []byte
+	Text string
 }
