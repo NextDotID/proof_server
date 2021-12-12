@@ -66,7 +66,8 @@ See [README.md](./README.md)
     + platform (string, required) - Target platform. See table above for all available platforms. See table above for all available values.
     + identity (string, required) - Identity in target platform to proof. Usually a "username" or "screen name". See [README.md](./README.md).
     + proof_location (string, optional) - Location where public-accessable proof post is set. See [README.md](./README.md).
-    + public_key (string, required) - Public key of NextID Persona to connect to. Should be secp256k1 curve (for now), 65-bytes long (uncompressed) and stringified into hex form (`0x[0-9a-f]{130}`).
+    + public_key (string, required) - Public key of NextID Persona to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
+
 
   + Body
 
@@ -80,16 +81,20 @@ See [README.md](./README.md)
 
 + Response 201 (application/json)
 
+Request submitted successfully. No error happened.
+
++ Response 400 (application/json)
+
+Request failed.
+
     + Attributes
 
-      + success (boolean, required) - Server proceeded this request successfully or not.
-      + reason (string, required) - If failed, hopefully this will contains some info you need. Empty string if succeeded.
+      + message (string, required) - Contains some error info for user.
 
     + Body
 
         {
-          "success": false,
-          "reason": "Tweet author is not the same as given identity."
+           "message": "Tweet author is not the same as given identity."
         }
 
 ## Query an existed binding [GET /proof]

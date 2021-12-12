@@ -7,35 +7,34 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
 
 // ValidatePersonalSignature checks whether (eth.personal.sign) signature,
 // payload and pubkey are matched.
 // Pubkey and signature should be without "0x".
-func ValidatePersonalSignature(payload string, signature []byte, pubkey *ecdsa.PublicKey) bool {
+func ValidatePersonalSignature(payload string, signature []byte, pubkey *ecdsa.PublicKey) (err error) {
 	// Recover pubkey from signature
 	if len(signature) != 65 {
-		logrus.Warnf("Error: Signature length invalid: %d instead of 65", len(signature))
-		return false
+		return xerrors.Errorf("Error: Signature length invalid: %d instead of 65", len(signature))
 	}
 	if signature[64] == 27 || signature[64] == 28 {
 		signature[64] -= 27
 	}
 
 	if signature[64] != 0 && signature[64] != 1 {
-		logrus.Warnf("Error: Signature Recovery ID not supported: %d", signature[64])
-		return false
+		return xerrors.Errorf("Error: Signature Recovery ID not supported: %d", signature[64])
 	}
 
 	pubkeyRecovered, err := crypto.SigToPub(signPersonalHash([]byte(payload)), signature)
 	if err != nil {
-		logrus.Warnf("Error when recovering pubkey from signature: %s", err.Error())
-		return false
+		return xerrors.Errorf("Error when recovering pubkey from signature: %s", err.Error())
 	}
 
-	return crypto.PubkeyToAddress(*pubkey) == crypto.PubkeyToAddress(*pubkeyRecovered)
+	if crypto.PubkeyToAddress(*pubkey) != crypto.PubkeyToAddress(*pubkeyRecovered) {
+		return xerrors.Errorf("Pubkey mismatch")
+	}
+	return nil
 }
 
 // GenerateKeypair generates a keypair.

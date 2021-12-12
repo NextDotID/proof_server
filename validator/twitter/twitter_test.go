@@ -21,6 +21,7 @@ var (
 			Identity:      "yeiwb",
 			ProofLocation: "1469221200140574721",
 		},
+		TweetText: "",
 	}
 )
 
@@ -50,7 +51,7 @@ func Test_Validate(t *testing.T) {
 		before_each(t)
 
 		newTweet := tweet
-		assert.True(t, newTweet.Validate())
+		assert.Nil(t, newTweet.Validate())
 		assert.Greater(t, len(newTweet.TweetText), 10)
 		assert.Empty(t, tweet.TweetText)
 	})
@@ -60,7 +61,7 @@ func Test_Validate(t *testing.T) {
 
 		newTweet := tweet
 		newTweet.Identity = "foobar"
-		assert.False(t, newTweet.Validate())
+		assert.NotNil(t, newTweet.Validate())
 	})
 
 	t.Run("should return proof location not found", func(t *testing.T) {
@@ -68,6 +69,6 @@ func Test_Validate(t *testing.T) {
 
 		newTweet := tweet
 		newTweet.ProofLocation = "123456"
-		assert.False(t, newTweet.Validate())
+		assert.NotNil(t, newTweet.Validate())
 	})
 }

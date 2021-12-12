@@ -10,9 +10,10 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/nextdotid/proof-server/validator"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
+	"github.com/nextdotid/proof-server/validator"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/xerrors"
 )
 
 type Keybase struct {
@@ -23,12 +24,12 @@ type Keybase struct {
 
 const (
 	VALIDATE_TEMPLATE = "^Prove myself: I'm 0x([0-9a-f]{66}) on NextID. Signature: (.*)"
-	POST_TEMPLATE = "Prove myself: I'm 0x%s on NextID. Signature: %%SIG_BASE64%%"
-	URL = "https://%s.keybase.pub/NextID/0x%s.txt"
+	POST_TEMPLATE     = "Prove myself: I'm 0x%s on NextID. Signature: %%SIG_BASE64%%"
+	URL               = "https://%s.keybase.pub/NextID/0x%s.txt"
 )
 
 var (
-	l = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "keybase"})
+	l  = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "keybase"})
 	re = regexp.MustCompile(VALIDATE_TEMPLATE)
 )
 
@@ -58,51 +59,45 @@ func (kb *Keybase) GenerateSignPayload() (payload string) {
 
 }
 
-func (kb *Keybase) Validate() (result bool) {
+func (kb *Keybase) Validate() (err error) {
 	url := fmt.Sprintf(URL, kb.Identity, mycrypto.CompressedPubkeyHex(kb.Pubkey))
 	kb.ProofLocation = url
 	resp, err := http.Get(url)
 	if err != nil {
-		l.Warnf("Error when requesting proof: %s", err.Error())
-		return false
+		return xerrors.Errorf("Error when requesting proof: %s", err.Error())
 	}
 	if resp.StatusCode != 200 {
-		l.Warnf("Error when requesting proof: Status code %d", resp.StatusCode)
-		return false
+		return xerrors.Errorf("Error when requesting proof: Status code %d", resp.StatusCode)
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		l.Warnf("Error when getting resp body")
-		return false
+		return xerrors.Errorf("Error when getting resp body")
 	}
 	kb.ProofText = strings.TrimSpace(string(body))
 	return kb.validateBody()
 }
 
-func (kb *Keybase) validateBody() bool {
+func (kb *Keybase) validateBody() error {
 	l := l.WithFields(logrus.Fields{"function": "validateBody", "keybase": kb.Identity})
 	matched := re.FindStringSubmatch(kb.ProofText)
 	l.Debugf("Body: \"%s\"", kb.ProofText)
 	if len(matched) < 3 {
-		l.Warnf("Proof text struct mismatch. Found: %+v", matched)
+		return xerrors.Errorf("Proof text struct mismatch.")
 	}
 
 	pubkeyHex := matched[1]
 	pubkeyRecovered, err := mycrypto.StringToPubkey(pubkeyHex)
 	if err != nil {
-		l.Warnf("Pubkey recover failed: %s", err.Error())
-		return false
+		return xerrors.Errorf("Pubkey recover failed: %s", err.Error())
 	}
 	if crypto.PubkeyToAddress(*kb.Pubkey) != crypto.PubkeyToAddress(*pubkeyRecovered) {
-		l.Warnf("Pubkey mismatch")
-		return false
+		return xerrors.Errorf("Pubkey mismatch")
 	}
 
 	sigBase64 := matched[2]
 	sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
 	if err != nil {
-		l.Warnf("Error when decoding signature %s: %s", sigBase64, err.Error())
-		return false
+		return xerrors.Errorf("Error when decoding signature: %s", err.Error())
 	}
 	return mycrypto.ValidatePersonalSignature(kb.GenerateSignPayload(), sigBytes, pubkeyRecovered)
 }

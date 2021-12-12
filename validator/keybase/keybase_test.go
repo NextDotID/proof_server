@@ -48,7 +48,7 @@ func Test_Validate(t *testing.T) {
 		before_each(t)
 
 		newKB := kb
-		assert.True(t, newKB.Validate())
+		assert.Nil(t, newKB.Validate())
 		assert.Greater(t, len(newKB.ProofText), 10)
 	})
 }

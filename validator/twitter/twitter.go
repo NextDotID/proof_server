@@ -13,6 +13,7 @@ import (
 	"github.com/nextdotid/proof-server/config"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/xerrors"
 
 	"github.com/nextdotid/proof-server/validator"
 )
@@ -60,54 +61,46 @@ func (twitter *Twitter) GenerateSignPayload() (payload string) {
 	return string(payloadBytes)
 }
 
-func (twitter *Twitter) Validate() (result bool) {
+func (twitter *Twitter) Validate() (err error) {
 	initClient()
 	tweetID, err := strconv.ParseInt(twitter.ProofLocation, 10, 64)
 	if err != nil {
-		l.Warnf("Error when parsing tweet ID %s: %s", twitter.ProofLocation, err.Error())
-		return false
+		return xerrors.Errorf("Error when parsing tweet ID %s: %s", twitter.ProofLocation, err.Error())
 	}
 
 	tweet, _, err := client.Statuses.Show(tweetID, &t.StatusShowParams{
 		TweetMode: "extended",
 	})
 	if err != nil {
-		l.Warnf("Error when getting tweet %s: %s", twitter.ProofLocation, err.Error())
-		return false
+		return xerrors.Errorf("Error when getting tweet %s: %w", twitter.ProofLocation, err)
 	}
 	if tweet.User.ScreenName != twitter.Identity {
-		l.Warnf("Screen name mismatch: expect %s - actual %s", twitter.Identity, tweet.User.ScreenName)
-		return false
+		return xerrors.Errorf("Screen name mismatch: expect %s - actual %s", twitter.Identity, tweet.User.ScreenName)
 	}
 
 	twitter.TweetText = tweet.FullText
 	return twitter.validateText()
 }
 
-func (twitter *Twitter) validateText() bool {
-	l := l.WithFields(logrus.Fields{"function": "validateText", "tweet": twitter.ProofLocation})
+func (twitter *Twitter) validateText() (err error) {
 	matched := re.FindStringSubmatch(twitter.TweetText)
 	if len(matched) < 3 {
-		l.Warnf("Tweet struct mismatch. Found: %+v", matched)
-		return false
+		return xerrors.Errorf("Tweet struct mismatch. Found: %+v", matched)
 	}
 
 	pubkeyHex := matched[1]
 	pubkeyRecovered, err := mycrypto.StringToPubkey(pubkeyHex)
 	if err != nil {
-		l.Warnf("Pubkey recover failed: %s", err.Error())
-		return false
+		return xerrors.Errorf("Pubkey recover failed: %s", err.Error())
 	}
 	if crypto.PubkeyToAddress(*twitter.Pubkey) != crypto.PubkeyToAddress(*pubkeyRecovered) {
-		l.Warnf("Pubkey mismatch")
-		return false
+		return xerrors.Errorf("Pubkey mismatch")
 	}
 
 	sigBase64 := matched[2]
 	sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
 	if err != nil {
-		l.Warnf("Error when decoding signature %s: %s", sigBase64, err.Error())
-		return false
+		return xerrors.Errorf("Error when decoding signature %s: %s", sigBase64, err.Error())
 	}
 	return mycrypto.ValidatePersonalSignature(twitter.GenerateSignPayload(), sigBytes, pubkeyRecovered)
 }

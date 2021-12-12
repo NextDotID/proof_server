@@ -1,12 +1,14 @@
 package model
 
 import (
+	"crypto/ecdsa"
 	"strings"
 	"time"
 
 	"golang.org/x/xerrors"
 
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/util/crypto"
 )
 
 type Proof struct {
@@ -40,6 +42,14 @@ func (proof *Proof) Previous() (prevProof *Proof, err error) {
 		return nil, xerrors.Errorf("%w", tx.Error)
 	}
 	return previous, nil
+}
+
+func (proof *Proof) Pubkey() (*ecdsa.PublicKey) {
+	pubkey, err := crypto.StringToPubkey(proof.Persona)
+	if err != nil {
+		return nil
+	}
+	return pubkey
 }
 
 // ProofFindLatest finds latest Proof in the chain by given persona pubkey.
