@@ -2,6 +2,7 @@ FORMAT: 1A
 
 # Changelog
 
+  - <2021-12-12 Sun> :: POST /proof/payload -> add post content
   - <2021-11-25 Thu> :: init draft
 
 # General
@@ -14,9 +15,14 @@ All requests and responses should be `Content-Type: application/json`.
 
 See [README.md](./README.md)
 
+## Post struct placeholders
+
+| placeholders   | Should be replaced to    | Sample                                                                                     |
+| `%SIG_BASE64%` | Base64-encoded signature | `1uZDzxZ6wae+IaF4BgJXWAWC9e/nxbkdC0xp+xRLz1FqeghynyW+SQnGQygdgQYLTLfXqq03nyFQJU0GidQ/3QA=` |
+
 # Group Proof
 
-## Query a proof payload to signature [POST /proof/payload]
+## Query a proof payload to signature and to post [POST /proof/payload]
 
 + Request (application/json)
 
@@ -25,7 +31,7 @@ See [README.md](./README.md)
     + action (string, required) - Action (`create` / `delete`)
     + platform (string, required) - Target platform. See table above for all available platforms. See table in [README.md](./README.md) for all available values.
     + identity (string, required) - Identity in target platform to proof. Usually a "username" or "screen name". See [README.md](./README.md).
-    + public_key (string, required) - Public key of NextID Persona to connect to. Should be secp256k1 curve (for now), 65-bytes long (which means uncompressed) and stringified into hex form (`/^0x[0-9a-f]{130}$/`).
+    + public_key (string, required) - Public key of NextID Persona to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
 
   + Body
 
@@ -40,12 +46,14 @@ See [README.md](./README.md)
 
   + Attributes (object)
 
-    + payload (string, required) - Raw string to be sent to `personal_sign`
+    + post_content (string, required) - Post to let user send / save to target platform. Placeholders should be replaced by frontend / client. See table above.
+    + sign_payload (string, required) - Raw string to be sent to `personal_sign`
 
   + Body
 
         {
-          "payload": "{\"action\":\"add\",\"created_at\":1638863332,\"identity\":\"my_twitter_screen_name\",\"platform\":\"twitter\",\"prev\":null}"
+          "post_content": "Prove myself: I'm 0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3 on NextID. Signature: %SIG_BASE64%",
+          "sign_payload": "{\"action\":\"add\",\"identity\":\"my_twitter_screen_name\",\"platform\":\"twitter\",\"prev\":null}"
         }
 
 ## Create a proof modification [POST /proof]
@@ -103,7 +111,7 @@ See [README.md](./README.md)
 
     + ids (array[object], required) - All IDs found under same Persona binding. Will be empty array if not found.
       + platform (string, required) - Platform (incl. `NextID`)
-      + identity (string, required) - Identity on that platform (incl. public key in `NextID`)
+      + identity (string, required) - Identity on that platform (incl. uncompressed public key in `NextID`)
       + proof_location (string, required) - Proof location
 
   + Body

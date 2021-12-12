@@ -1,7 +1,6 @@
 package keybase
 
 import (
-	"crypto/ecdsa"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -11,29 +10,31 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/validator"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/sirupsen/logrus"
 )
 
 type Keybase struct {
-	Previous string
-	Action types.Action
-	Pubkey *ecdsa.PublicKey
-	Identity string
-	ProofLocation string
+	validator.Base
+
 	ProofText string
 }
 
 const (
-	TEMPLATE = "^Prove myself: I'm 0x([0-9a-f]{66}) on NextID. Signature: (.*)"
+	VALIDATE_TEMPLATE = "^Prove myself: I'm 0x([0-9a-f]{66}) on NextID. Signature: (.*)"
+	POST_TEMPLATE = "Prove myself: I'm 0x%s on NextID. Signature: %%SIG_BASE64%%"
 	URL = "https://%s.keybase.pub/NextID/0x%s.txt"
 )
 
 var (
 	l = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "keybase"})
-	re = regexp.MustCompile(TEMPLATE)
+	re = regexp.MustCompile(VALIDATE_TEMPLATE)
 )
+
+func (kb *Keybase) GeneratePostPayload() (post string) {
+	return fmt.Sprintf(POST_TEMPLATE, mycrypto.CompressedPubkeyHex(kb.Pubkey))
+}
 
 func (kb *Keybase) GenerateSignPayload() (payload string) {
 	var payloadStruct map[string]interface{}

@@ -1,9 +1,9 @@
 package twitter
 
 import (
-	"crypto/ecdsa"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"strconv"
 
@@ -14,31 +14,30 @@ import (
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/sirupsen/logrus"
 
-	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/validator"
 )
 
 type Twitter struct {
-	// Previous signature hex ("0x.....")
-	Previous string
-	Action   types.Action
-	Pubkey   *ecdsa.PublicKey
-	// Twitter screen name
-	Identity string
-	// TweetID
-	ProofLocation string
+	validator.Base
+
 	// Filled when tweet fetched successfully.
 	TweetText string
 }
 
 const (
-	TEMPLATE = "^Prove myself: I'm 0x([0-9a-f]{66}) on NextID. Signature: (.*)$"
+	MATCH_TEMPLATE = "^Prove myself: I'm 0x([0-9a-f]{66}) on NextID. Signature: (.*)$"
+	POST_STRUCT = "Prove myself: I'm 0x%s on NextID. Signature: %%SIG_BASE64%%"
 )
 
 var (
 	client *t.Client
 	l      = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "twitter"})
-	re     = regexp.MustCompile(TEMPLATE)
+	re     = regexp.MustCompile(MATCH_TEMPLATE)
 )
+
+func (twitter *Twitter) GeneratePostPayload() (post string) {
+	return fmt.Sprintf(POST_STRUCT, mycrypto.CompressedPubkeyHex(twitter.Pubkey))
+}
 
 func (twitter *Twitter) GenerateSignPayload() (payload string) {
 	var payloadStruct map[string]interface{}
