@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strings"
 	"time"
 
 	"golang.org/x/xerrors"
@@ -18,7 +19,7 @@ type Proof struct {
 	Persona   string         `gorm:"index;not null"`
 	Platform  types.Platform `gorm:"index;not null"`
 	Identity  string         `gorm:"index;not null"`
-	Link      string         `gorm:"not null"`
+	Location  string         `gorm:"not null"`
 	Signature string         `gorm:"not null"`
 }
 
@@ -47,6 +48,9 @@ func ProofFindLatest(persona string) (proof *Proof, err error) {
 	// FIXME: make this correct by link iteration.
 	tx := DB.Where("persona = ?", persona).Last(proof)
 	if tx.Error != nil {
+		if strings.Contains(tx.Error.Error(), "record not found") {
+			return nil, nil
+		}
 		return nil, xerrors.Errorf("%w", tx.Error)
 	}
 	return proof, nil
