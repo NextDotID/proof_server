@@ -10,11 +10,12 @@ you on NextID.
 
 ### Supported
 
-| Platform                             | `platform` value | `identity` value                                                  | `proof_location` value                                              |
-|--------------------------------------|------------------|-------------------------------------------------------------------|---------------------------------------------------------------------|
-| NextID                               | `NextID`         | Public key HEX of NextID persona (`0x[0-9a-f]{130}`)              | N/A (will be added by binding other platforms)                      |
-| [Twitter](https://twitter.com)       | `twitter`        | `twitter`                                                         | Proof tweet ID (`1415362679095635970`)                              |
-| [Keybase](https://keybase.io)        | `keybase`        | `keybase`                                                         | N/A (use `https://your_identity.keybase.pub/NextID/PUBKEY_HEX.txt`) |
+| Platform                       | `platform` value | `identity` value                                     | `proof_location` value                                              |
+|--------------------------------|------------------|------------------------------------------------------|---------------------------------------------------------------------|
+| NextID                         | `NextID`         | Public key HEX of NextID persona (`0x[0-9a-f]{130}`) | N/A (will be added by binding other platforms)                      |
+| [Twitter](https://twitter.com) | `twitter`        | `twitter`                                            | Proof tweet ID (`1415362679095635970`)                              |
+| [Keybase](https://keybase.io)  | `keybase`        | `keybase`                                            | N/A (use `https://your_identity.keybase.pub/NextID/PUBKEY_HEX.txt`) |
+| Ethereum                       | `eth`            | ETH wallet address `0x123AbC...`                     | N/A (use arweave to store proof, must be two-way signature)         |
 
 ### Planning
 
@@ -25,7 +26,6 @@ you on NextID.
 | [Telegram](https://telegram.org)     | `telegram`       | `telegram`                                                        | `https://t.me/some_public_group/CHAT_ID_DIGITS`             |
 | [Discord](https://discord.com)       | `discord`        | `Discord#0000`                                                    | `https://discord.com/channels/DIGITS/DIGITS/DIGITS`         |
 | DNS (TXT field)                      | `dns`            | `example.com`                                                     | N/A (use `dig example.com TXT`)                             |
-| Ethereum                             | `eth`            | ETH wallet address `0x.....`                                      | N/A (use arweave to store proof, must be two-way signature) |
 | ENS                                  | `ens`            | `myens.eth`                                                       | N/A (use `id.next.proof` record in ENS to store proof)      |
 | Decentrialized Account Systems       | `das`            |                                                                   |                                                             |
 | Github                               | `github`         | `github_username`                                                 | Public visible Gist                                         |

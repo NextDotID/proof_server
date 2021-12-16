@@ -26,3 +26,6 @@ type Base struct {
 	Signature     []byte
 	Text string
 }
+
+// H for JSON builder.
+type H map[string]interface{}

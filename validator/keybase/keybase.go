@@ -34,8 +34,7 @@ func (kb *Keybase) GeneratePostPayload() (post string) {
 }
 
 func (kb *Keybase) GenerateSignPayload() (payload string) {
-	var payloadStruct map[string]interface{}
-	payloadStruct = map[string]interface{}{
+	payloadStruct := validator.H{
 		"action":   string(kb.Action),
 		"platform": "keybase",
 		"identity": kb.Identity,

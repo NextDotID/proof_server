@@ -36,8 +36,7 @@ func (twitter *Twitter) GeneratePostPayload() (post string) {
 }
 
 func (twitter *Twitter) GenerateSignPayload() (payload string) {
-	var payloadStruct map[string]interface{}
-	payloadStruct = map[string]interface{}{
+	payloadStruct := validator.H{
 		"action":   string(twitter.Action),
 		"platform": "twitter",
 		"identity": twitter.Identity,
