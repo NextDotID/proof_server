@@ -68,17 +68,12 @@ func validateProof(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.Publ
 		Identity:      req.Identity,
 		ProofLocation: req.ProofLocation,
 	}
-
-	switch req.Platform {
-	case types.Platforms.Twitter:
-		v_performer := twitter.Twitter(base)
-		return base, v_performer.Validate()
-	case types.Platforms.Keybase:
-		v_performer := keybase.Keybase(base)
-		return base, v_performer.Validate()
-	default:
+	performer_factory, ok := validator.Platforms[req.Platform]
+	if !ok {
 		return validator.Base{}, xerrors.Errorf("platform not supported: %s", string(req.Platform))
 	}
+	performer := performer_factory(base)
+	return base, performer.Validate()
 }
 
 func applyUpload(req ProofUploadRequest, prev *model.Proof, validator *validator.Base) error {

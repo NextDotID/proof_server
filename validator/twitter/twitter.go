@@ -11,6 +11,7 @@ import (
 	"github.com/dghubble/oauth1"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/nextdotid/proof-server/config"
+	"github.com/nextdotid/proof-server/types"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
@@ -31,15 +32,21 @@ var (
 	re     = regexp.MustCompile(MATCH_TEMPLATE)
 )
 
-func (twitter *Twitter) GeneratePostPayload() (post string) {
+func Init() {
+	validator.Platforms[types.Platforms.Twitter] = func(base validator.Base) validator.IValidator {
+		return Twitter(base)
+	}
+}
+
+func (twitter Twitter) GeneratePostPayload() (post string) {
 	return fmt.Sprintf(POST_STRUCT, mycrypto.CompressedPubkeyHex(twitter.Pubkey))
 }
 
-func (twitter *Twitter) GenerateSignPayload() (payload string) {
+func (twitter Twitter) GenerateSignPayload() (payload string) {
 	payloadStruct := validator.H{
 		"action":   string(twitter.Action),
-		"platform": "twitter",
 		"identity": twitter.Identity,
+		"platform": "twitter",
 		"prev":     nil,
 	}
 	if twitter.Previous != "" {
@@ -55,7 +62,7 @@ func (twitter *Twitter) GenerateSignPayload() (payload string) {
 	return string(payloadBytes)
 }
 
-func (twitter *Twitter) Validate() (err error) {
+func (twitter Twitter) Validate() (err error) {
 	initClient()
 	tweetID, err := strconv.ParseInt(twitter.ProofLocation, 10, 64)
 	if err != nil {
@@ -76,7 +83,7 @@ func (twitter *Twitter) Validate() (err error) {
 	return twitter.validateText()
 }
 
-func (twitter *Twitter) validateText() (err error) {
+func (twitter Twitter) validateText() (err error) {
 	matched := re.FindStringSubmatch(twitter.Text)
 	if len(matched) < 3 {
 		return xerrors.Errorf("Tweet struct mismatch. Found: %+v", matched)

@@ -6,6 +6,10 @@ import (
 	"github.com/nextdotid/proof-server/types"
 )
 
+var (
+	Platforms map[types.Platform]func(Base) IValidator
+)
+
 type IValidator interface {
 	// GeneratePostPayload gives a post structure (with
 	// placeholders) for user to post on target platform.
@@ -21,10 +25,13 @@ type Base struct {
 	Previous      string
 	Action        types.Action
 	Pubkey        *ecdsa.PublicKey
+	// Identity on target platform.
 	Identity      string
 	ProofLocation string
 	Signature     []byte
-	Text string
+	Text          string
+	// Extra info needed by separate platforms (e.g. Ethereum)
+	Extra         map[string]string
 }
 
 // H for JSON builder.

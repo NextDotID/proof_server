@@ -14,27 +14,37 @@ import (
 // payload and pubkey are matched.
 // Pubkey and signature should be without "0x".
 func ValidatePersonalSignature(payload string, signature []byte, pubkey *ecdsa.PublicKey) (err error) {
-	// Recover pubkey from signature
-	if len(signature) != 65 {
-		return xerrors.Errorf("Error: Signature length invalid: %d instead of 65", len(signature))
-	}
-	if signature[64] == 27 || signature[64] == 28 {
-		signature[64] -= 27
-	}
-
-	if signature[64] != 0 && signature[64] != 1 {
-		return xerrors.Errorf("Error: Signature Recovery ID not supported: %d", signature[64])
-	}
-
-	pubkeyRecovered, err := crypto.SigToPub(signPersonalHash([]byte(payload)), signature)
+	pubkeyRecovered, err := RecoverPubkeyFromPersonalSignature(payload, signature)
 	if err != nil {
-		return xerrors.Errorf("Error when recovering pubkey from signature: %s", err.Error())
+		return xerrors.Errorf("%w", err)
 	}
 
 	if crypto.PubkeyToAddress(*pubkey) != crypto.PubkeyToAddress(*pubkeyRecovered) {
 		return xerrors.Errorf("Pubkey mismatch")
 	}
 	return nil
+}
+
+// RecoverPubkeyFromPersonalSignature extract a public key from signature
+func RecoverPubkeyFromPersonalSignature(payload string, signature []byte) (pubkey *ecdsa.PublicKey, err error) {
+	// Recover pubkey from signature
+	if len(signature) != 65 {
+		return nil, xerrors.Errorf("Error: Signature length invalid: %d instead of 65", len(signature))
+	}
+	if signature[64] == 27 || signature[64] == 28 {
+		signature[64] -= 27
+	}
+
+	if signature[64] != 0 && signature[64] != 1 {
+		return nil, xerrors.Errorf("Error: Signature Recovery ID not supported: %d", signature[64])
+	}
+
+	pubkeyRecovered, err := crypto.SigToPub(signPersonalHash([]byte(payload)), signature)
+	if err != nil {
+		return nil, xerrors.Errorf("Error when recovering pubkey from signature: %s", err.Error())
+	}
+
+	return pubkeyRecovered, nil
 }
 
 // GenerateKeypair generates a keypair.

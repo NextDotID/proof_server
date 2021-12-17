@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/nextdotid/proof-server/types"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
 	"github.com/sirupsen/logrus"
@@ -29,15 +30,21 @@ var (
 	re = regexp.MustCompile(VALIDATE_TEMPLATE)
 )
 
-func (kb *Keybase) GeneratePostPayload() (post string) {
+func Init() {
+	validator.Platforms[types.Platforms.Keybase] = func(base validator.Base) validator.IValidator {
+		return Keybase(base)
+	}
+}
+
+func (kb Keybase) GeneratePostPayload() (post string) {
 	return fmt.Sprintf(POST_TEMPLATE, mycrypto.CompressedPubkeyHex(kb.Pubkey))
 }
 
-func (kb *Keybase) GenerateSignPayload() (payload string) {
+func (kb Keybase) GenerateSignPayload() (payload string) {
 	payloadStruct := validator.H{
 		"action":   string(kb.Action),
-		"platform": "keybase",
 		"identity": kb.Identity,
+		"platform": "keybase",
 		"prev":     nil,
 	}
 	if kb.Previous != "" {
@@ -54,7 +61,7 @@ func (kb *Keybase) GenerateSignPayload() (payload string) {
 
 }
 
-func (kb *Keybase) Validate() (err error) {
+func (kb Keybase) Validate() (err error) {
 	url := fmt.Sprintf(URL, kb.Identity, mycrypto.CompressedPubkeyHex(kb.Pubkey))
 	kb.ProofLocation = url
 	resp, err := http.Get(url)
@@ -72,7 +79,7 @@ func (kb *Keybase) Validate() (err error) {
 	return kb.validateBody()
 }
 
-func (kb *Keybase) validateBody() error {
+func (kb Keybase) validateBody() error {
 	l := l.WithFields(logrus.Fields{"function": "validateBody", "keybase": kb.Identity})
 	matched := re.FindStringSubmatch(kb.Text)
 	l.Debugf("Body: \"%s\"", kb.Text)
