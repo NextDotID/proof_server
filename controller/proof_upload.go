@@ -7,19 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nextdotid/proof-server/model"
 	"github.com/nextdotid/proof-server/types"
-	"github.com/nextdotid/proof-server/util/crypto"
+	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
-	"github.com/nextdotid/proof-server/validator/keybase"
-	"github.com/nextdotid/proof-server/validator/twitter"
 	"golang.org/x/xerrors"
 )
 
 type ProofUploadRequest struct {
-	Action        types.Action   `json:"action"`
-	Platform      types.Platform `json:"platform"`
-	Identity      string         `json:"identity"`
-	ProofLocation string         `json:"proof_location"`
-	PublicKey     string         `json:"public_key"`
+	Action        types.Action            `json:"action"`
+	Platform      types.Platform          `json:"platform"`
+	Identity      string                  `json:"identity"`
+	ProofLocation string                  `json:"proof_location"`
+	PublicKey     string                  `json:"public_key"`
+	Extra         ProofUploadRequestExtra `json:"extra"`
+}
+
+type ProofUploadRequestExtra struct {
+	EthereumWalletSignature string `json:"wallet_signature"`
 }
 
 func proofUpload(c *gin.Context) {
@@ -29,13 +32,13 @@ func proofUpload(c *gin.Context) {
 		errorResp(c, 400, xerrors.Errorf("parse request failed: %w", err))
 		return
 	}
-	pubkey, err := crypto.StringToPubkey(req.PublicKey)
+	pubkey, err := mycrypto.StringToPubkey(req.PublicKey)
 	if err != nil {
 		errorResp(c, 400, xerrors.Errorf("%w", err))
 		return
 	}
 
-	proof, err := model.ProofFindLatest(crypto.CompressedPubkeyHex(pubkey))
+	proof, err := model.ProofFindLatest(mycrypto.CompressedPubkeyHex(pubkey))
 	if err != nil {
 		errorResp(c, 500, xerrors.Errorf("internal database error"))
 		return
@@ -67,6 +70,9 @@ func validateProof(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.Publ
 		Pubkey:        pubkey,
 		Identity:      req.Identity,
 		ProofLocation: req.ProofLocation,
+		Extra: map[string]string{
+			"wallet_signature": req.Extra.EthereumWalletSignature,
+		},
 	}
 	performer_factory, ok := validator.Platforms[req.Platform]
 	if !ok {

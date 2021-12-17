@@ -2,6 +2,7 @@ FORMAT: 1A
 
 # Changelog
 
+  - <2021-12-17 Fri> :: POST /v1/proof -> add `extra`
   - <2021-12-12 Sun> :: POST /proof/payload -> add post content
   - <2021-11-25 Thu> :: init draft
 
@@ -67,6 +68,8 @@ See [README.md](./README.md)
     + identity (string, required) - Identity in target platform to proof. Usually a "username" or "screen name". See [README.md](./README.md).
     + proof_location (string, optional) - Location where public-accessable proof post is set. See [README.md](./README.md).
     + public_key (string, required) - Public key of NextID Persona to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
+    + extra (object, optional) - Extra info for specific platform needed.
+      + wallet_signature (string, optional) - (needed for `platform: ethereum`) Signature signed by ETH wallet (w/ same sign payload), BASE64-ed.
 
 
   + Body

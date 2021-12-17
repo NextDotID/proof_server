@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	// Platforms contains all supported platform factory.
 	Platforms map[types.Platform]func(Base) IValidator
 )
 
