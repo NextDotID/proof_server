@@ -2,6 +2,7 @@ FORMAT: 1A
 
 # Changelog
 
+  - <2021-12-20 Mon> :: GET /v1/proof -> structure changed to support multi Persona response
   - <2021-12-17 Fri> :: POST /v1/proof -> add `extra`
   - <2021-12-12 Sun> :: POST /proof/payload -> add post content
   - <2021-11-25 Thu> :: init draft
@@ -79,7 +80,8 @@ See [README.md](./README.md)
           "platform": "twitter",
           "identity": "my_twitter_screen_name",
           "proof_location": "1415362679095635970",
-          "public_key": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575"
+          "public_key": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575",
+          "extra": {}
         }
 
 + Response 201 (application/json)
@@ -117,22 +119,29 @@ Request failed.
 
   + Attributes
 
-    + ids (array[object], required) - All IDs found under same Persona binding. Will be empty array if not found.
-      + platform (string, required) - Platform (incl. `NextID`)
-      + identity (string, required) - Identity on that platform (incl. uncompressed public key in `NextID`)
-      + proof_location (string, required) - Proof location
+    + ids (array[object], required) - All IDs found. Will be empty array if not found.
+      + persona (string, required) - Persona public key
+      + proofs (array[object], required) - All proofs under this persona
+        + platform (string, required) - Platform
+        + identity (string, required) - Identity on that platform
 
   + Body
 
         {
           "ids": [{
-            "platform": "NextID",
-            "identity": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575"
+            "persona": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575",
+            "proofs": [{
+               "platform": "twitter",
+               "identity": "my_twitter_screen_name"
+             }, {
+               "platform": "facebook",
+               "identity": "my_facebook_username"
+             }]
           }, {
-            "platform": "twitter",
-            "identity": "my_twitter_screen_name"
-          }, {
-            "platform": "facebook",
-            "identity": "my_facebook_username"
+            "persona": "0xANOTHER",
+            "proofs": [{
+              "platform": "ethereum",
+              "identity": "0x114514......"
+            }]
           }]
         }
