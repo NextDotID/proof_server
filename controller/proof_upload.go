@@ -75,7 +75,6 @@ func validateProof(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.Publ
 		Pubkey:        pubkey,
 		Identity:      req.Identity,
 		ProofLocation: req.ProofLocation,
-
 	}
 
 	extra := map[string]string{}

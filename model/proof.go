@@ -20,7 +20,7 @@ type Proof struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	PreviousProof uint `gorm:"index;not null"`
+	PreviousProof uint `gorm:"index"`
 	// Persona is public key of user persona (string, /0x[0-9a-f]{130}/)
 	Persona   string         `gorm:"index;not null"`
 	Platform  types.Platform `gorm:"index;not null"`
@@ -97,7 +97,6 @@ func ProofCreateFromValidator(validator *validator.Base) (proof *Proof, err erro
 		Identity:      validator.Identity,
 		Location:      validator.ProofLocation,
 		Signature:     base64.StdEncoding.EncodeToString(validator.Signature),
-
 	}
 	if len(validator.Extra) != 0 {
 		extra_json, err := json.Marshal(validator.Extra)

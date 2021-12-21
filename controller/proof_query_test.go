@@ -67,6 +67,13 @@ func Test_proofQuery(t *testing.T) {
 		assert.Equal(t, persona, found.Persona)
 		assert.Equal(t, 1, len(found.Proofs))
 
+		partial_resp := ProofQueryResponse{}
+		APITestCall(Engine, "GET", "/v1/proof?platform=twitter&identity=eiw", "", &partial_resp)
+		assert.Equal(t, 1, len(resp.IDs))
+		found = partial_resp.IDs[0]
+		assert.Equal(t, persona, found.Persona)
+		assert.Equal(t, 1, len(found.Proofs))
+
 		empty_resp := ProofQueryResponse{}
 		APITestCall(Engine, "GET", "/v1/proof?platform=keybase&identity=yeiwb", "", &empty_resp)
 		assert.Equal(t, 0, len(empty_resp.IDs))
