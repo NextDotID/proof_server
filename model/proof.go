@@ -3,10 +3,12 @@ package model
 import (
 	"crypto/ecdsa"
 	"encoding/base64"
+	"encoding/json"
 	"strings"
 	"time"
 
 	"golang.org/x/xerrors"
+	"gorm.io/datatypes"
 
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
@@ -25,6 +27,7 @@ type Proof struct {
 	Identity  string         `gorm:"index;not null"`
 	Location  string         `gorm:"not null"`
 	Signature string         `gorm:"not null"`
+	Extra     datatypes.JSON `gorm:"default:'{}'"`
 }
 
 func (Proof) TableName() string {
@@ -94,7 +97,16 @@ func ProofCreateFromValidator(validator *validator.Base) (proof *Proof, err erro
 		Identity:      validator.Identity,
 		Location:      validator.ProofLocation,
 		Signature:     base64.StdEncoding.EncodeToString(validator.Signature),
+
 	}
+	if len(validator.Extra) != 0 {
+		extra_json, err := json.Marshal(validator.Extra)
+		if err != nil {
+			return nil, xerrors.Errorf("%w", err)
+		}
+		proof.Extra = datatypes.JSON(extra_json)
+	}
+
 	if validator.Previous != "" {
 		previous := &Proof{Signature: validator.Previous}
 		tx := DB.First(previous)

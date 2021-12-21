@@ -75,9 +75,13 @@ func validateProof(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.Publ
 		Pubkey:        pubkey,
 		Identity:      req.Identity,
 		ProofLocation: req.ProofLocation,
-		Extra: map[string]string{
-			"wallet_signature": req.Extra.EthereumWalletSignature,
-		},
+
+	}
+
+	extra := map[string]string{}
+	if len(req.Extra.EthereumWalletSignature) != 0 {
+		extra["wallet_signature"] = req.Extra.EthereumWalletSignature
+		base.Extra = extra
 	}
 
 	performer := performer_factory(base)
