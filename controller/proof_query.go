@@ -19,9 +19,13 @@ type ProofQueryResponse struct {
 }
 
 type ProofQueryResponseSingle struct {
+	Persona string                          `json:"persona"`
+	Proofs  []ProofQueryResponseSingleProof `json:"proofs"`
+}
+
+type ProofQueryResponseSingleProof struct {
 	Platform      types.Platform `json:"platform"`
 	Identity      string         `json:"identity"`
-	ProofLocation string         `json:"proof_location"`
 }
 
 func proofQuery(c *gin.Context) {
@@ -43,29 +47,39 @@ func proofQuery(c *gin.Context) {
 func performProofQuery(req ProofQueryRequest) []ProofQueryResponseSingle {
 	result := make([]ProofQueryResponseSingle, 0, 0)
 
-	proof := &model.Proof{}
-	// TODO: should deal with multi bindings
-	tx := model.DB.Where(&model.Proof{Platform: req.Platform, Identity: req.Identity}).Last(proof)
-	if tx.Error != nil || proof.ID == uint(0) {
-		return result
-	}
-
 	proofs := make([]model.Proof, 0, 0)
-	tx = model.DB.Where(&model.Proof{Persona: proof.Persona}).Find(&proofs)
-	if tx.Error != nil || len(proofs) == 0 {
+	tx := model.DB.
+		Where("platform", req.Platform).
+		Where("identity LIKE ?", "%" + req.Identity + "%").
+		Find(&proofs)
+	if tx.Error != nil || tx.RowsAffected == int64(0) || len(proofs) == 0 {
 		return result
 	}
 
-	result = append(result, ProofQueryResponseSingle{
-		Platform: types.Platforms.NextID,
-		Identity: proofs[0].Persona,
-	})
-
+	// proofs.group_by(&:persona)
+	persona_proof_map := make(map[string][]*model.Proof, 0)
 	for _, p := range proofs {
-		result = append(result, ProofQueryResponseSingle{
-			Platform: p.Platform,
-			Identity: p.Identity,
-		})
+		persona_proof, ok := persona_proof_map[p.Persona]
+		if ok {
+			persona_proof = append(persona_proof, &p)
+		} else {
+			persona_proof_map[p.Persona] = append(make([]*model.Proof, 0, 0), &p)
+		}
 	}
+
+	for persona, proofs := range persona_proof_map {
+		single := ProofQueryResponseSingle{
+			Persona: persona,
+			Proofs:  make([]ProofQueryResponseSingleProof, 0),
+		}
+		for _, p := range proofs {
+			single.Proofs = append(single.Proofs, ProofQueryResponseSingleProof{
+				Platform:      p.Platform,
+				Identity:      p.Identity,
+			})
+		}
+		result = append(result, single)
+	}
+
 	return result
 }

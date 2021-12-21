@@ -63,6 +63,11 @@ func validateProof(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.Publ
 	if prev != nil {
 		proof_signature = prev.Signature
 	}
+
+	performer_factory, ok := validator.Platforms[req.Platform]
+	if !ok {
+		return validator.Base{}, xerrors.Errorf("platform not supported: %s", string(req.Platform))
+	}
 	base := validator.Base{
 		Platform:      req.Platform,
 		Previous:      proof_signature,
@@ -74,10 +79,7 @@ func validateProof(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.Publ
 			"wallet_signature": req.Extra.EthereumWalletSignature,
 		},
 	}
-	performer_factory, ok := validator.Platforms[req.Platform]
-	if !ok {
-		return validator.Base{}, xerrors.Errorf("platform not supported: %s", string(req.Platform))
-	}
+
 	performer := performer_factory(base)
 	return base, performer.Validate()
 }

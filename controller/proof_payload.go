@@ -8,8 +8,6 @@ import (
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
-	"github.com/nextdotid/proof-server/validator/keybase"
-	"github.com/nextdotid/proof-server/validator/twitter"
 	"golang.org/x/xerrors"
 )
 
@@ -18,11 +16,16 @@ type ProofPayloadRequest struct {
 	Platform  types.Platform `json:"platform"`
 	Identity  string         `json:"identity"`
 	PublicKey string         `json:"public_key"`
+	Extra     ProofPayloadRequestExtra `json:"extra"`
 }
 
 type ProofPayloadResponse struct {
 	PostContent string `json:"post_content"`
 	SignPayload string `jsoN:"sign_payload"`
+}
+
+type ProofPayloadRequestExtra struct {
+	EthereumWalletSignature string `json:"wallet_signature"`
 }
 
 func proofPayload(c *gin.Context) {
@@ -62,25 +65,20 @@ func proofPayload(c *gin.Context) {
 		Action:   req.Action,
 		Pubkey:   parsed_pubkey,
 		Identity: req.Identity,
+		Extra: map[string]string{
+			"wallet_signature": req.Extra.EthereumWalletSignature,
+		},
 	}
-
-	switch req.Platform {
-	case types.Platforms.Twitter:
-		// FIXME: ??????????????????????????
-		v_performer := twitter.Twitter(v)
-		c.JSON(http.StatusOK, ProofPayloadResponse{
-			PostContent: v_performer.GeneratePostPayload(),
-			SignPayload: v_performer.GenerateSignPayload(),
-		})
-	case types.Platforms.Keybase:
-		v_performer := keybase.Keybase(v)
-		c.JSON(http.StatusOK, ProofPayloadResponse{
-			PostContent: v_performer.GeneratePostPayload(),
-			SignPayload: v_performer.GenerateSignPayload(),
-		})
-	default:
+	performer_factory, ok := validator.Platforms[req.Platform]
+	if !ok {
 		errorResp(c, http.StatusBadRequest, xerrors.New("unknown platform"))
+		return
 	}
+	performer := performer_factory(v)
+	c.JSON(http.StatusOK, ProofPayloadResponse{
+		PostContent: performer.GeneratePostPayload(),
+		SignPayload:performer.GenerateSignPayload(),
+	})
 }
 
 func proofPayloadCheckRequest(req *ProofPayloadRequest) bool {
