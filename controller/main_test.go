@@ -11,17 +11,26 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/model"
+	"github.com/nextdotid/proof-server/validator/ethereum"
+	"github.com/nextdotid/proof-server/validator/twitter"
+	"github.com/nextdotid/proof-server/validator/keybase"
 )
 
 func before_each(t *testing.T)  {
 	// Clean DB
 	model.DB.Where("1 = 1").Delete(&model.Proof{})
+	model.DB.Where("1 = 1").Delete(&model.ProofChain{})
 }
 
 func TestMain(m *testing.M)  {
 	config.Init("../config/config.test.json")
 	model.Init()
 	Init()
+
+	twitter.Init()
+	keybase.Init()
+	ethereum.Init()
+
 	before_each(nil)
 
 	os.Exit(m.Run())

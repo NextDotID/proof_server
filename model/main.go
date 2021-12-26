@@ -26,8 +26,13 @@ func Init()  {
 		l.Fatalf("Error when opening DB: %s\n", err.Error())
 	}
 
-	DB.AutoMigrate(
+	err = DB.AutoMigrate(
 		&Proof{},
+		&ProofChain{},
 	)
+	if err != nil {
+		panic(err)
+	}
+
 	l.Info("database initialized")
 }

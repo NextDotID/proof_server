@@ -23,13 +23,23 @@ func Test_ProofUpload(t *testing.T) {
 		APITestCall(Engine, "POST", "/v1/proof", &req, &resp)
 		assert.Empty(t, resp.Message)
 
+		pc := model.ProofChain{
+			Action: req.Action,
+			Platform: req.Platform,
+			Identity: req.Identity,
+			Location: req.ProofLocation,
+		}
+		model.DB.Where(&pc).First(&pc)
+		assert.Greater(t, pc.ID, int64(0))
+		assert.Equal(t, req.PublicKey, pc.Persona)
+
 		proof := model.Proof{
 			Platform: req.Platform,
 			Identity: req.Identity,
 			Location: req.ProofLocation,
 		}
 		model.DB.Where(&proof).First(&proof)
-		assert.Greater(t, proof.ID, uint(0))
+		assert.Greater(t, proof.ID, int64(0))
 		assert.Equal(t, req.PublicKey, proof.Persona)
 	})
 }

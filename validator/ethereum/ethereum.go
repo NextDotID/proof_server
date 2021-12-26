@@ -26,6 +26,9 @@ var (
 )
 
 func Init() {
+	if validator.Platforms == nil {
+		validator.Platforms = make(map[types.Platform]func(validator.Base) validator.IValidator)
+	}
 	validator.Platforms[types.Platforms.Ethereum] = func(base validator.Base) validator.IValidator {
 		return Ethereum(base)
 	}

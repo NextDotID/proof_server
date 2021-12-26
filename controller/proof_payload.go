@@ -46,17 +46,17 @@ func proofPayload(c *gin.Context) {
 		return
 	}
 
-	previous_proof, err := model.ProofFindLatest(crypto.CompressedPubkeyHex(parsed_pubkey))
+	previous_pc, err := model.ProofChainFindLatest(crypto.CompressedPubkeyHex(parsed_pubkey))
 	if err != nil {
-		errorResp(c, http.StatusInternalServerError, xerrors.New("database error"))
+		errorResp(c, http.StatusInternalServerError, xerrors.New("previous proof not found"))
 		return
 	}
 
 	var previous_signature string
-	if previous_proof == nil {
+	if previous_pc == nil {
 		previous_signature = ""
 	} else {
-		previous_signature = previous_proof.Signature
+		previous_signature = previous_pc.Signature
 	}
 
 	v := validator.Base{

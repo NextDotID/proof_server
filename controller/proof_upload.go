@@ -38,19 +38,19 @@ func proofUpload(c *gin.Context) {
 		return
 	}
 
-	proof, err := model.ProofFindLatest(mycrypto.CompressedPubkeyHex(pubkey))
+	previous_pc, err := model.ProofChainFindLatest(mycrypto.CompressedPubkeyHex(pubkey))
 	if err != nil {
 		errorResp(c, 500, xerrors.Errorf("internal database error"))
 		return
 	}
 
-	validator, err := validateProof(req, proof, pubkey)
+	validator, err := validateProof(req, previous_pc, pubkey)
 	if err != nil {
 		errorResp(c, 400, xerrors.Errorf("%w", err))
 		return
 	}
 
-	if err := applyUpload(req, proof, &validator); err != nil {
+	if err := applyUpload(&validator); err != nil {
 		errorResp(c, 400, xerrors.Errorf("%w", err))
 		return
 	}
@@ -58,10 +58,10 @@ func proofUpload(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{})
 }
 
-func validateProof(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.PublicKey) (validator.Base, error) {
-	proof_signature := ""
+func validateProof(req ProofUploadRequest, prev *model.ProofChain, pubkey *ecdsa.PublicKey) (validator.Base, error) {
+	prev_signature := ""
 	if prev != nil {
-		proof_signature = prev.Signature
+		prev_signature = prev.Signature
 	}
 
 	performer_factory, ok := validator.Platforms[req.Platform]
@@ -70,7 +70,7 @@ func validateProof(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.Publ
 	}
 	base := validator.Base{
 		Platform:      req.Platform,
-		Previous:      proof_signature,
+		Previous:      prev_signature,
 		Action:        req.Action,
 		Pubkey:        pubkey,
 		Identity:      req.Identity,
@@ -87,23 +87,16 @@ func validateProof(req ProofUploadRequest, prev *model.Proof, pubkey *ecdsa.Publ
 	return base, performer.Validate()
 }
 
-func applyUpload(req ProofUploadRequest, prev *model.Proof, validator *validator.Base) error {
-	switch req.Action {
-	case types.Actions.Create:
-		return generateProof(req, prev, validator)
-	case types.Actions.Delete:
-		return deleteProof(req, prev, validator)
-	default:
-		return xerrors.Errorf("Unknown action: %s", string(req.Action))
+func applyUpload(validator *validator.Base) error {
+	pc, err := model.ProofChainCreateFromValidator(validator)
+	if err != nil {
+		return xerrors.Errorf("%w", err)
 	}
-}
 
-func generateProof(req ProofUploadRequest, prev *model.Proof, validator *validator.Base) error {
-	_, err := model.ProofCreateFromValidator(validator)
-	return err
-}
+	err = pc.Apply()
+	if err != nil {
+		return xerrors.Errorf("%w", err)
+	}
 
-func deleteProof(req ProofUploadRequest, prev *model.Proof, validator *validator.Base) error {
-	// FIXME: impelement this
 	return nil
 }

@@ -42,7 +42,10 @@ func insert_proof(t *testing.T) {
 	}
 
 	for _, b := range validators {
-		_, err := model.ProofCreateFromValidator(&b)
+		pc, err := model.ProofChainCreateFromValidator(&b)
+		assert.Nil(t, err)
+
+		err = pc.Apply()
 		assert.Nil(t, err)
 	}
 }

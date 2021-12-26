@@ -20,7 +20,7 @@ func ValidatePersonalSignature(payload string, signature []byte, pubkey *ecdsa.P
 	}
 
 	if crypto.PubkeyToAddress(*pubkey) != crypto.PubkeyToAddress(*pubkeyRecovered) {
-		return xerrors.Errorf("Pubkey mismatch")
+		return xerrors.Errorf("bad signature")
 	}
 	return nil
 }

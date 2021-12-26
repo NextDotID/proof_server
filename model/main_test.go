@@ -6,9 +6,11 @@ import (
 
 	"github.com/nextdotid/proof-server/config"
 )
+
 func before_each(t *testing.T) {
 	// Clean DB
 	DB.Where("1 = 1").Delete(&Proof{})
+	DB.Where("1 = 1").Delete(&ProofChain{})
 }
 
 func TestMain(m *testing.M) {
