@@ -18,8 +18,8 @@ import (
 
 //  ProofChain is a chain of a persona's proof modification log.
 type ProofChain struct {
-	ID         int64          `gorm:"primarykey;column:'id'"`
-	CreatedAt  time.Time      `gorm:"column:'created_at'"`
+	ID         int64          `gorm:"primarykey"`
+	CreatedAt  time.Time      `gorm:"column:created_at"`
 	Action     types.Action   `gorm:"index;not null"`
 	Persona    string         `gorm:"index;not null"`
 	Identity   string         `gorm:"index;not null"`
