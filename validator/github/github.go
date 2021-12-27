@@ -28,7 +28,6 @@ type gistPayload struct {
 }
 
 var (
-	client *ghub.Client
 	l      = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "github"})
 )
 
@@ -39,8 +38,6 @@ func Init() {
 	validator.PlatformFactories[types.Platforms.Github] = func(base validator.Base) validator.IValidator {
 		return Github(base)
 	}
-
-	client = ghub.NewClient(nil)
 }
 
 func (gh Github) GeneratePostPayload() (post string) {
@@ -74,6 +71,7 @@ func (gh Github) GenerateSignPayload() (payload string) {
 }
 
 func (gh Github) Validate() (err error) {
+	client := ghub.NewClient(nil)
 	gist, response, err := client.Gists.Get(context.TODO(), gh.ProofLocation)
 	if err != nil {
 		return xerrors.Errorf("error when fetching gist: %w", err)
@@ -95,7 +93,7 @@ func (gh Github) Validate() (err error) {
 			continue
 		}
 
-		content = file.String()
+		content = *file.Content
 	}
 	if content == "" {
 		return xerrors.Errorf("%s not found or empty", gist_filename)
@@ -103,7 +101,7 @@ func (gh Github) Validate() (err error) {
 	payload := gistPayload{}
 	err = json.Unmarshal([]byte(content), &payload)
 	if err != nil {
-		return xerrors.Errorf("error when parsing file: %w", err)
+		return xerrors.Errorf("error when parsing JSON: %w", err)
 	}
 
 	pubkey_recovered, err := crypto.StringToPubkey(payload.Persona)
