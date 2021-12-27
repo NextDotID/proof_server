@@ -14,6 +14,7 @@ import (
 	"github.com/nextdotid/proof-server/validator/ethereum"
 	"github.com/nextdotid/proof-server/validator/twitter"
 	"github.com/nextdotid/proof-server/validator/keybase"
+	"github.com/nextdotid/proof-server/validator/github"
 )
 
 func before_each(t *testing.T)  {
@@ -30,6 +31,7 @@ func TestMain(m *testing.M)  {
 	twitter.Init()
 	keybase.Init()
 	ethereum.Init()
+	github.Init()
 
 	before_each(nil)
 

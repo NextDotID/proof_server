@@ -64,7 +64,7 @@ func validateProof(req ProofUploadRequest, prev *model.ProofChain, pubkey *ecdsa
 		prev_signature = prev.Signature
 	}
 
-	performer_factory, ok := validator.Platforms[req.Platform]
+	performer_factory, ok := validator.PlatformFactories[req.Platform]
 	if !ok {
 		return validator.Base{}, xerrors.Errorf("platform not supported: %s", string(req.Platform))
 	}
