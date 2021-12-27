@@ -12,6 +12,10 @@ import (
 	myconfig "github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/controller"
 	"github.com/nextdotid/proof-server/model"
+	"github.com/nextdotid/proof-server/validator/ethereum"
+	"github.com/nextdotid/proof-server/validator/github"
+	"github.com/nextdotid/proof-server/validator/keybase"
+	"github.com/nextdotid/proof-server/validator/twitter"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,8 +23,15 @@ var (
 	initialized = false
 )
 
-func initDB(cfg aws.Config) {
+func init_db(cfg aws.Config) {
 	model.Init()
+}
+
+func init_validators() {
+	twitter.Init()
+	ethereum.Init()
+	keybase.Init()
+	github.Init()
 }
 
 func init() {
@@ -32,10 +43,11 @@ func init() {
 	if err != nil {
 		logrus.Fatalf("Unable to load AWS config: %s", err)
 	}
-	initConfigFromAwsSecret()
+	init_config_from_aws_secret()
 	logrus.SetLevel(logrus.WarnLevel)
 
-	initDB(cfg)
+	init_db(cfg)
+	init_validators()
 	controller.Init()
 }
 
@@ -43,7 +55,7 @@ func main() {
 	algnhsa.ListenAndServe(controller.Engine, nil)
 }
 
-func initConfigFromAwsSecret() {
+func init_config_from_aws_secret() {
 	if initialized {
 		return
 	}
