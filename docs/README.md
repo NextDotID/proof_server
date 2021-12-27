@@ -4,32 +4,31 @@
 
 A bridge to connect your web2.0 service / cryptocurrency wallet to
 NextID identity system. So your friends or followers can easily find
-you on NextID.
+you on any supported platform.
 
-## Which platform can I proof?
+## Which platform can I prove?
 
 ### Supported
 
-| Platform                       | `platform` value | `identity` value                                     | `proof_location` value                                              |
-|--------------------------------|------------------|------------------------------------------------------|---------------------------------------------------------------------|
-| NextID                         | `NextID`         | Public key HEX of NextID persona (`0x[0-9a-f]{130}`) | N/A (will be added by binding other platforms)                      |
-| [Twitter](https://twitter.com) | `twitter`        | `twitter`                                            | Proof tweet ID (`1415362679095635970`)                              |
-| [Keybase](https://keybase.io)  | `keybase`        | `keybase`                                            | N/A (use `https://your_identity.keybase.pub/NextID/PUBKEY_HEX.txt`) |
-| Ethereum                       | `eth`            | ETH wallet address `0x123AbC...`                     | N/A (use arweave to store proof, must be two-way signature)         |
+| Platform | `platform` value | `identity` value             | `proof_location` value                                                         | Misc.                                                   |
+|----------|------------------|------------------------------|--------------------------------------------------------------------------------|---------------------------------------------------------|
+| Twitter  | `twitter`        | `twitter_username`           | Proof tweet ID (`1415362679095635970`)                                         |                                                         |
+| Keybase  | `keybase`        | `keybase_username`           | N/A (use `https://your_identity.keybase.pub/NextID/COMPRESSED_PUBKEY_HEX.txt`) |                                                         |
+| Ethereum | `eth`            | Wallet address `0x123AbC...` | N/A (Two-way signatures created from persona sk and wallet sk)                 |                                                         |
+| Github   | `github`         | `github_username`            | Public visible Gist ID `a6dddd2811af21b671fd`                                  | Gist should contains `0xPUBKEY_COMRESSED_HEX.json` file |
 
 ### Planning
 
-| Platform                             | `platform` value | `identity` value                                                  | `proof_location` value                                      |
-|--------------------------------------|------------------|-------------------------------------------------------------------|-------------------------------------------------------------|
-| [Facebook](https://www.facebook.com) | `facebook`       | Username in link (i.e. `Meta` in `https://www.facebook.com/Meta`) | Post ID (`460695145492083`)                                 |
-| [Minds](https://www.minds.com)       | `minds`          | `minds`                                                           | Newsfeed ID (`1309718521097228301`)                         |
-| [Telegram](https://telegram.org)     | `telegram`       | `telegram`                                                        | `https://t.me/some_public_group/CHAT_ID_DIGITS`             |
-| [Discord](https://discord.com)       | `discord`        | `Discord#0000`                                                    | `https://discord.com/channels/DIGITS/DIGITS/DIGITS`         |
-| DNS (TXT field)                      | `dns`            | `example.com`                                                     | N/A (use `dig example.com TXT`)                             |
-| ENS                                  | `ens`            | `myens.eth`                                                       | N/A (use `id.next.proof` record in ENS to store proof)      |
-| Decentrialized Account Systems       | `das`            |                                                                   |                                                             |
-| Github                               | `github`         | `github_username`                                                 | Public visible Gist                                         |
-| Email                                | `email`          | `mail_address@example.com`                                        | A public mailing list `mbox` download URL (?)               |
+| Platform                             | `platform` value | `identity` value                                                  | `proof_location` value                                 | Misc. |
+|--------------------------------------|------------------|-------------------------------------------------------------------|--------------------------------------------------------|-------|
+| [Facebook](https://www.facebook.com) | `facebook`       | Username in link (i.e. `Meta` in `https://www.facebook.com/Meta`) | Post ID (`460695145492083`)                            |       |
+| [Minds](https://www.minds.com)       | `minds`          | `minds`                                                           | Newsfeed ID (`1309718521097228301`)                    |       |
+| [Telegram](https://telegram.org)     | `telegram`       | `telegram`                                                        | `https://t.me/some_public_group/CHAT_ID_DIGITS`        |       |
+| [Discord](https://discord.com)       | `discord`        | `Discord#0000`                                                    | `https://discord.com/channels/DIGITS/DIGITS/DIGITS`    |       |
+| DNS (TXT field)                      | `dns`            | `example.com`                                                     | N/A (use `dig example.com TXT`)                        |       |
+| ENS                                  | `ens`            | `myens.eth`                                                       | N/A (use `id.next.proof` record in ENS to store proof) |       |
+| Decentrialized Account Systems       | `das`            |                                                                   |                                                        |       |
+| Email                                | `email`          | `mail_address@example.com`                                        | A public mailing list `mbox` download URL (?)          |       |
 
 ## How?
 
@@ -67,17 +66,17 @@ seem-to-be-normal proof tweet link)?
 Of course he can, since this network is decentrialized, there is no
 "gatekeeper", anybody can publish any data in their own namespace.
 
-Well, how should other users accept the result?  They can only fetch this
+Well, how should other users trust this claim?  They can only fetch this
 tweet and validate it locally.
 
-This will cause something:
+The result is:
 
-1. EVERY user should set fetch materials for EVERY platform available
+1. EVERY user should set fetch methods for EVERY platform available
    (typically API key) for their own.  Since they can only trust their
-   own result.  This will increase the difficulty of deployment for
-   every user.
+   own verfification result.  This will increase the difficulty of
+   deployment for every single user in this network.
 
-2. With "junk proofs" grow more and more (they will not disappear,
-   decentrialized, you know), every user will waste more and more API
-   usage on these unsuccessful proof.  Finally the whole network is
-   flooded.
+2. With "junk proofs" grow more and more (they will not disappear or
+   being deleted by someone, decentrialized, you know), every user
+   will waste more and more API usage on these unsuccessful proof.
+   In the end the whole network is flooded.

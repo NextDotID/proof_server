@@ -97,6 +97,7 @@ func BytesToPubKey(pk_bytes []byte) (*ecdsa.PublicKey, error) {
 	return result, nil
 }
 
+// CompressedPubkeyHex has no "0x".
 func CompressedPubkeyHex(pk *ecdsa.PublicKey) string {
 	return common.Bytes2Hex(crypto.CompressPubkey(pk))
 }
