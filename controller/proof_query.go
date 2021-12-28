@@ -48,13 +48,22 @@ func performProofQuery(req ProofQueryRequest) []ProofQueryResponseSingle {
 	result := make([]ProofQueryResponseSingle, 0, 0)
 
 	proofs := make([]model.Proof, 0, 0)
-	tx := model.DB.
-		Where("platform", req.Platform).
-		Where("identity LIKE ?", "%" + req.Identity + "%").
-		Find(&proofs)
-	if tx.Error != nil || tx.RowsAffected == int64(0) || len(proofs) == 0 {
-		return result
+	if req.Platform == types.Platforms.NextID {
+
+		tx := model.DB.Where("persona", req.Identity).Find(&proofs)
+		if tx.Error != nil || tx.RowsAffected == int64(0) || len(proofs) == 0 {
+			return result
+		}
+	} else {
+		tx := model.DB.
+			Where("platform", req.Platform).
+			Where("identity LIKE ?", "%" + req.Identity + "%").
+			Find(&proofs)
+		if tx.Error != nil || tx.RowsAffected == int64(0) || len(proofs) == 0 {
+			return result
+		}
 	}
+
 
 	// proofs.group_by(&:persona)
 	persona_proof_map := make(map[string][]*model.Proof, 0)
