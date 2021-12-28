@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nextdotid/proof-server/model"
@@ -50,14 +51,14 @@ func performProofQuery(req ProofQueryRequest) []ProofQueryResponseSingle {
 	proofs := make([]model.Proof, 0, 0)
 	if req.Platform == types.Platforms.NextID {
 
-		tx := model.DB.Where("persona", req.Identity).Find(&proofs)
+		tx := model.DB.Where("persona", strings.ToLower(req.Identity)).Find(&proofs)
 		if tx.Error != nil || tx.RowsAffected == int64(0) || len(proofs) == 0 {
 			return result
 		}
 	} else {
 		tx := model.DB.
 			Where("platform", req.Platform).
-			Where("identity LIKE ?", "%"+req.Identity+"%").
+			Where("identity LIKE ?", "%"+strings.ToLower(req.Identity)+"%").
 			Find(&proofs)
 		if tx.Error != nil || tx.RowsAffected == int64(0) || len(proofs) == 0 {
 			return result
