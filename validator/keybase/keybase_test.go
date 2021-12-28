@@ -47,7 +47,9 @@ func Test_Validate(t *testing.T) {
 		before_each(t)
 
 		newKB := kb
+		newKB.Identity = "NYKma"
 		assert.Nil(t, newKB.Validate())
 		assert.Greater(t, len(newKB.Text), 10)
+		assert.Equal(t, "nykma", newKB.Identity)
 	})
 }

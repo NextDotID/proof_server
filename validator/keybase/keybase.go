@@ -45,6 +45,7 @@ func (kb *Keybase) GeneratePostPayload() (post string) {
 }
 
 func (kb *Keybase) GenerateSignPayload() (payload string) {
+	kb.Identity = strings.ToLower(kb.Identity)
 	payloadStruct := validator.H{
 		"action":   string(kb.Action),
 		"identity": kb.Identity,
@@ -62,10 +63,10 @@ func (kb *Keybase) GenerateSignPayload() (payload string) {
 	}
 
 	return string(payloadBytes)
-
 }
 
 func (kb *Keybase) Validate() (err error) {
+	kb.Identity = strings.ToLower(kb.Identity)
 	url := fmt.Sprintf(URL, kb.Identity, mycrypto.CompressedPubkeyHex(kb.Pubkey))
 	kb.ProofLocation = url
 	resp, err := http.Get(url)

@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
@@ -42,6 +43,7 @@ func Init() {
 }
 
 func (gh *Github) GeneratePostPayload() (post string) {
+	gh.Identity = strings.ToLower(gh.Identity)
 	payload := gistPayload{
 		Version:        "1",
 		Comment:        "Here's an NextID proof of this Github account.",
@@ -57,6 +59,7 @@ func (gh *Github) GeneratePostPayload() (post string) {
 }
 
 func (gh *Github) GenerateSignPayload() (payload string) {
+	gh.Identity = strings.ToLower(gh.Identity)
 	payloadStruct := validator.H{
 		"action":   string(gh.Action),
 		"identity": gh.Identity,
@@ -72,6 +75,8 @@ func (gh *Github) GenerateSignPayload() (payload string) {
 }
 
 func (gh *Github) Validate() (err error) {
+	gh.Identity = strings.ToLower(gh.Identity)
+
 	client := ghub.NewClient(nil)
 	gist, response, err := client.Gists.Get(context.TODO(), gh.ProofLocation)
 	if err != nil {

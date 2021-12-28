@@ -3,6 +3,7 @@ package ethereum
 import (
 	"crypto/ecdsa"
 	"encoding/base64"
+	"strings"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/crypto"
@@ -58,7 +59,7 @@ func Test_GenerateSignPayload(t *testing.T) {
 		before_each(t)
 
 		result := eth.GenerateSignPayload()
-		assert.Contains(t, result, "\"identity\":\""+crypto.PubkeyToAddress(wallet_sk.PublicKey).Hex())
+		assert.Contains(t, result, "\"identity\":\""+strings.ToLower(crypto.PubkeyToAddress(wallet_sk.PublicKey).Hex()))
 		assert.Contains(t, result, "\"persona\":\"0x"+mycrypto.CompressedPubkeyHex(eth.Pubkey))
 		assert.Contains(t, result, "\"platform\":\"ethereum\"")
 	})

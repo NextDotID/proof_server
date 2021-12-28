@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 
 	t "github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -49,6 +50,7 @@ func (twitter *Twitter) GeneratePostPayload() (post string) {
 }
 
 func (twitter *Twitter) GenerateSignPayload() (payload string) {
+	twitter.Identity = strings.ToLower(twitter.Identity)
 	payloadStruct := validator.H{
 		"action":   string(twitter.Action),
 		"identity": twitter.Identity,
@@ -70,6 +72,7 @@ func (twitter *Twitter) GenerateSignPayload() (payload string) {
 
 func (twitter *Twitter) Validate() (err error) {
 	initClient()
+	twitter.Identity = strings.ToLower(twitter.Identity)
 	tweetID, err := strconv.ParseInt(twitter.ProofLocation, 10, 64)
 	if err != nil {
 		return xerrors.Errorf("Error when parsing tweet ID %s: %s", twitter.ProofLocation, err.Error())

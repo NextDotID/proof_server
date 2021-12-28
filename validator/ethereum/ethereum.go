@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"regexp"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -43,7 +44,7 @@ func (*Ethereum) GeneratePostPayload() (post string) {
 func (et *Ethereum) GenerateSignPayload() (payload string) {
 	payloadStruct := validator.H{
 		"action":   string(et.Action),
-		"identity": et.Identity,
+		"identity": strings.ToLower(et.Identity),
 		"persona":  "0x" + mycrypto.CompressedPubkeyHex(et.Pubkey),
 		"platform": "ethereum",
 		"prev":     nil,
@@ -61,6 +62,7 @@ func (et *Ethereum) GenerateSignPayload() (payload string) {
 
 func (et *Ethereum) Validate() (err error) {
 	// ETH wallet signature
+	et.Identity = strings.ToLower(et.Identity)
 	walletSignature, ok := et.Extra["wallet_signature"]
 	if !ok {
 		return xerrors.Errorf("wallet_signature not found")

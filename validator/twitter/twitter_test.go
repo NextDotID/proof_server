@@ -17,7 +17,7 @@ var (
 		Previous:      "",
 		Action:        types.Actions.Create,
 		Pubkey:        nil,
-		Identity:      "yeiwb",
+		Identity:      "YEIwb",
 		ProofLocation: "1469221200140574721",
 		Text:          "",
 	}
@@ -52,6 +52,7 @@ func Test_Validate(t *testing.T) {
 		assert.Nil(t, newTweet.Validate())
 		assert.Greater(t, len(newTweet.Text), 10)
 		assert.Empty(t, tweet.Text)
+		assert.Equal(t, "yeiwb", newTweet.Identity)
 	})
 
 	t.Run("should return identity error", func(t *testing.T) {
