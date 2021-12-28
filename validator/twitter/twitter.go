@@ -33,19 +33,22 @@ var (
 )
 
 func Init() {
+	initClient()
 	if validator.PlatformFactories == nil {
 		validator.PlatformFactories = make(map[types.Platform]func(validator.Base) validator.IValidator)
 	}
+
 	validator.PlatformFactories[types.Platforms.Twitter] = func(base validator.Base) validator.IValidator {
-		return Twitter(base)
+		twi := Twitter(base)
+		return &twi
 	}
 }
 
-func (twitter Twitter) GeneratePostPayload() (post string) {
+func (twitter *Twitter) GeneratePostPayload() (post string) {
 	return fmt.Sprintf(POST_STRUCT, mycrypto.CompressedPubkeyHex(twitter.Pubkey))
 }
 
-func (twitter Twitter) GenerateSignPayload() (payload string) {
+func (twitter *Twitter) GenerateSignPayload() (payload string) {
 	payloadStruct := validator.H{
 		"action":   string(twitter.Action),
 		"identity": twitter.Identity,
@@ -65,7 +68,7 @@ func (twitter Twitter) GenerateSignPayload() (payload string) {
 	return string(payloadBytes)
 }
 
-func (twitter Twitter) Validate() (err error) {
+func (twitter *Twitter) Validate() (err error) {
 	initClient()
 	tweetID, err := strconv.ParseInt(twitter.ProofLocation, 10, 64)
 	if err != nil {
@@ -86,7 +89,7 @@ func (twitter Twitter) Validate() (err error) {
 	return twitter.validateText()
 }
 
-func (twitter Twitter) validateText() (err error) {
+func (twitter *Twitter) validateText() (err error) {
 	matched := re.FindStringSubmatch(twitter.Text)
 	if len(matched) < 3 {
 		return xerrors.Errorf("Tweet struct mismatch. Found: %+v", matched)

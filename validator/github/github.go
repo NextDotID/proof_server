@@ -36,11 +36,12 @@ func Init() {
 		validator.PlatformFactories = make(map[types.Platform]func(validator.Base) validator.IValidator)
 	}
 	validator.PlatformFactories[types.Platforms.Github] = func(base validator.Base) validator.IValidator {
-		return Github(base)
+		gh := Github(base)
+		return &gh
 	}
 }
 
-func (gh Github) GeneratePostPayload() (post string) {
+func (gh *Github) GeneratePostPayload() (post string) {
 	payload := gistPayload{
 		Version:        "1",
 		Comment:        "Here's an NextID proof of this Github account.",
@@ -55,7 +56,7 @@ func (gh Github) GeneratePostPayload() (post string) {
 	return string(payload_json)
 }
 
-func (gh Github) GenerateSignPayload() (payload string) {
+func (gh *Github) GenerateSignPayload() (payload string) {
 	payloadStruct := validator.H{
 		"action":   string(gh.Action),
 		"identity": gh.Identity,
@@ -70,7 +71,7 @@ func (gh Github) GenerateSignPayload() (payload string) {
 	return string(payload_bytes)
 }
 
-func (gh Github) Validate() (err error) {
+func (gh *Github) Validate() (err error) {
 	client := ghub.NewClient(nil)
 	gist, response, err := client.Gists.Get(context.TODO(), gh.ProofLocation)
 	if err != nil {

@@ -35,15 +35,16 @@ func Init() {
 		validator.PlatformFactories = make(map[types.Platform]func(validator.Base) validator.IValidator)
 	}
 	validator.PlatformFactories[types.Platforms.Keybase] = func(base validator.Base) validator.IValidator {
-		return Keybase(base)
+		kb := Keybase(base)
+		return &kb
 	}
 }
 
-func (kb Keybase) GeneratePostPayload() (post string) {
+func (kb *Keybase) GeneratePostPayload() (post string) {
 	return fmt.Sprintf(POST_TEMPLATE, mycrypto.CompressedPubkeyHex(kb.Pubkey))
 }
 
-func (kb Keybase) GenerateSignPayload() (payload string) {
+func (kb *Keybase) GenerateSignPayload() (payload string) {
 	payloadStruct := validator.H{
 		"action":   string(kb.Action),
 		"identity": kb.Identity,
@@ -64,7 +65,7 @@ func (kb Keybase) GenerateSignPayload() (payload string) {
 
 }
 
-func (kb Keybase) Validate() (err error) {
+func (kb *Keybase) Validate() (err error) {
 	url := fmt.Sprintf(URL, kb.Identity, mycrypto.CompressedPubkeyHex(kb.Pubkey))
 	kb.ProofLocation = url
 	resp, err := http.Get(url)
@@ -82,7 +83,7 @@ func (kb Keybase) Validate() (err error) {
 	return kb.validateBody()
 }
 
-func (kb Keybase) validateBody() error {
+func (kb *Keybase) validateBody() error {
 	l := l.WithFields(logrus.Fields{"function": "validateBody", "keybase": kb.Identity})
 	matched := re.FindStringSubmatch(kb.Text)
 	l.Debugf("Body: \"%s\"", kb.Text)

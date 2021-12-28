@@ -30,17 +30,18 @@ func Init() {
 		validator.PlatformFactories = make(map[types.Platform]func(validator.Base) validator.IValidator)
 	}
 	validator.PlatformFactories[types.Platforms.Ethereum] = func(base validator.Base) validator.IValidator {
-		return Ethereum(base)
+		eth := Ethereum(base)
+		return &eth
 	}
 }
 
 
 // Not used by etheruem (for now).
-func (Ethereum) GeneratePostPayload() (post string) {
+func (*Ethereum) GeneratePostPayload() (post string) {
 	return ""
 }
 
-func (et Ethereum) GenerateSignPayload() (payload string) {
+func (et *Ethereum) GenerateSignPayload() (payload string) {
 	payloadStruct := validator.H{
 		"action": string(et.Action),
 		"identity": et.Identity,
@@ -56,11 +57,10 @@ func (et Ethereum) GenerateSignPayload() (payload string) {
 		l.Warnf("Error when marshaling struct: %s", err.Error())
 		return ""
 	}
-
 	return string(payloadBytes)
 }
 
-func (et Ethereum) Validate() (err error) {
+func (et *Ethereum) Validate() (err error) {
 	// ETH wallet signature
 	walletSignature, ok := et.Extra["wallet_signature"]
 	if !ok {
