@@ -22,17 +22,17 @@ type IValidator interface {
 }
 
 type Base struct {
-	Platform      types.Platform
-	Previous      string
-	Action        types.Action
-	Pubkey        *ecdsa.PublicKey
+	Platform types.Platform
+	Previous string
+	Action   types.Action
+	Pubkey   *ecdsa.PublicKey
 	// Identity on target platform.
 	Identity      string
 	ProofLocation string
 	Signature     []byte
 	Text          string
 	// Extra info needed by separate platforms (e.g. Ethereum)
-	Extra         map[string]string
+	Extra map[string]string
 }
 
 // H for JSON builder.

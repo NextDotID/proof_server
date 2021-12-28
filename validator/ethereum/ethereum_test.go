@@ -13,15 +13,16 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
+
 var (
 	persona_sk *ecdsa.PrivateKey
-	wallet_sk *ecdsa.PrivateKey
+	wallet_sk  *ecdsa.PrivateKey
 
 	eth = Ethereum{
-		Platform:      types.Platforms.Ethereum,
-		Previous:      "",
-		Action:        types.Actions.Create,
-		Extra:         map[string]string{
+		Platform: types.Platforms.Ethereum,
+		Previous: "",
+		Action:   types.Actions.Create,
+		Extra: map[string]string{
 			"wallet_signature": "",
 		},
 	}
@@ -52,14 +53,13 @@ func Test_GeneratePostPayload(t *testing.T) {
 	})
 }
 
-
 func Test_GenerateSignPayload(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
 
 		result := eth.GenerateSignPayload()
-		assert.Contains(t, result, "\"identity\":\"" + crypto.PubkeyToAddress(wallet_sk.PublicKey).Hex())
-		assert.Contains(t, result, "\"persona\":\"0x" + mycrypto.CompressedPubkeyHex(eth.Pubkey))
+		assert.Contains(t, result, "\"identity\":\""+crypto.PubkeyToAddress(wallet_sk.PublicKey).Hex())
+		assert.Contains(t, result, "\"persona\":\"0x"+mycrypto.CompressedPubkeyHex(eth.Pubkey))
 		assert.Contains(t, result, "\"platform\":\"ethereum\"")
 	})
 }

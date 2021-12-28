@@ -10,11 +10,11 @@ import (
 
 var (
 	DB *gorm.DB
-	l = logrus.WithFields(logrus.Fields{"module": "model"})
+	l  = logrus.WithFields(logrus.Fields{"module": "model"})
 )
 
 // Init initializes DB connection instance and do migration at startup.
-func Init()  {
+func Init() {
 	if DB != nil { // initialized
 		return
 	}

@@ -24,7 +24,7 @@ func Test_ProofUpload(t *testing.T) {
 		assert.Empty(t, resp.Message)
 
 		pc := model.ProofChain{
-			Action: req.Action,
+			Action:   req.Action,
 			Platform: req.Platform,
 			Identity: req.Identity,
 			Location: req.ProofLocation,

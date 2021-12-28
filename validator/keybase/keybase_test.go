@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/nextdotid/proof-server/config"
-	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/types"
+	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )

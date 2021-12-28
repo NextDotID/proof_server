@@ -12,10 +12,10 @@ import (
 )
 
 type ProofPayloadRequest struct {
-	Action    types.Action   `json:"action"`
-	Platform  types.Platform `json:"platform"`
-	Identity  string         `json:"identity"`
-	PublicKey string         `json:"public_key"`
+	Action    types.Action             `json:"action"`
+	Platform  types.Platform           `json:"platform"`
+	Identity  string                   `json:"identity"`
+	PublicKey string                   `json:"public_key"`
 	Extra     ProofPayloadRequestExtra `json:"extra"`
 }
 
@@ -77,7 +77,7 @@ func proofPayload(c *gin.Context) {
 	performer := performer_factory(v)
 	c.JSON(http.StatusOK, ProofPayloadResponse{
 		PostContent: performer.GeneratePostPayload(),
-		SignPayload:performer.GenerateSignPayload(),
+		SignPayload: performer.GenerateSignPayload(),
 	})
 }
 

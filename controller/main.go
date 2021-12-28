@@ -14,7 +14,7 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-func Init()  {
+func Init() {
 	Engine = gin.Default()
 	Engine.GET("/healthz", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{

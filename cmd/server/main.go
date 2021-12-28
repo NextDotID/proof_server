@@ -16,7 +16,7 @@ import (
 
 var (
 	flagConfigPath = flag.String("config", "./config/config.json", "Config.json file path")
-	flagPort = flag.Int("port", 9800, "Listen port")
+	flagPort       = flag.Int("port", 9800, "Listen port")
 )
 
 func init_validators() {

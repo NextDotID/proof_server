@@ -23,7 +23,7 @@ type DBConfig struct {
 }
 
 type PlatformConfig struct {
-	Twitter TwitterPlatformConfig `json:"twitter"`
+	Twitter  TwitterPlatformConfig  `json:"twitter"`
 	Ethereum EthereumPlatformConfig `json:"ethereum"`
 }
 

@@ -35,7 +35,7 @@ func insert_proof(t *testing.T) {
 			Identity:      "0xd5F630652D4a8a5f95cda3738CE9f43fa26E764F",
 			ProofLocation: "",
 			Signature:     []byte{2},
-			Extra:         map[string]string{
+			Extra: map[string]string{
 				"ethereum_pubkey": "0x04ae5933a45605e7fff23cd010455911c1f0194479438859af5140d749937e53fd935d768efa9229ae8be3314631e945c56f915778ad4565b4efafcd13864e2fd7",
 			},
 		},

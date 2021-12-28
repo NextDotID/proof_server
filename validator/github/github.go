@@ -28,7 +28,7 @@ type gistPayload struct {
 }
 
 var (
-	l      = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "github"})
+	l = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "github"})
 )
 
 func Init() {

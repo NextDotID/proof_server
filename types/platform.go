@@ -10,8 +10,8 @@ var Platforms = struct {
 	Keybase  Platform
 	Ethereum Platform
 }{
-	Github: "github",
-	NextID: "nextid",
+	Github:   "github",
+	NextID:   "nextid",
 	Twitter:  "twitter",
 	Keybase:  "keybase",
 	Ethereum: "ethereum",

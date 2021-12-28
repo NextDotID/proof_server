@@ -16,11 +16,11 @@ func Test_ProofChainFindBySignature(t *testing.T) {
 		pk, _ := crypto.StringToPubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
 
 		proof := ProofChain{
-			Persona:       "0x" + crypto.CompressedPubkeyHex(pk),
-			Platform:      "twitter",
-			Identity:      "yeiwb",
-			Location:      "1469221200140574721",
-			Signature:     "gMUJ75eewkdaNrFp7bafzckv9+rlW7rVaxkB7/sYzYgFdFltYG+gn0lYzVNgrAdHWZPmu2giwJniGG7HG9iNigE=",
+			Persona:   "0x" + crypto.CompressedPubkeyHex(pk),
+			Platform:  "twitter",
+			Identity:  "yeiwb",
+			Location:  "1469221200140574721",
+			Signature: "gMUJ75eewkdaNrFp7bafzckv9+rlW7rVaxkB7/sYzYgFdFltYG+gn0lYzVNgrAdHWZPmu2giwJniGG7HG9iNigE=",
 		}
 		tx := DB.Create(&proof)
 		assert.Nil(t, tx.Error)
@@ -138,12 +138,12 @@ func Test_Apply(t *testing.T) {
 		pk, _ := crypto.StringToPubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
 
 		pc := ProofChain{
-			Action:     types.Actions.Create,
-			Persona:    MarshalPersona(pk),
-			Identity:   "yeiwb",
-			Location: "1469221200140574721",
-			Platform:   types.Platforms.Twitter,
-			Signature:  MarshalSignature([]byte{1, 2, 3, 4}),
+			Action:    types.Actions.Create,
+			Persona:   MarshalPersona(pk),
+			Identity:  "yeiwb",
+			Location:  "1469221200140574721",
+			Platform:  types.Platforms.Twitter,
+			Signature: MarshalSignature([]byte{1, 2, 3, 4}),
 		}
 		tx := DB.Create(&pc)
 		assert.Nil(t, tx.Error)
@@ -151,7 +151,7 @@ func Test_Apply(t *testing.T) {
 		err := pc.Apply()
 		assert.Nil(t, err)
 
-		proof_found := Proof{ProofChainID: pc.ID,}
+		proof_found := Proof{ProofChainID: pc.ID}
 		DB.First(&proof_found)
 
 		assert.NotZero(t, proof_found.ID)
@@ -167,12 +167,12 @@ func Test_Apply(t *testing.T) {
 
 		// Delete
 		pc_delete := ProofChain{
-			Action:     types.Actions.Delete,
-			Persona:    MarshalPersona(pk),
-			Identity:   "yeiwb",
-			Location: "1469221200140574721",
-			Platform:   types.Platforms.Twitter,
-			Signature:  MarshalSignature([]byte{1, 2, 3, 4}),
+			Action:    types.Actions.Delete,
+			Persona:   MarshalPersona(pk),
+			Identity:  "yeiwb",
+			Location:  "1469221200140574721",
+			Platform:  types.Platforms.Twitter,
+			Signature: MarshalSignature([]byte{1, 2, 3, 4}),
 		}
 		pc_delete.Apply()
 		DB.Model(&Proof{}).Where("proof_chain_id = ?", pc.ID).Count(&count)

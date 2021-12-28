@@ -23,7 +23,7 @@ type Twitter validator.Base
 
 const (
 	MATCH_TEMPLATE = "^Prove myself: I'm 0x([0-9a-f]{66}) on NextID. Signature: (.*)$"
-	POST_STRUCT = "Prove myself: I'm 0x%s on NextID. Signature: %%SIG_BASE64%%"
+	POST_STRUCT    = "Prove myself: I'm 0x%s on NextID. Signature: %%SIG_BASE64%%"
 )
 
 var (

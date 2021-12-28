@@ -21,7 +21,7 @@ const (
 )
 
 var (
-	l = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "ethereum"})
+	l  = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "ethereum"})
 	re = regexp.MustCompile(VALIDATE_TEMPLATE)
 )
 
@@ -35,7 +35,6 @@ func Init() {
 	}
 }
 
-
 // Not used by etheruem (for now).
 func (*Ethereum) GeneratePostPayload() (post string) {
 	return ""
@@ -43,11 +42,11 @@ func (*Ethereum) GeneratePostPayload() (post string) {
 
 func (et *Ethereum) GenerateSignPayload() (payload string) {
 	payloadStruct := validator.H{
-		"action": string(et.Action),
+		"action":   string(et.Action),
 		"identity": et.Identity,
-		"persona": "0x" + mycrypto.CompressedPubkeyHex(et.Pubkey),
+		"persona":  "0x" + mycrypto.CompressedPubkeyHex(et.Pubkey),
 		"platform": "ethereum",
-		"prev": nil,
+		"prev":     nil,
 	}
 	if et.Previous != "" {
 		payloadStruct["prev"] = et.Previous

@@ -24,8 +24,8 @@ type ProofQueryResponseSingle struct {
 }
 
 type ProofQueryResponseSingleProof struct {
-	Platform      types.Platform `json:"platform"`
-	Identity      string         `json:"identity"`
+	Platform types.Platform `json:"platform"`
+	Identity string         `json:"identity"`
 }
 
 func proofQuery(c *gin.Context) {
@@ -57,13 +57,12 @@ func performProofQuery(req ProofQueryRequest) []ProofQueryResponseSingle {
 	} else {
 		tx := model.DB.
 			Where("platform", req.Platform).
-			Where("identity LIKE ?", "%" + req.Identity + "%").
+			Where("identity LIKE ?", "%"+req.Identity+"%").
 			Find(&proofs)
 		if tx.Error != nil || tx.RowsAffected == int64(0) || len(proofs) == 0 {
 			return result
 		}
 	}
-
 
 	// proofs.group_by(&:persona)
 	persona_proof_map := make(map[string][]*model.Proof, 0)
@@ -83,8 +82,8 @@ func performProofQuery(req ProofQueryRequest) []ProofQueryResponseSingle {
 		}
 		for _, p := range proofs {
 			single.Proofs = append(single.Proofs, ProofQueryResponseSingleProof{
-				Platform:      p.Platform,
-				Identity:      p.Identity,
+				Platform: p.Platform,
+				Identity: p.Identity,
 			})
 		}
 		result = append(result, single)
