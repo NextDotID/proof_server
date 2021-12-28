@@ -2,6 +2,7 @@ FORMAT: 1A
 
 # Changelog
 
+  - <2021-12-27 Mon> :: POST /v1/proof -> add `extra` -> `signature`
   - <2021-12-21 Tue> :: POST /v1/proof/payload -> add `extra`
   - <2021-12-20 Mon> :: GET /v1/proof -> structure changed to support multi Persona response
   - <2021-12-17 Fri> :: POST /v1/proof -> add `extra`
@@ -35,8 +36,6 @@ See [README.md](./README.md)
     + platform (string, required) - Target platform. See table above for all available platforms. See table in [README.md](./README.md) for all available values.
     + identity (string, required) - Identity in target platform to proof. Usually a "username" or "screen name". See [README.md](./README.md).
     + public_key (string, required) - Public key of NextID Persona to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
-    + extra (object, optional) - Extra info for specific platform needed.
-      + wallet_signature (string, optional) - (needed for `platform: ethereum`) Signature signed by ETH wallet (w/ same sign payload), BASE64-ed.
 
   + Body
 
@@ -44,8 +43,7 @@ See [README.md](./README.md)
           "action": "create",
           "platform": "twitter",
           "identity": "my_twitter_screen_name",
-          "public_key": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575",
-          "extra": {}
+          "public_key": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575"
         }
 
 + Response 200 (application/json)
@@ -58,7 +56,7 @@ See [README.md](./README.md)
   + Body
 
         {
-          "post_content": "Prove myself: I'm 0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3 on NextID. Signature: %SIG_BASE64%",
+          "post_content": "Prove myself: I'm 0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3 on NextID. Signature: %%SIG_BASE64%%",
           "sign_payload": "{\"action\":\"add\",\"identity\":\"my_twitter_screen_name\",\"platform\":\"twitter\",\"prev\":null}"
         }
 
@@ -75,7 +73,7 @@ See [README.md](./README.md)
     + public_key (string, required) - Public key of NextID Persona to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
     + extra (object, optional) - Extra info for specific platform needed.
       + wallet_signature (string, optional) - (needed for `platform: ethereum`) Signature signed by ETH wallet (w/ same sign payload), BASE64-ed.
-
+      + signature (string, optional) - (needed for `platform: ethereum`) Signature signed by Persona private key (w/ same sign payload), BASE64-ed.
 
   + Body
 

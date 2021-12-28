@@ -2,6 +2,7 @@ package controller
 
 import (
 	"crypto/ecdsa"
+	"encoding/base64"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,7 @@ type ProofUploadRequest struct {
 }
 
 type ProofUploadRequestExtra struct {
+	Signature               string `json:"signature"`
 	EthereumWalletSignature string `json:"wallet_signature"`
 }
 
@@ -77,10 +79,16 @@ func validateProof(req ProofUploadRequest, prev *model.ProofChain, pubkey *ecdsa
 		ProofLocation: req.ProofLocation,
 	}
 
-	extra := map[string]string{}
-	if len(req.Extra.EthereumWalletSignature) != 0 {
+	if req.Platform == types.Platforms.Ethereum {
+		extra := map[string]string{}
 		extra["wallet_signature"] = req.Extra.EthereumWalletSignature
 		base.Extra = extra
+
+		persona_sig, err := base64.StdEncoding.DecodeString(req.Extra.Signature)
+		if err != nil {
+			return validator.Base{}, xerrors.Errorf("error when decoding persona signature: %w", err)
+		}
+		base.Signature = persona_sig
 	}
 
 	performer := performer_factory(base)
