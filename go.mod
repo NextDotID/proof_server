@@ -38,6 +38,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.11.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
@@ -78,6 +79,7 @@ require (
 	github.com/akrylysov/algnhsa v0.12.1
 	github.com/ethereum/go-ethereum v1.10.16
 	github.com/gin-contrib/cors v1.3.1
+	github.com/bwmarrin/discordgo v0.23.2
 	github.com/google/go-github/v41 v41.0.0
 	github.com/google/uuid v1.3.0
 	github.com/samber/lo v1.11.0
