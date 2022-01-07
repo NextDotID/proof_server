@@ -2,6 +2,7 @@ FORMAT: 1A
 
 # Changelog
 
+  - <2022-01-07 Fri> :: GET /v1/proof -> support multiple identities and whole platform search
   - <2021-12-27 Mon> :: POST /v1/proof -> add `extra` -> `signature`
   - <2021-12-21 Tue> :: POST /v1/proof/payload -> add `extra`
   - <2021-12-20 Mon> :: GET /v1/proof -> structure changed to support multi Persona response
@@ -110,12 +111,14 @@ Request failed.
 
     + Parameters
 
-      + platform (string, required) - Proof platform
-      + identity (string, required) - Identity on target platform
+      + platform (string, optional) - Proof platform. If not present, all platforms will be searched.
+      + identity (string, required) - Identity on target platform. Separate identities with comma (`,`) if you want to query mutipe identity at once.
 
     + Example
 
       `GET /proof?platform=twitter&identity=my_twitter_screen_name`
+
+      `GET /proof?identity=abc,def`
 
 + Response 200 (application/json)
 

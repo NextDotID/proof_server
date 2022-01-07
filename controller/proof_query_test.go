@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	persona = "0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3"
+	persona string = "0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3"
 )
 
 func insert_proof(t *testing.T) {
@@ -32,7 +32,7 @@ func insert_proof(t *testing.T) {
 			Previous:      "0x01",
 			Action:        types.Actions.Create,
 			Pubkey:        pubkey,
-			Identity:      "0xd5F630652D4a8a5f95cda3738CE9f43fa26E764F",
+			Identity:      "0xd5f630652d4a8a5f95cda3738ce9f43fa26e764f",
 			ProofLocation: "",
 			Signature:     []byte{2},
 			Extra: map[string]string{
@@ -81,8 +81,36 @@ func Test_proofQuery(t *testing.T) {
 		APITestCall(Engine, "GET", "/v1/proof?platform=keybase&identity=yeiwb", "", &empty_resp)
 		assert.Equal(t, 0, len(empty_resp.IDs))
 	})
-}
 
-func Test_performProofQuery(t *testing.T) {
+	t.Run("all platform result", func(t *testing.T) {
+		before_each(t)
+		insert_proof(t)
 
+		resp := ProofQueryResponse{}
+		APITestCall(Engine, "GET", "/v1/proof?identity=eiwb", "", &resp)
+		assert.Equal(t, 1, len(resp.IDs))
+		found := resp.IDs[0]
+		assert.Equal(t, persona, found.Persona)
+		assert.Equal(t, 1, len(found.Proofs))
+	})
+
+	t.Run("multiple identity + fuzzy", func(t *testing.T) {
+		before_each(t)
+		insert_proof(t)
+
+		resp := ProofQueryResponse{}
+		APITestCall(Engine, "GET", "/v1/proof?identity=eiw,0xd5f630652d4", "", &resp)
+		assert.Equal(t, 1, len(resp.IDs))
+		assert.Equal(t, 2, len(resp.IDs[0].Proofs))
+	})
+
+	t.Run("persona", func(t *testing.T) {
+		before_each(t)
+		insert_proof(t)
+
+		resp := ProofQueryResponse{}
+		APITestCall(Engine, "GET", "/v1/proof?identity="+persona+"&platform=nextid", "", &resp)
+		assert.Equal(t, 1, len(resp.IDs))
+		assert.Equal(t, 2, len(resp.IDs[0].Proofs))
+	})
 }
