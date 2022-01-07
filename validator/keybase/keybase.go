@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"regexp"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/nextdotid/proof-server/types"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
@@ -19,15 +17,22 @@ import (
 
 type Keybase validator.Base
 
+type KeybasePayload struct {
+	Version string `json:"version"`
+	Comment string `json:"comment"`
+	Comment2 string `json:"comment2"`
+	Persona string `json:"persona"`
+	KeybaseUsername string `json:"keybase_username"`
+	SignPayload string `json:"sign_payload"`
+	Signature string `json:"signature"`
+}
+
 const (
-	VALIDATE_TEMPLATE = "^Prove myself: I'm 0x([0-9a-f]{66}) on NextID. Signature: (.*)"
-	POST_TEMPLATE     = "Prove myself: I'm 0x%s on NextID. Signature: %%SIG_BASE64%%"
-	URL               = "https://%s.keybase.pub/NextID/0x%s.txt"
+	URL               = "https://%s.keybase.pub/NextID/0x%s.json"
 )
 
 var (
 	l  = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "keybase"})
-	re = regexp.MustCompile(VALIDATE_TEMPLATE)
 )
 
 func Init() {
@@ -41,7 +46,18 @@ func Init() {
 }
 
 func (kb *Keybase) GeneratePostPayload() (post string) {
-	return fmt.Sprintf(POST_TEMPLATE, mycrypto.CompressedPubkeyHex(kb.Pubkey))
+	kb.Identity = strings.ToLower(kb.Identity)
+	payload := KeybasePayload{
+		Version:         "1",
+		Comment:        "Here's an NextID proof of this Keybase account.",
+		Comment2:       "To validate, base64.decode the signature, and recover pubkey from it using sign_payload with ethereum personal_sign algo.",
+		Persona:         "0x" + mycrypto.CompressedPubkeyHex(kb.Pubkey),
+		KeybaseUsername: kb.Identity,
+		SignPayload:     kb.GenerateSignPayload(),
+		Signature:       "%%SIG_BASE64%%",
+	}
+	payload_json, _ := json.MarshalIndent(payload, "", "\t")
+	return string(payload_json)
 }
 
 func (kb *Keybase) GenerateSignPayload() (payload string) {
@@ -49,7 +65,7 @@ func (kb *Keybase) GenerateSignPayload() (payload string) {
 	payloadStruct := validator.H{
 		"action":   string(kb.Action),
 		"identity": kb.Identity,
-		"platform": "keybase",
+		"platform": string(types.Platforms.Keybase),
 		"prev":     nil,
 	}
 	if kb.Previous != "" {
@@ -80,32 +96,25 @@ func (kb *Keybase) Validate() (err error) {
 	if err != nil {
 		return xerrors.Errorf("Error when getting resp body")
 	}
-	kb.Text = strings.TrimSpace(string(body))
-	return kb.validateBody()
+
+	payload := new(KeybasePayload)
+	err = json.Unmarshal(body, payload)
+	if err != nil {
+		return xerrors.Errorf("error when decoding JSON: %w", err)
+	}
+	return kb.validateBody(payload)
 }
 
-func (kb *Keybase) validateBody() error {
-	l := l.WithFields(logrus.Fields{"function": "validateBody", "keybase": kb.Identity})
-	matched := re.FindStringSubmatch(kb.Text)
-	l.Debugf("Body: \"%s\"", kb.Text)
-	if len(matched) < 3 {
-		return xerrors.Errorf("Proof text struct mismatch.")
+func (kb *Keybase) validateBody(payload *KeybasePayload) error {
+	if payload.Persona != ("0x" + mycrypto.CompressedPubkeyHex(kb.Pubkey)) {
+		return xerrors.Errorf("Persona mismatch")
 	}
 
-	pubkeyHex := matched[1]
-	pubkeyRecovered, err := mycrypto.StringToPubkey(pubkeyHex)
+	sig_bytes, err := base64.StdEncoding.DecodeString(payload.Signature)
 	if err != nil {
-		return xerrors.Errorf("Pubkey recover failed: %s", err.Error())
-	}
-	if crypto.PubkeyToAddress(*kb.Pubkey) != crypto.PubkeyToAddress(*pubkeyRecovered) {
-		return xerrors.Errorf("Pubkey mismatch")
+		return xerrors.Errorf("error when decoding sig: %w", err)
 	}
 
-	sigBase64 := matched[2]
-	sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
-	if err != nil {
-		return xerrors.Errorf("Error when decoding signature: %s", err.Error())
-	}
-	kb.Signature = sigBytes
-	return mycrypto.ValidatePersonalSignature(kb.GenerateSignPayload(), sigBytes, pubkeyRecovered)
+	kb.Signature = sig_bytes
+	return mycrypto.ValidatePersonalSignature(kb.GenerateSignPayload(), sig_bytes, kb.Pubkey)
 }

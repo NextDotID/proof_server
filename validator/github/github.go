@@ -47,7 +47,7 @@ func (gh *Github) GeneratePostPayload() (post string) {
 	payload := gistPayload{
 		Version:        "1",
 		Comment:        "Here's an NextID proof of this Github account.",
-		Comment2:       "To valildate, base64.decode the signature, and recover pubkey from it using sign_payload with ethereum personal_sign algo.",
+		Comment2:       "To validate, base64.decode the signature, and recover pubkey from it using sign_payload with ethereum personal_sign algo.",
 		Persona:        "0x" + crypto.CompressedPubkeyHex(gh.Pubkey),
 		GithubUsername: gh.Identity,
 		SignPayload:    gh.GenerateSignPayload(),

@@ -1,7 +1,6 @@
 package keybase
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/nextdotid/proof-server/config"
@@ -35,10 +34,12 @@ func Test_GeneratePostPayload(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
 
-		result := kb.GeneratePostPayload()
-		assert.True(t, strings.Contains(result, "Prove myself"))
-		assert.True(t, strings.Contains(result, mycrypto.CompressedPubkeyHex(kb.Pubkey)))
-		assert.True(t, strings.Contains(result, "%SIG_BASE64%"))
+		new_kb := kb
+		result := new_kb.GeneratePostPayload()
+		assert.Contains(t, result, "To validate")
+		assert.Contains(t, result, mycrypto.CompressedPubkeyHex(new_kb.Pubkey))
+		assert.Contains(t, result, "%%SIG_BASE64%%")
+		t.Logf("%+v", result)
 	})
 }
 
@@ -46,10 +47,10 @@ func Test_Validate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
 
-		newKB := kb
-		newKB.Identity = "NYKma"
-		assert.Nil(t, newKB.Validate())
-		assert.Greater(t, len(newKB.Text), 10)
-		assert.Equal(t, "nykma", newKB.Identity)
+		new_kb := kb
+		new_kb.Identity = "NYKma"
+		assert.Nil(t, new_kb.Validate())
+		assert.Greater(t, len(new_kb.Signature), 10)
+		assert.Equal(t, "nykma", new_kb.Identity)
 	})
 }
