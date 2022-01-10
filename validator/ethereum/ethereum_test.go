@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/validator"
 
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/sirupsen/logrus"
@@ -18,21 +19,24 @@ import (
 var (
 	persona_sk *ecdsa.PrivateKey
 	wallet_sk  *ecdsa.PrivateKey
-
-	eth = Ethereum{
-		Platform: types.Platforms.Ethereum,
-		Previous: "",
-		Action:   types.Actions.Create,
-		Extra: map[string]string{
-			"wallet_signature": "",
-		},
-	}
 )
 
 func before_each(t *testing.T) {
 	logrus.SetLevel(logrus.DebugLevel)
 	config.Init("../../config/config.test.json")
+}
 
+func generate() Ethereum {
+	eth := Ethereum {
+		Base: &validator.Base{
+			Platform: types.Platforms.Ethereum,
+			Previous: "",
+			Action:   types.Actions.Create,
+			Extra: map[string]string{
+				"wallet_signature": "",
+			},
+		},
+	}
 	_, persona_sk = mycrypto.GenerateKeypair()
 	eth.Pubkey = &persona_sk.PublicKey
 
@@ -45,11 +49,14 @@ func before_each(t *testing.T) {
 	eth.Extra = map[string]string{
 		"wallet_signature": base64.StdEncoding.EncodeToString(wallet_sig),
 	}
+
+	return eth
 }
 
 func Test_GeneratePostPayload(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
+		eth := generate()
 		assert.Equal(t, "", eth.GeneratePostPayload())
 	})
 }
@@ -58,6 +65,7 @@ func Test_GenerateSignPayload(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
 
+		eth := generate()
 		result := eth.GenerateSignPayload()
 		assert.Contains(t, result, "\"identity\":\""+strings.ToLower(crypto.PubkeyToAddress(wallet_sk.PublicKey).Hex()))
 		assert.Contains(t, result, "\"persona\":\"0x"+mycrypto.CompressedPubkeyHex(eth.Pubkey))
@@ -69,6 +77,7 @@ func Test_Validate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
 
+		eth := generate()
 		assert.Nil(t, eth.Validate())
 	})
 }

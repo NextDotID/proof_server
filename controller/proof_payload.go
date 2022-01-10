@@ -74,7 +74,7 @@ func proofPayload(c *gin.Context) {
 		errorResp(c, http.StatusBadRequest, xerrors.New("unknown platform"))
 		return
 	}
-	performer := performer_factory(v)
+	performer := performer_factory(&v)
 	c.JSON(http.StatusOK, ProofPayloadResponse{
 		PostContent: performer.GeneratePostPayload(),
 		SignPayload: performer.GenerateSignPayload(),

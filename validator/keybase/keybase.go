@@ -15,7 +15,9 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type Keybase validator.Base
+type Keybase struct {
+	*validator.Base
+}
 
 type KeybasePayload struct {
 	Version string `json:"version"`
@@ -37,10 +39,10 @@ var (
 
 func Init() {
 	if validator.PlatformFactories == nil {
-		validator.PlatformFactories = make(map[types.Platform]func(validator.Base) validator.IValidator)
+		validator.PlatformFactories = make(map[types.Platform]func(*validator.Base) validator.IValidator)
 	}
-	validator.PlatformFactories[types.Platforms.Keybase] = func(base validator.Base) validator.IValidator {
-		kb := Keybase(base)
+	validator.PlatformFactories[types.Platforms.Keybase] = func(base *validator.Base) validator.IValidator {
+		kb := Keybase { base }
 		return &kb
 	}
 }

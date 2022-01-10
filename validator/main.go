@@ -8,7 +8,7 @@ import (
 
 var (
 	// PlatformFactories contains all supported platform factory.
-	PlatformFactories map[types.Platform]func(Base) IValidator
+	PlatformFactories map[types.Platform]func(*Base) IValidator
 )
 
 type IValidator interface {

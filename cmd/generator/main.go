@@ -70,7 +70,7 @@ func main() {
 		Pubkey:   &secret_key.PublicKey,
 		Identity: strings.ToLower(*flag_identity),
 	}
-	validator := platform_factory(base)
+	validator := platform_factory(&base)
 
 	sign_payload := validator.GenerateSignPayload()
 	fmt.Printf("Sign payload: vvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", sign_payload)

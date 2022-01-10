@@ -91,7 +91,7 @@ func validateProof(req ProofUploadRequest, prev *model.ProofChain, pubkey *ecdsa
 		base.Signature = persona_sig
 	}
 
-	performer := performer_factory(base)
+	performer := performer_factory(&base)
 	return base, performer.Validate()
 }
 

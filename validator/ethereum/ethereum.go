@@ -15,7 +15,9 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type Ethereum validator.Base
+type Ethereum struct {
+	*validator.Base
+}
 
 const (
 	VALIDATE_TEMPLATE = `^{"eth_address":"0x([0-9a-fA-F]{40})","signature":"(.*)"}$`
@@ -28,10 +30,10 @@ var (
 
 func Init() {
 	if validator.PlatformFactories == nil {
-		validator.PlatformFactories = make(map[types.Platform]func(validator.Base) validator.IValidator)
+		validator.PlatformFactories = make(map[types.Platform]func(*validator.Base) validator.IValidator)
 	}
-	validator.PlatformFactories[types.Platforms.Ethereum] = func(base validator.Base) validator.IValidator {
-		eth := Ethereum(base)
+	validator.PlatformFactories[types.Platforms.Ethereum] = func(base *validator.Base) validator.IValidator {
+		eth := Ethereum { base }
 		return &eth
 	}
 }

@@ -20,7 +20,9 @@ import (
 	"github.com/nextdotid/proof-server/validator"
 )
 
-type Twitter validator.Base
+type Twitter struct {
+	*validator.Base
+}
 
 const (
 	MATCH_TEMPLATE = "^Prove myself: I'm 0x([0-9a-f]{66}) on NextID. Signature: (.*)$"
@@ -36,11 +38,11 @@ var (
 func Init() {
 	initClient()
 	if validator.PlatformFactories == nil {
-		validator.PlatformFactories = make(map[types.Platform]func(validator.Base) validator.IValidator)
+		validator.PlatformFactories = make(map[types.Platform]func(*validator.Base) validator.IValidator)
 	}
 
-	validator.PlatformFactories[types.Platforms.Twitter] = func(base validator.Base) validator.IValidator {
-		twi := Twitter(base)
+	validator.PlatformFactories[types.Platforms.Twitter] = func(base *validator.Base) validator.IValidator {
+		twi := Twitter { base }
 		return &twi
 	}
 }

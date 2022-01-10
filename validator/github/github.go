@@ -16,7 +16,9 @@ import (
 	ghub "github.com/google/go-github/v41/github"
 )
 
-type Github validator.Base
+type Github struct {
+	*validator.Base
+}
 
 type gistPayload struct {
 	Version        string `json:"version"`
@@ -34,10 +36,10 @@ var (
 
 func Init() {
 	if validator.PlatformFactories == nil {
-		validator.PlatformFactories = make(map[types.Platform]func(validator.Base) validator.IValidator)
+		validator.PlatformFactories = make(map[types.Platform]func(*validator.Base) validator.IValidator)
 	}
-	validator.PlatformFactories[types.Platforms.Github] = func(base validator.Base) validator.IValidator {
-		gh := Github(base)
+	validator.PlatformFactories[types.Platforms.Github] = func(base *validator.Base) validator.IValidator {
+		gh := Github { base }
 		return &gh
 	}
 }
