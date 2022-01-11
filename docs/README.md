@@ -80,3 +80,7 @@ The result is:
    being deleted by someone, decentrialized, you know), every user
    will waste more and more API usage on these unsuccessful proof.
    In the end the whole network is flooded.
+
+## Presentation
+
+- <2022-01-11 Tue> :: (Chinese) [A brief introduction of ProofService & NextID](https://docs.google.com/presentation/d/1aq9H8eViLRgZ32xcTcTsAdET52X3P3jtuJFIP5COpyI/edit?usp=sharing)
