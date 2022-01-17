@@ -25,6 +25,31 @@ See [README.md](./README.md)
 | placeholders   | Should be replaced to    | Sample                                                                                     |
 | `%SIG_BASE64%` | Base64-encoded signature | `1uZDzxZ6wae+IaF4BgJXWAWC9e/nxbkdC0xp+xRLz1FqeghynyW+SQnGQygdgQYLTLfXqq03nyFQJU0GidQ/3QA=` |
 
+# Group Common
+
+## General info [GET /healthz]
+
++ Request (application/json)
+
++ Response 200 (application/json)
+
+  + Attributes (object)
+
+    + hello (string, required) - must be `proof server`.
+    + platforms (array[string], required) - All `platform`s supported by this server.
+
+  + Body
+
+        {
+          "hello": "proof server",
+          "platforms": [
+              "github",
+              "twitter",
+              "ethereum",
+              "keybase"
+          ]
+        }
+
 # Group Proof
 
 ## Query a proof payload to signature and to post [POST /v1/proof/payload]
