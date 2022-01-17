@@ -30,13 +30,13 @@ func errorResp(c *gin.Context, error_code int, err error) {
 }
 
 func healthz(c *gin.Context) {
-	supported_platforms := make([]string, 0)
+	platforms := make([]string, 0)
 	for p, _ := range validator.PlatformFactories {
-		supported_platforms = append(supported_platforms, string(p))
+		platforms = append(platforms, string(p))
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"hello": "proof server",
-		"supported_platforms": supported_platforms,
+		"platforms": platforms,
 	})
 }
