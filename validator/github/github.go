@@ -78,6 +78,7 @@ func (gh *Github) GenerateSignPayload() (payload string) {
 
 func (gh *Github) Validate() (err error) {
 	gh.Identity = strings.ToLower(gh.Identity)
+	gh.SignaturePayload = gh.GenerateSignPayload()
 
 	client := ghub.NewClient(nil)
 	gist, response, err := client.Gists.Get(context.TODO(), gh.ProofLocation)
@@ -90,7 +91,7 @@ func (gh *Github) Validate() (err error) {
 	}
 
 	if gh.Identity != gist.Owner.GetLogin() {
-		return xerrors.Errorf("gist owner mismatch: should be %s, but get %s", gh.Identity, gist.Owner.GetLogin())
+		return xerrors.Errorf("gist owner mismatch: should be %s, but got %s", gh.Identity, gist.Owner.GetLogin())
 	}
 
 	gist_filename := fmt.Sprintf("0x%s.json", crypto.CompressedPubkeyHex(gh.Pubkey))

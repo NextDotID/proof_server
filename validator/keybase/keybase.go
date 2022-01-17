@@ -85,6 +85,8 @@ func (kb *Keybase) GenerateSignPayload() (payload string) {
 
 func (kb *Keybase) Validate() (err error) {
 	kb.Identity = strings.ToLower(kb.Identity)
+	kb.SignaturePayload = kb.GenerateSignPayload()
+
 	url := fmt.Sprintf(URL, kb.Identity, mycrypto.CompressedPubkeyHex(kb.Pubkey))
 	kb.ProofLocation = url
 	resp, err := http.Get(url)
@@ -118,5 +120,5 @@ func (kb *Keybase) validateBody(payload *KeybasePayload) error {
 	}
 
 	kb.Signature = sig_bytes
-	return mycrypto.ValidatePersonalSignature(kb.GenerateSignPayload(), sig_bytes, kb.Pubkey)
+	return mycrypto.ValidatePersonalSignature(kb.SignaturePayload, sig_bytes, kb.Pubkey)
 }

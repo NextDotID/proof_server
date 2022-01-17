@@ -18,17 +18,18 @@ import (
 
 //  ProofChain is a chain of a persona's proof modification log.
 type ProofChain struct {
-	ID         int64          `gorm:"primarykey"`
-	CreatedAt  time.Time      `gorm:"column:created_at"`
-	Action     types.Action   `gorm:"index;not null"`
-	Persona    string         `gorm:"index;not null"`
-	Identity   string         `gorm:"index;not null"`
-	Platform   types.Platform `gorm:"index;not null"`
-	Location   string         `gorm:"not null"`
-	Signature  string         `gorm:"not null"`
-	Extra      datatypes.JSON `gorm:"default:'{}'"`
-	PreviousID sql.NullInt64  `gorm:"index"`
-	Previous   *ProofChain
+	ID               int64          `gorm:"primarykey"`
+	CreatedAt        time.Time      `gorm:"column:created_at"`
+	Action           types.Action   `gorm:"index;not null"`
+	Persona          string         `gorm:"index;not null"`
+	Identity         string         `gorm:"index;not null"`
+	Platform         types.Platform `gorm:"index;not null"`
+	Location         string         `gorm:"not null"`
+	Signature        string         `gorm:"not null"`
+	SignaturePayload string         `gorm:"column:signature_payload"`
+	Extra            datatypes.JSON `gorm:"default:'{}'"`
+	PreviousID       sql.NullInt64  `gorm:"index"`
+	Previous         *ProofChain
 }
 
 func (ProofChain) TableName() string {
@@ -131,13 +132,14 @@ func ProofChainFindBySignature(signature string) (pc *ProofChain, err error) {
 
 func ProofChainCreateFromValidator(validator *validator.Base) (pc *ProofChain, err error) {
 	pc = &ProofChain{
-		Action:    validator.Action,
-		Persona:   MarshalPersona(validator.Pubkey),
-		Identity:  strings.ToLower(validator.Identity), // TODO: exception may occur
-		Platform:  validator.Platform,
-		Location:  validator.ProofLocation,
-		Signature: MarshalSignature(validator.Signature),
-		Previous:  nil,
+		Action:           validator.Action,
+		Persona:          MarshalPersona(validator.Pubkey),
+		Identity:         strings.ToLower(validator.Identity), // TODO: exception may occur
+		Platform:         validator.Platform,
+		Location:         validator.ProofLocation,
+		Signature:        MarshalSignature(validator.Signature),
+		SignaturePayload: validator.SignaturePayload,
+		Previous:         nil,
 	}
 
 	if validator.Previous != "" {

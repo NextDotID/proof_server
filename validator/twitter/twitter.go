@@ -75,6 +75,8 @@ func (twitter *Twitter) GenerateSignPayload() (payload string) {
 func (twitter *Twitter) Validate() (err error) {
 	initClient()
 	twitter.Identity = strings.ToLower(twitter.Identity)
+	twitter.SignaturePayload = twitter.GenerateSignPayload()
+
 	tweetID, err := strconv.ParseInt(twitter.ProofLocation, 10, 64)
 	if err != nil {
 		return xerrors.Errorf("Error when parsing tweet ID %s: %s", twitter.ProofLocation, err.Error())
@@ -115,7 +117,7 @@ func (twitter *Twitter) validateText() (err error) {
 		return xerrors.Errorf("Error when decoding signature %s: %s", sigBase64, err.Error())
 	}
 	twitter.Signature = sigBytes
-	return mycrypto.ValidatePersonalSignature(twitter.GenerateSignPayload(), sigBytes, pubkeyRecovered)
+	return mycrypto.ValidatePersonalSignature(twitter.SignaturePayload, sigBytes, pubkeyRecovered)
 }
 
 func initClient() {

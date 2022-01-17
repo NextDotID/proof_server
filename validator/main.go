@@ -27,10 +27,11 @@ type Base struct {
 	Action   types.Action
 	Pubkey   *ecdsa.PublicKey
 	// Identity on target platform.
-	Identity      string
-	ProofLocation string
-	Signature     []byte
-	Text          string
+	Identity         string
+	ProofLocation    string
+	Signature        []byte
+	SignaturePayload string
+	Text             string
 	// Extra info needed by separate platforms (e.g. Ethereum)
 	Extra map[string]string
 }

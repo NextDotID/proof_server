@@ -64,6 +64,9 @@ func (et *Ethereum) GenerateSignPayload() (payload string) {
 
 // Both persona-signed and wallelt-signed request are vaild.
 func (et *Ethereum) Validate() (err error) {
+	et.SignaturePayload = et.GenerateSignPayload()
+	et.Identity = strings.ToLower(et.Identity)
+
 	switch et.Action {
 	case types.Actions.Create: {
 		return et.validateCreate()
@@ -79,7 +82,6 @@ func (et *Ethereum) Validate() (err error) {
 
 func (et *Ethereum) validateCreate() (err error) {
 	// ETH wallet signature
-	et.Identity = strings.ToLower(et.Identity)
 	walletSignature, ok := et.Extra["wallet_signature"]
 	if !ok {
 		return xerrors.Errorf("wallet_signature not found")
@@ -114,7 +116,6 @@ func validateEthSignature(sig, payload, address string) error {
 }
 
 func (et *Ethereum) validateDelete() (err error) {
-	et.Identity = strings.ToLower(et.Identity)
 	walletSignature, ok := et.Extra["wallet_signature"]
 	if ok && walletSignature != "" { // Validate wallet-signed signature
 		sig, err := base64.StdEncoding.DecodeString(walletSignature)
