@@ -21,7 +21,7 @@ type ProofPayloadRequest struct {
 
 type ProofPayloadResponse struct {
 	PostContent string `json:"post_content"`
-	SignPayload string `jsoN:"sign_payload"`
+	SignPayload string `json:"sign_payload"`
 }
 
 type ProofPayloadRequestExtra struct {
