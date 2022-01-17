@@ -15,8 +15,8 @@ const (
 )
 
 type ProofQueryRequest struct {
-	Platform string `form:"platform"`
-	Identity []string       `form:"identity"`
+	Platform string   `form:"platform"`
+	Identity []string `form:"identity"`
 }
 
 type ProofQueryResponse struct {
@@ -56,40 +56,42 @@ func performProofQuery(req ProofQueryRequest) []ProofQueryResponseSingle {
 	proofs := make([]model.Proof, 0, 0)
 	tx := model.DB
 
-	switch (req.Platform) {
-	case string(types.Platforms.NextID): {
-		tx = tx.Where("persona IN ?", req.Identity).
-			Limit(QUERY_LIMIT).
-			Find(&proofs)
-	}
-	case "": { // All platform
-		tx = tx.Where("identity LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%")
-		for i, id := range req.Identity {
-			if i == 0 {
-				continue
-			}
-			tx = tx.Or("identity LIKE ?", "%"+strings.ToLower(id)+"%")
+	switch req.Platform {
+	case string(types.Platforms.NextID):
+		{
+			tx = tx.Where("persona IN ?", req.Identity).
+				Limit(QUERY_LIMIT).
+				Find(&proofs)
 		}
-
-		tx = tx.Limit(QUERY_LIMIT).Find(&proofs)
-	}
-	default: {
-		tx = tx.Where("platform", req.Platform).
-			Where("identity LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%")
-
-		for i, id := range req.Identity {
-			if i == 0 {
-				continue
+	case "":
+		{ // All platform
+			tx = tx.Where("identity LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%")
+			for i, id := range req.Identity {
+				if i == 0 {
+					continue
+				}
+				tx = tx.Or("identity LIKE ?", "%"+strings.ToLower(id)+"%")
 			}
-			tx = tx.Or("identity LIKE ?", "%"+strings.ToLower(id)+"%")
+
+			tx = tx.Limit(QUERY_LIMIT).Find(&proofs)
 		}
-		tx = tx.Limit(QUERY_LIMIT).Find(&proofs)
-	}
+	default:
+		{
+			tx = tx.Where("platform", req.Platform).
+				Where("identity LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%")
+
+			for i, id := range req.Identity {
+				if i == 0 {
+					continue
+				}
+				tx = tx.Or("identity LIKE ?", "%"+strings.ToLower(id)+"%")
+			}
+			tx = tx.Limit(QUERY_LIMIT).Find(&proofs)
+		}
 	}
 	if tx.Error != nil || tx.RowsAffected == int64(0) || len(proofs) == 0 {
 		return result
 	}
-
 
 	// proofs.group_by(&:persona)
 	persona_proof_map := make(map[string][]model.Proof, 0)

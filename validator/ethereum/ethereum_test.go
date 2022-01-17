@@ -27,7 +27,7 @@ func before_each(t *testing.T) {
 }
 
 func generate() Ethereum {
-	eth := Ethereum {
+	eth := Ethereum{
 		Base: &validator.Base{
 			Platform: types.Platforms.Ethereum,
 			Previous: "",
@@ -79,5 +79,60 @@ func Test_Validate(t *testing.T) {
 
 		eth := generate()
 		assert.Nil(t, eth.Validate())
+	})
+}
+
+func Test_Validate_Delete(t *testing.T) {
+	t.Run("signed by persona", func(t *testing.T) {
+		before_each(t)
+
+		eth := generate()
+		eth.Action = types.Actions.Delete
+		eth.Extra = map[string]string{
+			"wallet_signature": "",
+		}
+		eth.Signature, _ = mycrypto.SignPersonal([]byte(eth.GenerateSignPayload()), persona_sk)
+
+		assert.Nil(t, eth.Validate())
+	})
+
+	t.Run("signed by wallet", func(t *testing.T) {
+		before_each(t)
+
+		eth := generate()
+		eth.Action = types.Actions.Delete
+		wallet_sig, _ := mycrypto.SignPersonal([]byte(eth.GenerateSignPayload()), wallet_sk)
+		eth.Extra = map[string]string{
+			"wallet_signature": base64.StdEncoding.EncodeToString(wallet_sig),
+		}
+
+		assert.Nil(t, eth.Validate())
+	})
+
+	t.Run("signed by persona, but put in wallet_signature", func(t *testing.T) {
+		before_each(t)
+
+		eth := generate()
+		eth.Action = types.Actions.Delete
+
+		eth.Signature, _ = mycrypto.SignPersonal([]byte(eth.GenerateSignPayload()), persona_sk)
+		eth.Extra = map[string]string{
+			"wallet_signature": base64.StdEncoding.EncodeToString(eth.Signature),
+		}
+
+		assert.NotNil(t, eth.Validate())
+	})
+
+	t.Run("signed by wallet, but put in eth.Signature", func(t *testing.T) {
+		before_each(t)
+
+		before_each(t)
+
+		eth := generate()
+		eth.Action = types.Actions.Delete
+		eth.Signature, _ = mycrypto.SignPersonal([]byte(eth.GenerateSignPayload()), wallet_sk)
+		eth.Extra = map[string]string{}
+
+		assert.NotNil(t, eth.Validate())
 	})
 }

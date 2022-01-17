@@ -62,7 +62,22 @@ func (et *Ethereum) GenerateSignPayload() (payload string) {
 	return string(payloadBytes)
 }
 
+// Both persona-signed and wallelt-signed request are vaild.
 func (et *Ethereum) Validate() (err error) {
+	switch et.Action {
+	case types.Actions.Create: {
+		return et.validateCreate()
+	}
+	case types.Actions.Delete: {
+		return et.validateDelete()
+	}
+	default: {
+		return xerrors.Errorf("unknown action: %s", et.Action)
+	}
+	}
+}
+
+func (et *Ethereum) validateCreate() (err error) {
 	// ETH wallet signature
 	et.Identity = strings.ToLower(et.Identity)
 	walletSignature, ok := et.Extra["wallet_signature"]
@@ -96,4 +111,28 @@ func validateEthSignature(sig, payload, address string) error {
 		return xerrors.Errorf("ETH wallet signature validation failed")
 	}
 	return nil
+}
+
+func (et *Ethereum) validateDelete() (err error) {
+	et.Identity = strings.ToLower(et.Identity)
+	walletSignature, ok := et.Extra["wallet_signature"]
+	if ok && walletSignature != "" { // Validate wallet-signed signature
+		sig, err := base64.StdEncoding.DecodeString(walletSignature)
+		if err != nil {
+			return xerrors.Errorf("error when decoding wallet sig: %w", err)
+		}
+		wallet_pubkey, err := mycrypto.RecoverPubkeyFromPersonalSignature(et.GenerateSignPayload(), sig)
+		if err != nil {
+			return xerrors.Errorf("error when recovering pubkey from sig: %w", err)
+		}
+		wallet_address := crypto.PubkeyToAddress(*wallet_pubkey)
+		if common.HexToAddress(et.Identity) != wallet_address {
+			return xerrors.Errorf("not signed by this wallet: found %s instead of %s", wallet_address.Hex(), et.Identity)
+		}
+
+		return nil
+	}
+
+	// Vaildate persona-signed siganture
+	return mycrypto.ValidatePersonalSignature(et.GenerateSignPayload(), et.Signature, et.Pubkey)
 }
