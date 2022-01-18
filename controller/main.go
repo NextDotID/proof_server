@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/nextdotid/proof-server/validator"
 )
@@ -15,8 +16,27 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
+func middlewareCors() gin.HandlerFunc {
+	// TODO: strict CORS origin when deployed to production
+	// if Environment != "production" {
+	return cors.Default()
+	// }
+	// cors_config := cors.DefaultConfig()
+	// cors_config.AllowAllOrigins = false
+	// cors_config.AllowWildcard = false
+	// cors_config.AllowOrigins = []string{CORS_ORIGIN_URL}
+	// return cors.New(cors_config)
+}
+
+
 func Init() {
+	if Engine != nil {
+		return
+	}
+
 	Engine = gin.Default()
+	Engine.Use(middlewareCors())
+
 	Engine.GET("/healthz", healthz)
 	Engine.POST("/v1/proof/payload", proofPayload)
 	Engine.POST("/v1/proof", proofUpload)
