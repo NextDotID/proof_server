@@ -14,7 +14,7 @@ you on any supported platform.
 |----------|------------------|------------------------------|--------------------------------------------------------------------------------|---------------------------------------------------------|
 | Twitter  | `twitter`        | `twitter_username`           | Proof tweet ID (`1415362679095635970`)                                         |                                                         |
 | Keybase  | `keybase`        | `keybase_username`           | N/A (use `https://your_identity.keybase.pub/NextID/COMPRESSED_PUBKEY_HEX.txt`) |                                                         |
-| Ethereum | `eth`            | Wallet address `0x123AbC...` | N/A (Two-way signatures created from persona sk and wallet sk)                 |                                                         |
+| Ethereum | `ethereum`       | Wallet address `0x123AbC...` | N/A (Two-way signatures created from persona sk and wallet sk)                 |                                                         |
 | Github   | `github`         | `github_username`            | Public visible Gist ID `a6dddd2811af21b671fd`                                  | Gist should contains `0xPUBKEY_COMRESSED_HEX.json` file |
 
 ### Planning
