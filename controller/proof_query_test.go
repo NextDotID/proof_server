@@ -29,7 +29,7 @@ func insert_proof(t *testing.T) {
 		},
 		{
 			Platform:      types.Platforms.Ethereum,
-			Previous:      "0x01",
+			Previous:      "AQ==",
 			Action:        types.Actions.Create,
 			Pubkey:        pubkey,
 			Identity:      "0xd5f630652d4a8a5f95cda3738ce9f43fa26e764f",

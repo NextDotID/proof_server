@@ -10,6 +10,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_ProofChainFindLatest(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		before_each(t)
+		pk, _ := crypto.StringToPubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
+
+		proof := ProofChain{
+			Persona:   "0x" + crypto.CompressedPubkeyHex(pk),
+			Platform:  "twitter",
+			Identity:  "yeiwb",
+			Location:  "1469221200140574721",
+			Signature: "gMUJ75eewkdaNrFp7bafzckv9+rlW7rVaxkB7/sYzYgFdFltYG+gn0lYzVNgrAdHWZPmu2giwJniGG7HG9iNigE=",
+		}
+		tx := DB.Create(&proof)
+		assert.Nil(t, tx.Error)
+
+		pc, err := ProofChainFindLatest("0x" + crypto.CompressedPubkeyHex(pk))
+		assert.Nil(t, err)
+		assert.Equal(t, pc.Identity, proof.Identity)
+	})
+}
+
 func Test_ProofChainFindBySignature(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
@@ -25,6 +46,10 @@ func Test_ProofChainFindBySignature(t *testing.T) {
 		tx := DB.Create(&proof)
 		assert.Nil(t, tx.Error)
 		assert.Nil(t, proof.Previous)
+
+		proof_found, err := ProofChainFindBySignature("gMUJ75eewkdaNrFp7bafzckv9+rlW7rVaxkB7/sYzYgFdFltYG+gn0lYzVNgrAdHWZPmu2giwJniGG7HG9iNigE=")
+		assert.Nil(t, err)
+		assert.Equal(t, proof.Persona, proof_found.Persona)
 	})
 
 	t.Run("should return empty result", func(t *testing.T) {

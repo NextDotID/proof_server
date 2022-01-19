@@ -109,7 +109,7 @@ func MarshalSignature(signature []byte) string {
 
 func ProofChainFindLatest(persona string) (pc *ProofChain, err error) {
 	pc = new(ProofChain)
-	tx := DB.Where("persona = ?", MarshalPersona(persona)).Last(pc)
+	tx := DB.Where("persona = ?", MarshalPersona(persona)).Order("id DESC").Take(pc)
 	if tx.Error != nil {
 		if strings.Contains(tx.Error.Error(), "record not found") {
 			return nil, nil
@@ -121,8 +121,8 @@ func ProofChainFindLatest(persona string) (pc *ProofChain, err error) {
 }
 
 func ProofChainFindBySignature(signature string) (pc *ProofChain, err error) {
-	previous := &ProofChain{Signature: signature}
-	tx := DB.First(previous)
+	previous := &ProofChain{}
+	tx := DB.Where("signature = ?", signature).Take(previous)
 	if tx.Error != nil || previous.ID == int64(0) {
 		return nil, xerrors.Errorf("error finding previous proof chain: %w", tx.Error)
 	}
