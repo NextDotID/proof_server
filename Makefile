@@ -1,6 +1,8 @@
 .PHONY: build test
 
 bin_dir=build/
+commit=$$(git rev-parse HEAD)
+time=$$(date +%s)
 
 # Things in my.mk:
 # aws-lambda-function=my-lambda-function
@@ -9,7 +11,9 @@ bin_dir=build/
 -include ./my.mk
 
 build:
-	@go build -o ${bin_dir} ./cmd/...
+	@go build \
+	-ldflags "-X 'github.com/nextdotid/proof-server/common.Environment=develop' -X 'github.com/nextdotid/proof-server/common.Revision=${commit}' -X 'github.com/nextdotid/proof-server/common.BuildTime=${time}'" \
+	-o ${bin_dir} ./cmd/...
 
 test:
 	@go test -v ./...
@@ -17,7 +21,8 @@ test:
 lambda-build:
 	@go clean
 	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build \
-	-x \
+	-v -x \
+	-ldflags "-X 'github.com/nextdotid/proof-server/common.Environment=staging' -X 'github.com/nextdotid/proof-server/common.Revision=${commit}' -X 'github.com/nextdotid/proof-server/common.BuildTime=${time}'" \
 	-o ./build/lambda \
 	./cmd/lambda
 

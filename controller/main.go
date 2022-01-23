@@ -6,6 +6,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/nextdotid/proof-server/validator"
+	"github.com/nextdotid/proof-server/common"
 )
 
 var (
@@ -58,5 +59,8 @@ func healthz(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"hello": "proof server",
 		"platforms": platforms,
+		"environment": common.Environment,
+		"revision": common.Revision,
+		"built_at": common.BuildTime,
 	})
 }
