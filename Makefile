@@ -16,7 +16,7 @@ test:
 
 lambda-build:
 	@go clean
-	@GOOS=linux CGO_ENABLED=0 go build \
+	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build \
 	-x \
 	-o ./build/lambda \
 	./cmd/lambda
