@@ -18,15 +18,8 @@ type ErrorResponse struct {
 }
 
 func middlewareCors() gin.HandlerFunc {
-	// TODO: strict CORS origin when deployed to production
-	// if Environment != "production" {
+	// *
 	return cors.Default()
-	// }
-	// cors_config := cors.DefaultConfig()
-	// cors_config.AllowAllOrigins = false
-	// cors_config.AllowWildcard = false
-	// cors_config.AllowOrigins = []string{CORS_ORIGIN_URL}
-	// return cors.New(cors_config)
 }
 
 
