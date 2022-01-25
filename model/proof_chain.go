@@ -58,17 +58,18 @@ func (pc *ProofChain) Apply() (err error) {
 
 func (pc *ProofChain) createProof() (err error) {
 	proof_found := Proof{
-		Persona:      pc.Persona,
-		Platform:     pc.Platform,
-		Identity:     pc.Identity,
-		Location:     pc.Location,
+		Persona:  pc.Persona,
+		Platform: pc.Platform,
+		Identity: pc.Identity,
+		Location: pc.Location,
 	}
 	proof_create := &Proof{
-		ProofChainID: pc.ID,
-		Persona:      pc.Persona,
-		Platform:     pc.Platform,
-		Identity:     pc.Identity,
-		Location:     pc.Location,
+		ProofChainID:  pc.ID,
+		Persona:       pc.Persona,
+		Platform:      pc.Platform,
+		Identity:      pc.Identity,
+		Location:      pc.Location,
+		LastCheckedAt: time.Now(),
 	}
 	tx := DB.FirstOrCreate(proof_create, proof_found)
 	if tx.Error != nil {

@@ -8,8 +8,9 @@ import (
 
 // Proof is final proof state of a user (persona).
 type Proof struct {
-	ID        int64 `gorm:"primarykey"`
-	CreatedAt time.Time
+	ID            int64 `gorm:"primarykey"`
+	CreatedAt     time.Time
+	LastCheckedAt time.Time
 
 	ProofChainID int64 `gorm:"index"`
 	ProofChain   ProofChain
