@@ -11,6 +11,7 @@ type Proof struct {
 	ID            int64 `gorm:"primarykey"`
 	CreatedAt     time.Time
 	LastCheckedAt time.Time
+	IsValid         bool
 
 	ProofChainID int64 `gorm:"index"`
 	ProofChain   ProofChain

@@ -70,6 +70,7 @@ func (pc *ProofChain) createProof() (err error) {
 		Identity:      pc.Identity,
 		Location:      pc.Location,
 		LastCheckedAt: time.Now(),
+		IsValid:       true,
 	}
 	tx := DB.FirstOrCreate(proof_create, proof_found)
 	if tx.Error != nil {
