@@ -69,12 +69,12 @@ func proofPayload(c *gin.Context) {
 			"wallet_signature": req.Extra.EthereumWalletSignature,
 		},
 	}
-	performer_factory, ok := validator.PlatformFactories[req.Platform]
-	if !ok {
+
+	performer := validator.BaseToInterface(&v)
+	if performer == nil {
 		errorResp(c, http.StatusBadRequest, xerrors.New("unknown platform"))
 		return
 	}
-	performer := performer_factory(&v)
 	c.JSON(http.StatusOK, ProofPayloadResponse{
 		PostContent: performer.GeneratePostPayload(),
 		SignPayload: performer.GenerateSignPayload(),

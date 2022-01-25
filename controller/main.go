@@ -45,7 +45,7 @@ func errorResp(c *gin.Context, error_code int, err error) {
 
 func healthz(c *gin.Context) {
 	platforms := make([]string, 0)
-	for p, _ := range validator.PlatformFactories {
+	for p := range validator.PlatformFactories {
 		platforms = append(platforms, string(p))
 	}
 

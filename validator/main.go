@@ -36,5 +36,16 @@ type Base struct {
 	Extra map[string]string
 }
 
+// BaseToInterface converts a `validator.Base` struct to
+// `validator.IValidator` interface.
+func BaseToInterface(v *Base) IValidator {
+	performer_factory, ok := PlatformFactories[v.Platform]
+	if !ok {
+		return nil
+	}
+
+	return performer_factory(v)
+}
+
 // H for JSON builder.
 type H map[string]interface{}

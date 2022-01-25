@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/validator"
+	"golang.org/x/xerrors"
 )
 
 // Proof is final proof state of a user (persona).
@@ -11,7 +13,8 @@ type Proof struct {
 	ID            int64 `gorm:"primarykey"`
 	CreatedAt     time.Time
 	LastCheckedAt time.Time
-	IsValid         bool
+	IsValid       bool
+	InvalidReason string
 
 	ProofChainID int64 `gorm:"index"`
 	ProofChain   ProofChain
@@ -24,4 +27,33 @@ type Proof struct {
 
 func (Proof) TableName() string {
 	return "proof"
+}
+
+// Revalidate validates current proof, will update `IsValid` and `LastCheckedAt`.
+func (proof *Proof) Revalidate() (result bool, err error) {
+	v, err := proof.ProofChain.RestoreValidator()
+	if err != nil {
+		return false, xerrors.Errorf("error when restoring validator: %w", err)
+	}
+
+	iv := validator.BaseToInterface(v)
+	if iv == nil {
+		return false, xerrors.Errorf("unknown platform: %s", string(proof.Platform))
+	}
+
+	err = iv.Validate()
+	if err != nil {
+		proof.touchValid(false, err.Error())
+		return false, xerrors.Errorf("validate failed: %w", err)
+	}
+
+	proof.touchValid(true, "")
+	return true, nil
+}
+
+func (proof *Proof) touchValid(result bool, reason string) {
+	proof.LastCheckedAt = time.Now()
+	proof.IsValid = result
+	proof.InvalidReason = reason
+	DB.Save(proof)
 }

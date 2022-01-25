@@ -204,3 +204,28 @@ func Test_Apply(t *testing.T) {
 		assert.Equal(t, int64(0), count)
 	})
 }
+
+
+func Test_ProofChain_RestoreValidator(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		before_each(t)
+
+		pk, _ := crypto.StringToPubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
+		pc := ProofChain{
+			Action:    types.Actions.Create,
+			Persona:   MarshalPersona(pk),
+			Identity:  "yeiwb",
+			Location:  "1469221200140574721",
+			Platform:  types.Platforms.Twitter,
+			Signature: "gMUJ75eewkdaNrFp7bafzckv9+rlW7rVaxkB7/sYzYgFdFltYG+gn0lYzVNgrAdHWZPmu2giwJniGG7HG9iNigE=",
+		}
+		tx := DB.Create(&pc)
+		assert.Nil(t, tx.Error)
+
+		v, err := pc.RestoreValidator()
+		assert.Nil(t, err)
+		assert.Equal(t, v.Platform, types.Platforms.Twitter)
+		assert.Equal(t, v.Identity, pc.Identity)
+		assert.Equal(t, len(v.Signature), 65)
+	})
+}

@@ -57,7 +57,7 @@ func (pc *ProofChain) Apply() (err error) {
 }
 
 func (pc *ProofChain) createProof() (err error) {
-	proof_found := Proof{
+	proof_condition := Proof{
 		Persona:  pc.Persona,
 		Platform: pc.Platform,
 		Identity: pc.Identity,
@@ -71,8 +71,9 @@ func (pc *ProofChain) createProof() (err error) {
 		Location:      pc.Location,
 		LastCheckedAt: time.Now(),
 		IsValid:       true,
+		InvalidReason: "",
 	}
-	tx := DB.FirstOrCreate(proof_create, proof_found)
+	tx := DB.FirstOrCreate(proof_create, proof_condition)
 	if tx.Error != nil {
 		return xerrors.Errorf("%w", tx.Error)
 	}
@@ -91,6 +92,43 @@ func (pc *ProofChain) deleteProof() (err error) {
 		return xerrors.Errorf("%w", tx.Error)
 	}
 	return nil
+}
+
+func (pc *ProofChain) SignatureBytes() (sig []byte) {
+	byte, err := base64.StdEncoding.DecodeString(pc.Signature)
+	if err != nil {
+		return nil
+	}
+	return byte
+}
+
+// RestoreValidator rebuilds `validator.Base` from current `ProofChain` record.
+func (pc *ProofChain) RestoreValidator() (v *validator.Base, err error) {
+	previous_sig := ""
+	if pc.Previous != nil {
+		previous_sig = pc.Previous.Signature
+	}
+
+	extra := map[string]string{}
+	if pc.Extra.String() != "" {
+		err = json.Unmarshal([]byte(pc.Extra.String()), &extra)
+		if err != nil {
+			return nil, xerrors.Errorf("%w", err)
+		}
+	}
+
+	v = &validator.Base{
+		Platform:         pc.Platform,
+		Previous:         previous_sig,
+		Action:           pc.Action,
+		Pubkey:           pc.Pubkey(),
+		Identity:         pc.Identity,
+		ProofLocation:    pc.Location,
+		Signature:        pc.SignatureBytes(),
+		Extra:            extra,
+	}
+
+	return v, nil
 }
 
 // MarshalPersona accepts *ecdsa.Pubkey | string type of pubkey,
