@@ -2,6 +2,7 @@ FORMAT: 1A
 
 # Changelog
 
+  - <2022-01-25 Tue> :: GET /v1/proof -> `last_checked_at` / `is_valid` / `invalid_reason`
   - <2022-01-07 Fri> :: GET /v1/proof -> support multiple identities and whole platform search
   - <2021-12-27 Mon> :: POST /v1/proof -> add `extra` -> `signature`
   - <2021-12-21 Tue> :: POST /v1/proof/payload -> add `extra`
@@ -136,7 +137,7 @@ Request failed.
 
     + Parameters
 
-      + platform (string, optional) - Proof platform. If not present, all platforms will be searched.
+      + platform (string, optional) - Proof platform. If not given, all platforms will be searched.
       + identity (string, required) - Identity on target platform. Separate identities with comma (`,`) if you want to query mutipe identity at once.
 
     + Example
@@ -154,6 +155,9 @@ Request failed.
       + proofs (array[object], required) - All proofs under this persona
         + platform (string, required) - Platform
         + identity (string, required) - Identity on that platform
+        + last_checked_at (string, required) - When last validation happened. (timestamp, unit: second)
+        + is_valid (bool, required) - This record is valid or not according to last validation.
+        + invalid_reason (string, required) - If not valid, reason will appears here.
 
   + Body
 
@@ -161,17 +165,26 @@ Request failed.
           "ids": [{
             "persona": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575",
             "proofs": [{
-               "platform": "twitter",
-               "identity": "my_twitter_screen_name"
-             }, {
-               "platform": "facebook",
-               "identity": "my_facebook_username"
-             }]
+              "platform": "twitter",
+              "identity": "my_twitter_screen_name",
+              "last_checked_at": "1643099438",
+              "is_valid": false,
+              "invalid_reason": "tweet not found"
+            }, {
+              "platform": "facebook",
+              "identity": "my_facebook_username",
+              "last_checked_at": "1643099438",
+              "is_valid": true,
+              "invalid_reason": ""
+            }]
           }, {
             "persona": "0xANOTHER",
             "proofs": [{
               "platform": "ethereum",
-              "identity": "0x114514......"
+              "identity": "0x114514......",
+              "last_checked_at": "1643099438",
+              "is_valid": true,
+              "invalid_reason": ""
             }]
           }]
         }

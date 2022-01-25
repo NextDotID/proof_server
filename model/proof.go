@@ -29,7 +29,8 @@ func (Proof) TableName() string {
 	return "proof"
 }
 
-// Revalidate validates current proof, will update `IsValid` and `LastCheckedAt`.
+// Revalidate validates current proof, will update `IsValid` and
+// `LastCheckedAt`. Must be used after `DB.Preload("ProofChain")`.
 func (proof *Proof) Revalidate() (result bool, err error) {
 	v, err := proof.ProofChain.RestoreValidator()
 	if err != nil {

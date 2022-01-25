@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -29,8 +30,11 @@ type ProofQueryResponseSingle struct {
 }
 
 type ProofQueryResponseSingleProof struct {
-	Platform types.Platform `json:"platform"`
-	Identity string         `json:"identity"`
+	Platform      types.Platform `json:"platform"`
+	Identity      string         `json:"identity"`
+	LastCheckedAt string         `json:"last_checked_at"`
+	IsValid       bool           `json:"is_valid"`
+	InvalidReason string         `json:"invalid_reason"`
 }
 
 func proofQuery(c *gin.Context) {
@@ -113,6 +117,9 @@ func performProofQuery(req ProofQueryRequest) []ProofQueryResponseSingle {
 			single.Proofs = append(single.Proofs, ProofQueryResponseSingleProof{
 				Platform: p.Platform,
 				Identity: p.Identity,
+				LastCheckedAt: strconv.FormatInt(p.LastCheckedAt.Unix(), 10),
+				IsValid: p.IsValid,
+				InvalidReason: p.InvalidReason,
 			})
 		}
 		result = append(result, single)
