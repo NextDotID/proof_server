@@ -32,6 +32,7 @@ type ProofQueryResponseSingle struct {
 type ProofQueryResponseSingleProof struct {
 	Platform      types.Platform `json:"platform"`
 	Identity      string         `json:"identity"`
+	CreatedAt     string         `json:"created_at"`
 	LastCheckedAt string         `json:"last_checked_at"`
 	IsValid       bool           `json:"is_valid"`
 	InvalidReason string         `json:"invalid_reason"`
@@ -115,10 +116,11 @@ func performProofQuery(req ProofQueryRequest) []ProofQueryResponseSingle {
 		}
 		for _, p := range proofs {
 			single.Proofs = append(single.Proofs, ProofQueryResponseSingleProof{
-				Platform: p.Platform,
-				Identity: p.Identity,
+				Platform:      p.Platform,
+				Identity:      p.Identity,
+				CreatedAt:     strconv.FormatInt(p.CreatedAt.Unix(), 10),
 				LastCheckedAt: strconv.FormatInt(p.LastCheckedAt.Unix(), 10),
-				IsValid: p.IsValid,
+				IsValid:       p.IsValid,
 				InvalidReason: p.InvalidReason,
 			})
 		}

@@ -2,6 +2,7 @@ FORMAT: 1A
 
 # Changelog
 
+  - <2022-01-27 Thu> :: GET /v1/proof -> `created_at`
   - <2022-01-25 Tue> :: GET /v1/proof -> `last_checked_at` / `is_valid` / `invalid_reason`
   - <2022-01-07 Fri> :: GET /v1/proof -> support multiple identities and whole platform search
   - <2021-12-27 Mon> :: POST /v1/proof -> add `extra` -> `signature`
@@ -155,6 +156,7 @@ Request failed.
       + proofs (array[object], required) - All proofs under this persona
         + platform (string, required) - Platform
         + identity (string, required) - Identity on that platform
+        + created_at (string, required) - Creation time of this proof. (timestamp, unit: second)
         + last_checked_at (string, required) - When last validation happened. (timestamp, unit: second)
         + is_valid (bool, required) - This record is valid or not according to last validation.
         + invalid_reason (string, required) - If not valid, reason will appears here.
@@ -167,12 +169,14 @@ Request failed.
             "proofs": [{
               "platform": "twitter",
               "identity": "my_twitter_screen_name",
+              "created_at": "1643099438",
               "last_checked_at": "1643099438",
               "is_valid": false,
               "invalid_reason": "tweet not found"
             }, {
               "platform": "facebook",
               "identity": "my_facebook_username",
+              "created_at": "1643099438",
               "last_checked_at": "1643099438",
               "is_valid": true,
               "invalid_reason": ""
@@ -182,6 +186,7 @@ Request failed.
             "proofs": [{
               "platform": "ethereum",
               "identity": "0x114514......",
+              "created_at": "1643099438",
               "last_checked_at": "1643099438",
               "is_valid": true,
               "invalid_reason": ""
