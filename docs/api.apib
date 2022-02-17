@@ -153,6 +153,7 @@ Request failed.
 
     + ids (array[object], required) - All IDs found. Will be empty array if not found.
       + persona (string, required) - Persona public key
+      + kv (object, required) - Key-Value pair set by user.
       + proofs (array[object], required) - All proofs under this persona
         + platform (string, required) - Platform
         + identity (string, required) - Identity on that platform
@@ -166,6 +167,7 @@ Request failed.
         {
           "ids": [{
             "persona": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575",
+            "kv": {},
             "proofs": [{
               "platform": "twitter",
               "identity": "my_twitter_screen_name",
@@ -183,6 +185,9 @@ Request failed.
             }]
           }, {
             "persona": "0xANOTHER",
+            "kv": {
+              "some": ["customized", "key", "value", "pair"]
+            },
             "proofs": [{
               "platform": "ethereum",
               "identity": "0x114514......",
@@ -192,4 +197,63 @@ Request failed.
               "invalid_reason": ""
             }]
           }]
+        }
+
+# Group KV
+
+## Get signature message of updating [POST /v1/kv/payload]
+
+Note: `body` will be sort-by-key by server. Make sure to save
+order-aware struct in `[]`
+
++ Request (application/json)
+
+  + Attributes (object)
+
+    + persona (string, required) - Persona public key.
+    + body (object, required) - KV body. Internal structure is controlled by frontend.
+
+  + Body
+
+        {
+          "persona": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575",
+          "body": {
+            "this": "is",
+            "a": "sample",
+            "structure": ["it", "could", "be", "anything"]
+          }
+        }
+
++ Response 200 (application/json)
+
+  + Attributes (body)
+
+    + sign_payload (string, required) - String to sign to.
+
+  + Body
+
+        {
+          "sign_payload": "{\"action\":\"kv_set\",\"body\":{\"a\":\"sample\",\"this\":\"is\"},\"prev\":null}"
+        }
+
+## Update a full set of key-value pairs [POST /v1/kv]
+
++ Request (application/json)
+
+  + Attributes (object)
+
+    + persona (string, required) - Persona public key.
+    + signature (string, required) - Signature of this request.
+    + values (object, required) - KV body. Internal structure is controlled by frontend.
+
+  + Body
+
+        {
+          "persona": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575",
+          "signature": "SIGNATURE_BASE64_HERE",
+          "values": {
+            "this": "is",
+            "a": "sample",
+            "structure": ["it", "could", "be", "anything"]
+          }
         }

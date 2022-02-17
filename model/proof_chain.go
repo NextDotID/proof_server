@@ -51,6 +51,8 @@ func (pc *ProofChain) Apply() (err error) {
 		return pc.createProof()
 	case types.Actions.Delete:
 		return pc.deleteProof()
+	case types.Actions.KVSet:
+		return pc.kvSet()
 	default:
 		return xerrors.Errorf("unknown action: %s", string(pc.Action))
 	}
@@ -92,6 +94,10 @@ func (pc *ProofChain) deleteProof() (err error) {
 		return xerrors.Errorf("%w", tx.Error)
 	}
 	return nil
+}
+
+func (pc *ProofChain) kvSet() (err error) {
+	return nil // TODO
 }
 
 func (pc *ProofChain) SignatureBytes() (sig []byte) {
