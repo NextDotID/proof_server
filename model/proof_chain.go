@@ -32,6 +32,11 @@ type ProofChain struct {
 	Previous         *ProofChain
 }
 
+type ExtraContent struct {
+	WalletSignature string  `json:"wallet_signature"`
+	KVPatch         KVPatch `json:"kv_patch"`
+}
+
 func (ProofChain) TableName() string {
 	return "proof_chains"
 }
@@ -44,6 +49,12 @@ func (pc *ProofChain) Pubkey() *ecdsa.PublicKey {
 	return pubkey
 }
 
+func (pc *ProofChain) UnmarshalExtra() ExtraContent {
+	result := ExtraContent{}
+	json.Unmarshal([]byte(pc.Extra.String()), &result)
+	return result
+}
+
 // Apply applies current ProofChain modification to Proof model.
 func (pc *ProofChain) Apply() (err error) {
 	switch pc.Action {
@@ -51,7 +62,7 @@ func (pc *ProofChain) Apply() (err error) {
 		return pc.createProof()
 	case types.Actions.Delete:
 		return pc.deleteProof()
-	case types.Actions.KVSet:
+	case types.Actions.KV:
 		return pc.kvSet()
 	default:
 		return xerrors.Errorf("unknown action: %s", string(pc.Action))
@@ -97,7 +108,7 @@ func (pc *ProofChain) deleteProof() (err error) {
 }
 
 func (pc *ProofChain) kvSet() (err error) {
-	return nil // TODO
+	return KVApplyPatchFromProofChain(pc)
 }
 
 func (pc *ProofChain) SignatureBytes() (sig []byte) {
@@ -124,14 +135,14 @@ func (pc *ProofChain) RestoreValidator() (v *validator.Base, err error) {
 	}
 
 	v = &validator.Base{
-		Platform:         pc.Platform,
-		Previous:         previous_sig,
-		Action:           pc.Action,
-		Pubkey:           pc.Pubkey(),
-		Identity:         pc.Identity,
-		ProofLocation:    pc.Location,
-		Signature:        pc.SignatureBytes(),
-		Extra:            extra,
+		Platform:      pc.Platform,
+		Previous:      previous_sig,
+		Action:        pc.Action,
+		Pubkey:        pc.Pubkey(),
+		Identity:      pc.Identity,
+		ProofLocation: pc.Location,
+		Signature:     pc.SignatureBytes(),
+		Extra:         extra,
 	}
 
 	return v, nil

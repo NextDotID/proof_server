@@ -5,9 +5,9 @@ type Action string
 var Actions = struct {
 	Create Action
 	Delete Action
-	KVSet  Action
+	KV  Action
 }{
 	Create: "create",
 	Delete: "delete",
-	KVSet:  "kv_set",
+	KV:  "kv",
 }

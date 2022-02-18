@@ -29,6 +29,7 @@ func Init() {
 	err = DB.AutoMigrate(
 		&Proof{},
 		&ProofChain{},
+		&KV{},
 	)
 	if err != nil {
 		panic(err)
