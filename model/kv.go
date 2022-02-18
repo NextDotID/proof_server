@@ -10,8 +10,6 @@ type KV struct {
 	Value        string
 	ProofChainID int64 `gorm:"column:proof_chain_id; index"`
 	ProofChain   *ProofChain
-	CreatedAt    time.Time `gorm:"column:created_at"`
-	UpdatedAt    time.Time `gorm:"column:updated_at"`
 }
 
 func (KV) TableName() string {
