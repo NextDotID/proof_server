@@ -35,7 +35,7 @@ func Init() {
 	Engine.POST("/v1/proof/payload", proofPayload)
 	Engine.POST("/v1/proof", proofUpload)
 	Engine.GET("/v1/proof", proofQuery)
-	// Engine.POST("/v1/kv/payload", kvPatchPayload)
+	Engine.POST("/v1/kv/payload", kvPatchPayload)
 	// Engine.POST("/v1/kv", kvPatch)
 }
 

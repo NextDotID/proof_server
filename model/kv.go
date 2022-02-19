@@ -19,8 +19,8 @@ type KV struct {
 
 type KVContent map[string]interface{}
 type KVPatch struct {
-	Set KVContent
-	Del []string
+	Set KVContent `json:"set"`
+	Del []string  `json:"del"`
 }
 
 func (KV) TableName() string {
@@ -82,7 +82,7 @@ func (kv *KV) ApplyPatch(patch KVPatch) (error) {
 		delete(content, del_key)
 	}
 
-	return  kv.OverrideContent(content)
+	return kv.OverrideContent(content)
 }
 
 func (kv *KV) OverrideContent(new_content KVContent) (error) {
