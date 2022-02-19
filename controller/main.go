@@ -36,7 +36,7 @@ func Init() {
 	Engine.POST("/v1/proof", proofUpload)
 	Engine.GET("/v1/proof", proofQuery)
 	Engine.POST("/v1/kv/payload", kvPatchPayload)
-	// Engine.POST("/v1/kv", kvPatch)
+	Engine.POST("/v1/kv", kvPatch)
 }
 
 func errorResp(c *gin.Context, error_code int, err error) {

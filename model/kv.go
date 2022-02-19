@@ -2,7 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"strings"
 
 	"golang.org/x/xerrors"
 	"gorm.io/datatypes"
@@ -52,15 +51,16 @@ func (kv *KV) ToJSONString() string {
 
 func KVApplyPatchFromProofChain(pc *ProofChain) (error) {
 	kv, err := KVFindByPersona(pc.Persona)
-
-	// Create one if not found
-	if strings.Contains(err.Error(), "not found") {
-		kv.ProofChain = pc
-		kv.ProofChainID = pc.ID
-
-		DB.Create(&kv)
-	} else {
+	if err != nil {
 		return xerrors.Errorf("%w", err)
+	}
+	if kv == nil {
+		kv = &KV{
+			Persona:      pc.Persona,
+			ProofChainID: pc.ID,
+			ProofChain:   pc,
+		}
+		DB.Create(&kv)
 	}
 
 	return kv.ApplyPatch(pc.UnmarshalExtra().KVPatch)
@@ -109,6 +109,9 @@ func KVFindByPersona(persona interface{}) (*KV, error) {
 	tx := DB.Find(&result)
 	if tx.Error != nil {
 		return nil, xerrors.Errorf("%w", tx.Error)
+	}
+	if tx.RowsAffected == int64(0) {
+		return nil, nil
 	}
 
 	return &result, nil
