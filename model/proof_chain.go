@@ -108,7 +108,8 @@ func (pc *ProofChain) deleteProof() (err error) {
 }
 
 func (pc *ProofChain) kvSet() (err error) {
-	return KVApplyPatchFromProofChain(pc)
+	_, err = KVApplyPatchFromProofChain(pc)
+	return err
 }
 
 func (pc *ProofChain) SignatureBytes() (sig []byte) {

@@ -49,10 +49,10 @@ func (kv *KV) ToJSONString() string {
 	return string(result)
 }
 
-func KVApplyPatchFromProofChain(pc *ProofChain) (error) {
+func KVApplyPatchFromProofChain(pc *ProofChain) (*KV, error) {
 	kv, err := KVFindByPersona(pc.Persona)
 	if err != nil {
-		return xerrors.Errorf("%w", err)
+		return nil, xerrors.Errorf("%w", err)
 	}
 	if kv == nil {
 		kv = &KV{
@@ -63,7 +63,8 @@ func KVApplyPatchFromProofChain(pc *ProofChain) (error) {
 		DB.Create(&kv)
 	}
 
-	return kv.ApplyPatch(pc.UnmarshalExtra().KVPatch)
+	err = kv.ApplyPatch(pc.UnmarshalExtra().KVPatch)
+	return kv, err
 }
 
 func (kv *KV) ApplyPatch(patch KVPatch) (error) {
@@ -96,6 +97,7 @@ func (kv *KV) OverrideContent(new_content KVContent) (error) {
 }
 
 // KVFindByPersona accepts `*ecdsa.Pubkey` and `string` types.
+// Will return both `nil` if record not found.
 func KVFindByPersona(persona interface{}) (*KV, error) {
 	pubkey := MarshalPersona(persona)
 	if pubkey == "" {
