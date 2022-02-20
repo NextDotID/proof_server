@@ -26,6 +26,7 @@ type ProofQueryResponse struct {
 
 type ProofQueryResponseSingle struct {
 	Persona string                          `json:"persona"`
+	KV      model.KVContent                 `json:"kv"`
 	Proofs  []ProofQueryResponseSingleProof `json:"proofs"`
 }
 
@@ -110,8 +111,15 @@ func performProofQuery(req ProofQueryRequest) []ProofQueryResponseSingle {
 	}
 
 	for persona, proofs := range persona_proof_map {
+		kv_content := model.KVContent{}
+		kv, _ := model.KVFindByPersona(persona)
+		if kv != nil {
+			kv_content, _ = kv.GetContent()
+		}
+
 		single := ProofQueryResponseSingle{
 			Persona: persona,
+			KV: kv_content,
 			Proofs:  make([]ProofQueryResponseSingleProof, 0),
 		}
 		for _, p := range proofs {

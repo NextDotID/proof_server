@@ -69,6 +69,7 @@ func Test_proofQuery(t *testing.T) {
 		found := resp.IDs[0]
 		assert.Equal(t, persona, found.Persona)
 		assert.Equal(t, 1, len(found.Proofs))
+		assert.Equal(t, 0, len(found.KV))
 
 		partial_resp := ProofQueryResponse{}
 		APITestCall(Engine, "GET", "/v1/proof?platform=twitter&identity=eiw", "", &partial_resp)
@@ -112,5 +113,34 @@ func Test_proofQuery(t *testing.T) {
 		APITestCall(Engine, "GET", "/v1/proof?identity="+persona+"&platform=nextid", "", &resp)
 		assert.Equal(t, 1, len(resp.IDs))
 		assert.Equal(t, 2, len(resp.IDs[0].Proofs))
+	})
+
+	t.Run("KV", func(t *testing.T) {
+		before_each(t)
+		insert_proof(t)
+
+		pubkey, _ := crypto.StringToPubkey(persona)
+		kv_base := &validator.Base{
+			Platform:         types.Platforms.KV,
+			Previous:         "Ag==", // 0x02
+			Action:           types.Actions.KV,
+			Pubkey:           pubkey,
+			Signature:        []byte{3},
+			Extra:            map[string]string{
+				"kv_patch": "{\"set\": {\"a\":\"test\",\"this\":\"is\"},\"del\":[]}",
+			},
+		}
+		pc, err := model.ProofChainCreateFromValidator(kv_base)
+		assert.Nil(t, err)
+		assert.Nil(t, pc.Apply())
+
+		resp := ProofQueryResponse{}
+		APITestCall(Engine, "GET", "/v1/proof?identity=yeiwb&platform=twitter", "", &resp)
+		assert.Equal(t, 1, len(resp.IDs))
+		found := resp.IDs[0]
+		assert.Equal(t, model.KVContent{
+			"a": "test",
+			"this": "is",
+		}, found.KV)
 	})
 }
