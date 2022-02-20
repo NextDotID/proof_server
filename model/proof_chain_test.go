@@ -2,8 +2,10 @@ package model
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
@@ -227,5 +229,26 @@ func Test_ProofChain_RestoreValidator(t *testing.T) {
 		assert.Equal(t, v.Platform, types.Platforms.Twitter)
 		assert.Equal(t, v.Identity, pc.Identity)
 		assert.Equal(t, len(v.Signature), 65)
+	})
+}
+
+func Test_UnmarshalExtra(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		before_each(t)
+		extra_orig := gin.H{
+			"ethereum_pubkey": "ETH_PUBKEY",
+			"kv_patch": "{\"set\":{\"this\":\"is\",\"a\":[\"test\",\"case\"]}}",
+		}
+		extra_bytes, _ := json.Marshal(extra_orig)
+		pc := ProofChain{
+			Extra:            extra_bytes,
+		}
+		extra := pc.UnmarshalExtra()
+		assert.Equal(t, "ETH_PUBKEY", extra.EthereumPubkey)
+		assert.Equal(t, KVContent{
+			"a": []interface{}{"test", "case"},
+			"this": "is",
+		}, extra.KVPatch.Set)
+		assert.Equal(t, 0, len(extra.KVPatch.Del))
 	})
 }

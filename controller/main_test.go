@@ -15,10 +15,12 @@ import (
 	"github.com/nextdotid/proof-server/validator/github"
 	"github.com/nextdotid/proof-server/validator/keybase"
 	"github.com/nextdotid/proof-server/validator/twitter"
+	"github.com/nextdotid/proof-server/validator/kv"
 )
 
 func before_each(t *testing.T) {
 	// Clean DB
+	model.DB.Where("1 = 1").Delete(&model.KV{})
 	model.DB.Where("1 = 1").Delete(&model.Proof{})
 	model.DB.Where("1 = 1").Delete(&model.ProofChain{})
 }
@@ -32,6 +34,7 @@ func TestMain(m *testing.M) {
 	keybase.Init()
 	ethereum.Init()
 	github.Init()
+	kv.Init()
 
 	before_each(nil)
 

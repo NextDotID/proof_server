@@ -45,8 +45,10 @@ func kvPatch(c *gin.Context) {
 		Action:    types.Actions.KV,
 		Pubkey:    pubkey,
 		Signature: sig,
+		// used in validator.Validate()
 		Text:      string(changes_json),
-		Extra: map[string]interface{}{
+		// used in ProofChain creation
+		Extra: map[string]string{
 			"kv_patch": string(changes_json),
 		},
 	}

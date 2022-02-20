@@ -33,6 +33,7 @@ type ProofChain struct {
 }
 
 type ExtraContent struct {
+	EthereumPubkey  string  `json:"ethereum_pubkey"`
 	WalletSignature string  `json:"wallet_signature"`
 	KVPatch         KVPatch `json:"kv_patch"`
 }
@@ -49,9 +50,26 @@ func (pc *ProofChain) Pubkey() *ecdsa.PublicKey {
 	return pubkey
 }
 
+
 func (pc *ProofChain) UnmarshalExtra() ExtraContent {
-	result := ExtraContent{}
-	json.Unmarshal([]byte(pc.Extra.String()), &result)
+	// Basiclly I need to fight with JSON.stringify-ed `KVPatch`
+	// value.  Yeah It's my fault to set `validator.Base.Extra` as
+	// `map[string]string` instead of `map[string]interface{}`.
+	// TODO: solve this?
+	var temp_struct struct{
+		EthereumPubkey string `json:"ethereum_pubkey"`
+		WalletSignature string `json:"wallet_signature"`
+		KVPatch string `json:"kv_patch"`
+	}
+	json.Unmarshal([]byte(pc.Extra.String()), &temp_struct)
+	result := ExtraContent{
+		EthereumPubkey: temp_struct.EthereumPubkey,
+		WalletSignature: temp_struct.WalletSignature,
+	}
+	if temp_struct.KVPatch != "" {
+		json.Unmarshal([]byte(temp_struct.KVPatch), &result.KVPatch)
+	}
+
 	return result
 }
 
