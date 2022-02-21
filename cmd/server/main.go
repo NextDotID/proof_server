@@ -10,6 +10,7 @@ import (
 	"github.com/nextdotid/proof-server/validator/ethereum"
 	"github.com/nextdotid/proof-server/validator/github"
 	"github.com/nextdotid/proof-server/validator/keybase"
+	"github.com/nextdotid/proof-server/validator/kv"
 	"github.com/nextdotid/proof-server/validator/twitter"
 	"github.com/sirupsen/logrus"
 )
@@ -24,6 +25,7 @@ func init_validators() {
 	ethereum.Init()
 	keybase.Init()
 	github.Init()
+	kv.Init()
 }
 
 func main() {
