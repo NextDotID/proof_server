@@ -88,7 +88,7 @@ func (twitter *Twitter) Validate() (err error) {
 	if err != nil {
 		return xerrors.Errorf("Error when getting tweet %s: %w", twitter.ProofLocation, err)
 	}
-	if tweet.User.ScreenName != twitter.Identity {
+	if strings.ToLower(tweet.User.ScreenName) != strings.ToLower(twitter.Identity) {
 		return xerrors.Errorf("Screen name mismatch: expect %s - actual %s", twitter.Identity, tweet.User.ScreenName)
 	}
 
