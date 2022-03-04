@@ -76,6 +76,10 @@ func (twitter *Twitter) Validate() (err error) {
 	initClient()
 	twitter.Identity = strings.ToLower(twitter.Identity)
 	twitter.SignaturePayload = twitter.GenerateSignPayload()
+	// Deletion. No need to fetch tweet.
+	if twitter.Action == types.Actions.Delete {
+		return mycrypto.ValidatePersonalSignature(twitter.SignaturePayload, twitter.Signature, twitter.Pubkey)
+	}
 
 	tweetID, err := strconv.ParseInt(twitter.ProofLocation, 10, 64)
 	if err != nil {

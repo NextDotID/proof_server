@@ -79,7 +79,7 @@ func validateProof(req ProofUploadRequest, prev *model.ProofChain, pubkey *ecdsa
 		ProofLocation: req.ProofLocation,
 	}
 
-	if req.Platform == types.Platforms.Ethereum {
+	if req.Extra.Signature != "" || req.Platform == types.Platforms.Ethereum {
 		extra := map[string]string{}
 		extra["wallet_signature"] = req.Extra.EthereumWalletSignature
 		base.Extra = extra
