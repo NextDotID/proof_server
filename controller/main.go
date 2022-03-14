@@ -34,6 +34,7 @@ func Init() {
 	Engine.GET("/healthz", healthz)
 	Engine.POST("/v1/proof/payload", proofPayload)
 	Engine.POST("/v1/proof", proofUpload)
+	Engine.GET("/v1/proof/exists", proofExists)
 	Engine.GET("/v1/proof", proofQuery)
 }
 
@@ -50,7 +51,7 @@ func healthz(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"hello": "proof server",
+		"hello": "proof service",
 		"platforms": platforms,
 		"environment": common.Environment,
 		"revision": common.Revision,
