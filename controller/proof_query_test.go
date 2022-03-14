@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"crypto/ecdsa"
 	"testing"
 
+	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/nextdotid/proof-server/model"
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
@@ -49,6 +51,27 @@ func insert_proof(t *testing.T) {
 	}
 }
 
+/// Insert Random Persona <-> Given ETH public key binding.
+func insert_eth_proof(t *testing.T, eth_pub_key *ecdsa.PublicKey) {
+	personaPk, _ := crypto.GenerateKeypair()
+	validator := validator.Base{
+		Platform:         types.Platforms.Ethereum,
+		Previous:         "",
+		Action:           types.Actions.Create,
+		Pubkey:           personaPk,
+		Identity:         ethcrypto.PubkeyToAddress(*eth_pub_key).String(),
+		ProofLocation:    "",
+		Signature:        []byte{1},
+		SignaturePayload: "",
+		Text:             "",
+		Extra:            map[string]string{},
+	}
+	pc, err := model.ProofChainCreateFromValidator(&validator)
+	assert.Nil(t, err)
+	err = pc.Apply()
+	assert.Nil(t, err)
+}
+
 func Test_proofQuery(t *testing.T) {
 	t.Run("smoke", func(t *testing.T) {
 		before_each(t)
@@ -68,6 +91,10 @@ func Test_proofQuery(t *testing.T) {
 		found := resp.IDs[0]
 		assert.Equal(t, persona, found.Persona)
 		assert.Equal(t, 1, len(found.Proofs))
+		assert.Equal(t, 0, resp.Pagination.Next)
+		assert.Equal(t, int64(1), resp.Pagination.Total)
+		assert.Equal(t, 1, resp.Pagination.Current)
+		assert.Equal(t, PER_PAGE, resp.Pagination.Per)
 
 		partial_resp := ProofQueryResponse{}
 		APITestCall(Engine, "GET", "/v1/proof?platform=twitter&identity=eiw", "", &partial_resp)
@@ -111,5 +138,33 @@ func Test_proofQuery(t *testing.T) {
 		APITestCall(Engine, "GET", "/v1/proof?identity="+persona+"&platform=nextid", "", &resp)
 		assert.Equal(t, 1, len(resp.IDs))
 		assert.Equal(t, 2, len(resp.IDs[0].Proofs))
+	})
+
+	t.Run("patination", func(t *testing.T) {
+		before_each(t)
+		eth_pubkey, _ := crypto.GenerateKeypair()
+		for i := 0; i < 45; i++ { // Create 45 records
+			insert_eth_proof(t, eth_pubkey)
+		}
+		url := "/v1/proof?identity="+ethcrypto.PubkeyToAddress(*eth_pubkey).String()+"&platform=ethereum"
+
+		resp_page1 := ProofQueryResponse{} // Page not given
+		APITestCall(Engine, "GET", url, nil, &resp_page1)
+		assert.Equal(t, int64(45), resp_page1.Pagination.Total)
+		assert.Equal(t, 1, resp_page1.Pagination.Current)
+		assert.Equal(t, 2, resp_page1.Pagination.Next)
+		assert.Equal(t, PER_PAGE, len(resp_page1.IDs))
+
+		resp_page3 := ProofQueryResponse{} // Last page
+		APITestCall(Engine, "GET", url + "&page=3", nil, &resp_page3)
+		assert.Equal(t, 3, resp_page3.Pagination.Current)
+		assert.Equal(t, 0, resp_page3.Pagination.Next)
+		assert.Equal(t, 5, len(resp_page3.IDs))
+
+		resp_page4 := ProofQueryResponse{} // Page overflow
+		APITestCall(Engine, "GET", url + "&page=4", nil, &resp_page4)
+		assert.Equal(t, 4, resp_page4.Pagination.Current)
+		assert.Equal(t, 0, resp_page4.Pagination.Next)
+		assert.Equal(t, 0, len(resp_page4.IDs))
 	})
 }

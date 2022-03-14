@@ -12,16 +12,25 @@ import (
 )
 
 const (
-	QUERY_LIMIT = 20
+	PER_PAGE = 20
 )
 
 type ProofQueryRequest struct {
 	Platform string   `form:"platform"`
 	Identity []string `form:"identity"`
+	Page     int      `form:"page"`
 }
 
 type ProofQueryResponse struct {
-	IDs []ProofQueryResponseSingle `json:"ids"`
+	Pagination ProofQueryPaginationResponse `json:"pagination"`
+	IDs        []ProofQueryResponseSingle   `json:"ids"`
+}
+
+type ProofQueryPaginationResponse struct {
+	Total   int64 `json:"total"`
+	Per     int   `json:"per"`
+	Current int   `json:"current"`
+	Next    int   `json:"next"`
 }
 
 type ProofQueryResponseSingle struct {
@@ -50,23 +59,34 @@ func proofQuery(c *gin.Context) {
 	}
 	req.Identity = strings.Split(req.Identity[0], ",")
 
+	ids, pagination := performProofQuery(req)
 	c.JSON(http.StatusOK, ProofQueryResponse{
-		IDs: performProofQuery(req),
+		Pagination: pagination,
+		IDs:        ids,
 	})
 }
 
-func performProofQuery(req ProofQueryRequest) []ProofQueryResponseSingle {
-	result := make([]ProofQueryResponseSingle, 0, 0)
+func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, ProofQueryPaginationResponse) {
+	pagination := ProofQueryPaginationResponse{
+		Total:   0,
+		Per:     PER_PAGE,
+		Current: req.Page,
+		Next:    0,
+	}
+	if pagination.Current <= 0 { // `page` param not provided. Set it to 1.
+		pagination.Current = 1
+	}
+	offsetCount := pagination.Per * (pagination.Current - 1)
 
+	result := make([]ProofQueryResponseSingle, 0, 0)
 	proofs := make([]model.Proof, 0, 0)
-	tx := model.DB
+	tx := model.DB.Model(&model.Proof{})
 
 	switch req.Platform {
 	case string(types.Platforms.NextID):
 		{
-			tx = tx.Where("persona IN ?", req.Identity).
-				Limit(QUERY_LIMIT).
-				Find(&proofs)
+			tx = tx.Where("persona IN ?", req.Identity).Offset(offsetCount).Limit(pagination.Per).Find(&proofs)
+			pagination.Total = tx.RowsAffected
 		}
 	case "":
 		{ // All platform
@@ -77,8 +97,9 @@ func performProofQuery(req ProofQueryRequest) []ProofQueryResponseSingle {
 				}
 				tx = tx.Or("identity LIKE ?", "%"+strings.ToLower(id)+"%")
 			}
-
-			tx = tx.Limit(QUERY_LIMIT).Find(&proofs)
+			countTx := tx // Value-copy another query for total amount calculation
+			countTx.Count(&pagination.Total)
+			tx = tx.Offset(offsetCount).Limit(pagination.Per).Find(&proofs)
 		}
 	default:
 		{
@@ -91,11 +112,13 @@ func performProofQuery(req ProofQueryRequest) []ProofQueryResponseSingle {
 				}
 				tx = tx.Or("identity LIKE ?", "%"+strings.ToLower(id)+"%")
 			}
-			tx = tx.Limit(QUERY_LIMIT).Find(&proofs)
+			countTx := tx
+			countTx.Count(&pagination.Total)
+			tx = tx.Offset(offsetCount).Limit(pagination.Per).Find(&proofs)
 		}
 	}
 	if tx.Error != nil || tx.RowsAffected == int64(0) || len(proofs) == 0 {
-		return result
+		return result, pagination
 	}
 
 	// proofs.group_by(&:persona)
@@ -127,5 +150,8 @@ func performProofQuery(req ProofQueryRequest) []ProofQueryResponseSingle {
 		result = append(result, single)
 	}
 
-	return result
+	if pagination.Total > int64(pagination.Per * pagination.Current) {
+		pagination.Next = pagination.Current + 1
+	}
+	return result, pagination
 }
