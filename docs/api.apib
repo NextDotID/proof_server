@@ -193,3 +193,45 @@ Request failed.
             }]
           }]
         }
+
+## Check if a proof exists [GET /v1/proof/exists]
+
++ Request
+
+  + Parameters
+
+    + platform (string, required) - Proof platform.
+    + identity (string, required) - Identity on target platform.
+    + public_key (string, required) - Public key of NextID Persona to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`)
+
+  + Example
+
+    `GET /v1/proof/exists?platform=twitter&identity=some_twitter_screenname&public_key=0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575`
+
++ Response 200 (application/json)
+
+Found.
+
+  + Attributes
+
+    + created_at (string, required) - Createtion time of this proof. (timestamp, unit: second)
+    + last_checked_at (string, required) - When last validation happened. (timestamp, unit: second)
+    + is_valid (bool, required) - This record is valid or not according to last validation.
+    + invalid_reason (string, required) - If not valid, reason will appears here.
+
+  + Body
+
+        {
+          "created_at": "1643099438",
+          "last_checked_at": "1643099438",
+          "is_valid": true,
+          "invalid_reason": ""
+        }
+
++ Response 404 (application/json)
+
+Not found.
+
+  + Attributes
+
+    + message (string, required) - Message of which part goes wrong.
