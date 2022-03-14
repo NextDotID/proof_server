@@ -140,17 +140,23 @@ Request failed.
 
       + platform (string, optional) - Proof platform. If not given, all platforms will be searched.
       + identity (string, required) - Identity on target platform. Separate identities with comma (`,`) if you want to query mutipe identity at once.
+      + page (number, optional) - Pagination. First page is number `1`.
 
     + Example
 
       `GET /proof?platform=twitter&identity=my_twitter_screen_name`
 
-      `GET /proof?identity=abc,def`
+      `GET /proof?identity=abc,def&page=3`
 
 + Response 200 (application/json)
 
   + Attributes
 
+    + pagination (object, required) - Pagination info
+      + total (number, required) - Total amount of results.
+      + per (number, required) - How many `ids` results per page.
+      + current (number, required) - current page number.
+      + next (number, required) - Next page. `0` if current page is the last one.
     + ids (array[object], required) - All IDs found. Will be empty array if not found.
       + persona (string, required) - Persona public key
       + proofs (array[object], required) - All proofs under this persona
@@ -164,6 +170,12 @@ Request failed.
   + Body
 
         {
+          "pagination": {
+            "total": 27,
+            "per": 10,
+            "current": 1,
+            "next": 2
+          },
           "ids": [{
             "persona": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575",
             "proofs": [{
