@@ -15,7 +15,6 @@ const (
 )
 
 func insert_proof(t *testing.T) {
-	persona := "0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3"
 	pubkey, _ := crypto.StringToPubkey(persona)
 	validators := []validator.Base{
 		{
