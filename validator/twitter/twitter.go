@@ -43,7 +43,7 @@ func Init() {
 	}
 
 	validator.PlatformFactories[types.Platforms.Twitter] = func(base *validator.Base) validator.IValidator {
-		twi := Twitter { base }
+		twi := Twitter{base}
 		return &twi
 	}
 }
@@ -55,12 +55,12 @@ func (twitter *Twitter) GeneratePostPayload() (post string) {
 func (twitter *Twitter) GenerateSignPayload() (payload string) {
 	twitter.Identity = strings.ToLower(twitter.Identity)
 	payloadStruct := validator.H{
-		"action":   string(twitter.Action),
-		"identity": twitter.Identity,
-		"platform": "twitter",
-		"prev":     nil,
+		"action":     string(twitter.Action),
+		"identity":   twitter.Identity,
+		"platform":   "twitter",
+		"prev":       nil,
 		"created_at": util.TimeToTimestampString(twitter.CreatedAt),
-		"uuid": twitter.Uuid.String(),
+		"uuid":       twitter.Uuid.String(),
 	}
 	if twitter.Previous != "" {
 		payloadStruct["prev"] = twitter.Previous

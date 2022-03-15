@@ -146,7 +146,7 @@ func Test_proofQuery(t *testing.T) {
 		for i := 0; i < 45; i++ { // Create 45 records
 			insert_eth_proof(t, eth_pubkey)
 		}
-		url := "/v1/proof?identity="+ethcrypto.PubkeyToAddress(*eth_pubkey).String()+"&platform=ethereum"
+		url := "/v1/proof?identity=" + ethcrypto.PubkeyToAddress(*eth_pubkey).String() + "&platform=ethereum"
 
 		resp_page1 := ProofQueryResponse{} // Page not given
 		APITestCall(Engine, "GET", url, nil, &resp_page1)
@@ -156,13 +156,13 @@ func Test_proofQuery(t *testing.T) {
 		assert.Equal(t, PER_PAGE, len(resp_page1.IDs))
 
 		resp_page3 := ProofQueryResponse{} // Last page
-		APITestCall(Engine, "GET", url + "&page=3", nil, &resp_page3)
+		APITestCall(Engine, "GET", url+"&page=3", nil, &resp_page3)
 		assert.Equal(t, 3, resp_page3.Pagination.Current)
 		assert.Equal(t, 0, resp_page3.Pagination.Next)
 		assert.Equal(t, 5, len(resp_page3.IDs))
 
 		resp_page4 := ProofQueryResponse{} // Page overflow
-		APITestCall(Engine, "GET", url + "&page=4", nil, &resp_page4)
+		APITestCall(Engine, "GET", url+"&page=4", nil, &resp_page4)
 		assert.Equal(t, 4, resp_page4.Pagination.Current)
 		assert.Equal(t, 0, resp_page4.Pagination.Next)
 		assert.Equal(t, 0, len(resp_page4.IDs))

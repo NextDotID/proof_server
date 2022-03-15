@@ -150,7 +150,7 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 		result = append(result, single)
 	}
 
-	if pagination.Total > int64(pagination.Per * pagination.Current) {
+	if pagination.Total > int64(pagination.Per*pagination.Current) {
 		pagination.Next = pagination.Current + 1
 	}
 	return result, pagination

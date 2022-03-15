@@ -34,7 +34,7 @@ func Init() {
 		validator.PlatformFactories = make(map[types.Platform]func(*validator.Base) validator.IValidator)
 	}
 	validator.PlatformFactories[types.Platforms.Ethereum] = func(base *validator.Base) validator.IValidator {
-		eth := Ethereum { base }
+		eth := Ethereum{base}
 		return &eth
 	}
 }
@@ -46,13 +46,13 @@ func (*Ethereum) GeneratePostPayload() (post string) {
 
 func (et *Ethereum) GenerateSignPayload() (payload string) {
 	payloadStruct := validator.H{
-		"action":   string(et.Action),
-		"identity": strings.ToLower(et.Identity),
-		"persona":  "0x" + mycrypto.CompressedPubkeyHex(et.Pubkey),
-		"platform": "ethereum",
-		"prev":     nil,
+		"action":     string(et.Action),
+		"identity":   strings.ToLower(et.Identity),
+		"persona":    "0x" + mycrypto.CompressedPubkeyHex(et.Pubkey),
+		"platform":   "ethereum",
+		"prev":       nil,
 		"created_at": util.TimeToTimestampString(et.CreatedAt),
-		"uuid": et.Uuid.String(),
+		"uuid":       et.Uuid.String(),
 	}
 	if et.Previous != "" {
 		payloadStruct["prev"] = et.Previous
@@ -71,15 +71,18 @@ func (et *Ethereum) Validate() (err error) {
 	et.Identity = strings.ToLower(et.Identity)
 
 	switch et.Action {
-	case types.Actions.Create: {
-		return et.validateCreate()
-	}
-	case types.Actions.Delete: {
-		return et.validateDelete()
-	}
-	default: {
-		return xerrors.Errorf("unknown action: %s", et.Action)
-	}
+	case types.Actions.Create:
+		{
+			return et.validateCreate()
+		}
+	case types.Actions.Delete:
+		{
+			return et.validateDelete()
+		}
+	default:
+		{
+			return xerrors.Errorf("unknown action: %s", et.Action)
+		}
 	}
 }
 

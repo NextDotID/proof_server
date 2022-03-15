@@ -90,7 +90,7 @@ func validateProof(req ProofUploadRequest, prev *model.ProofChain, pubkey *ecdsa
 		Identity:      req.Identity,
 		ProofLocation: req.ProofLocation,
 		CreatedAt:     created_at,
-		Uuid: parsed_uuid,
+		Uuid:          parsed_uuid,
 	}
 
 	if req.Extra.Signature != "" || req.Platform == types.Platforms.Ethereum {

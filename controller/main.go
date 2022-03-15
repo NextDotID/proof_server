@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/nextdotid/proof-server/validator"
 	"github.com/nextdotid/proof-server/common"
+	"github.com/nextdotid/proof-server/validator"
 )
 
 var (
@@ -21,7 +21,6 @@ func middlewareCors() gin.HandlerFunc {
 	// *
 	return cors.Default()
 }
-
 
 func Init() {
 	if Engine != nil {
@@ -51,10 +50,10 @@ func healthz(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"hello": "proof service",
-		"platforms": platforms,
+		"hello":       "proof service",
+		"platforms":   platforms,
 		"environment": common.Environment,
-		"revision": common.Revision,
-		"built_at": common.BuildTime,
+		"revision":    common.Revision,
+		"built_at":    common.BuildTime,
 	})
 }

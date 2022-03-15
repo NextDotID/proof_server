@@ -38,7 +38,7 @@ func generate() Ethereum {
 				"wallet_signature": "",
 			},
 			CreatedAt: time.Now(),
-			Uuid: uuid.New(),
+			Uuid:      uuid.New(),
 		},
 	}
 	_, persona_sk = mycrypto.GenerateKeypair()

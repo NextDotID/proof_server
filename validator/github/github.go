@@ -68,12 +68,12 @@ func (gh *Github) GeneratePostPayload() (post string) {
 func (gh *Github) GenerateSignPayload() (payload string) {
 	gh.Identity = strings.ToLower(gh.Identity)
 	payloadStruct := validator.H{
-		"action":   string(gh.Action),
-		"identity": gh.Identity,
-		"platform": string(types.Platforms.Github),
-		"prev":     nil,
-		"created_at":      util.TimeToTimestampString(gh.CreatedAt),
-		"uuid":           gh.Uuid.String(),
+		"action":     string(gh.Action),
+		"identity":   gh.Identity,
+		"platform":   string(types.Platforms.Github),
+		"prev":       nil,
+		"created_at": util.TimeToTimestampString(gh.CreatedAt),
+		"uuid":       gh.Uuid.String(),
 	}
 	if gh.Previous != "" {
 		payloadStruct["prev"] = gh.Previous
