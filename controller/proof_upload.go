@@ -6,8 +6,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/nextdotid/proof-server/model"
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/util"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
 	"golang.org/x/xerrors"
@@ -19,6 +21,8 @@ type ProofUploadRequest struct {
 	Identity      string                  `json:"identity"`
 	ProofLocation string                  `json:"proof_location"`
 	PublicKey     string                  `json:"public_key"`
+	Uuid          string                  `json:"uuid"`
+	CreatedAt     string                  `json:"created_at"`
 	Extra         ProofUploadRequestExtra `json:"extra"`
 }
 
@@ -70,6 +74,14 @@ func validateProof(req ProofUploadRequest, prev *model.ProofChain, pubkey *ecdsa
 	if !ok {
 		return validator.Base{}, xerrors.Errorf("platform not supported: %s", string(req.Platform))
 	}
+	created_at, err := util.TimestampStringToTime(req.CreatedAt)
+	if err != nil {
+		return validator.Base{}, xerrors.Errorf("error when parsing created_at: %s not recognized", req.CreatedAt)
+	}
+	parsed_uuid, err := uuid.Parse(req.Uuid)
+	if err != nil {
+		return validator.Base{}, xerrors.Errorf("error when parsing uuid: %s not recognized", req.Uuid)
+	}
 	base := validator.Base{
 		Platform:      req.Platform,
 		Previous:      prev_signature,
@@ -77,6 +89,8 @@ func validateProof(req ProofUploadRequest, prev *model.ProofChain, pubkey *ecdsa
 		Pubkey:        pubkey,
 		Identity:      req.Identity,
 		ProofLocation: req.ProofLocation,
+		CreatedAt:     created_at,
+		Uuid: parsed_uuid,
 	}
 
 	if req.Extra.Signature != "" || req.Platform == types.Platforms.Ethereum {

@@ -2,10 +2,13 @@ package controller
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/nextdotid/proof-server/model"
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/util"
 	"github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
 	"golang.org/x/xerrors"
@@ -22,6 +25,8 @@ type ProofPayloadRequest struct {
 type ProofPayloadResponse struct {
 	PostContent string `json:"post_content"`
 	SignPayload string `json:"sign_payload"`
+	Uuid        string `json:"uuid"`
+	CreatedAt   string `json:"created_at"`
 }
 
 type ProofPayloadRequestExtra struct {
@@ -60,11 +65,13 @@ func proofPayload(c *gin.Context) {
 	}
 
 	v := validator.Base{
-		Platform: req.Platform,
-		Previous: previous_signature,
-		Action:   req.Action,
-		Pubkey:   parsed_pubkey,
-		Identity: req.Identity,
+		Platform:  req.Platform,
+		Previous:  previous_signature,
+		Action:    req.Action,
+		Pubkey:    parsed_pubkey,
+		Identity:  req.Identity,
+		Uuid:      uuid.New(),
+		CreatedAt: time.Now(),
 		Extra: map[string]string{
 			"wallet_signature": req.Extra.EthereumWalletSignature,
 		},
@@ -78,6 +85,8 @@ func proofPayload(c *gin.Context) {
 	c.JSON(http.StatusOK, ProofPayloadResponse{
 		PostContent: performer.GeneratePostPayload(),
 		SignPayload: performer.GenerateSignPayload(),
+		CreatedAt:   util.TimeToTimestampString(v.CreatedAt),
+		Uuid:        v.Uuid.String(),
 	})
 }
 
