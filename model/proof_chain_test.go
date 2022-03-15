@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"encoding/base64"
 	"testing"
 
@@ -203,8 +204,39 @@ func Test_Apply(t *testing.T) {
 		DB.Model(&Proof{}).Where("proof_chain_id = ?", pc.ID).Count(&count)
 		assert.Equal(t, int64(0), count)
 	})
-}
 
+	t.Run("avoid duplicate", func(t *testing.T) {
+		before_each(t)
+		pk, _ := crypto.GenerateKeypair()
+		pc := ProofChain{
+			Action:    types.Actions.Create,
+			Persona:   MarshalPersona(pk),
+			Identity:  "yeiwb",
+			Location:  "1469221200140574721",
+			Platform:  types.Platforms.Twitter,
+			Signature: MarshalSignature([]byte{1}),
+		}
+		assert.Nil(t, DB.Create(&pc).Error)
+		assert.Nil(t, pc.Apply())
+
+		pc2 := ProofChain{
+			Action:     types.Actions.Create,
+			Persona:    MarshalPersona(pk),
+			Identity:   "yeiwb",
+			Platform:   types.Platforms.Twitter,
+			Location:   "1469221200140574721",
+			Signature:  MarshalSignature([]byte{1}),
+			PreviousID: sql.NullInt64{Int64: pc.ID, Valid: true},
+			Previous:   &pc,
+		}
+		assert.Nil(t, DB.Create(&pc2).Error)
+		assert.Nil(t, pc.Apply())
+
+		var count int64
+		DB.Model(&Proof{}).Count(&count)
+		assert.Equal(t, int64(1), count)
+	})
+}
 
 func Test_ProofChain_RestoreValidator(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
