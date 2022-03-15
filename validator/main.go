@@ -2,7 +2,9 @@ package validator
 
 import (
 	"crypto/ecdsa"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/nextdotid/proof-server/types"
 )
 
@@ -34,6 +36,12 @@ type Base struct {
 	Text             string
 	// Extra info needed by separate platforms (e.g. Ethereum)
 	Extra map[string]string
+	// CreatedAt indicates creation time of this link
+	CreatedAt time.Time
+	// Uuid gives this link an unique identifier, to let other
+	// third-party service distinguish / store / dedup links with
+	// ease.
+	Uuid uuid.UUID
 }
 
 // BaseToInterface converts a `validator.Base` struct to

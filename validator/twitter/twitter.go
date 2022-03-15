@@ -13,6 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/util"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
@@ -58,6 +59,8 @@ func (twitter *Twitter) GenerateSignPayload() (payload string) {
 		"identity": twitter.Identity,
 		"platform": "twitter",
 		"prev":     nil,
+		"created_at": util.TimeToTimestampString(twitter.CreatedAt),
+		"uuid": twitter.Uuid.String(),
 	}
 	if twitter.Previous != "" {
 		payloadStruct["prev"] = twitter.Previous

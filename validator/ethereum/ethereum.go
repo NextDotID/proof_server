@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/util"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
 	"github.com/sirupsen/logrus"
@@ -50,6 +51,8 @@ func (et *Ethereum) GenerateSignPayload() (payload string) {
 		"persona":  "0x" + mycrypto.CompressedPubkeyHex(et.Pubkey),
 		"platform": "ethereum",
 		"prev":     nil,
+		"created_at": util.TimeToTimestampString(et.CreatedAt),
+		"uuid": et.Uuid.String(),
 	}
 	if et.Previous != "" {
 		payloadStruct["prev"] = et.Previous

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/util"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
 	"github.com/sirupsen/logrus"
@@ -20,21 +21,23 @@ type Keybase struct {
 }
 
 type KeybasePayload struct {
-	Version string `json:"version"`
-	Comment string `json:"comment"`
-	Comment2 string `json:"comment2"`
-	Persona string `json:"persona"`
+	Version         string `json:"version"`
+	Comment         string `json:"comment"`
+	Comment2        string `json:"comment2"`
+	Persona         string `json:"persona"`
 	KeybaseUsername string `json:"keybase_username"`
-	SignPayload string `json:"sign_payload"`
-	Signature string `json:"signature"`
+	SignPayload     string `json:"sign_payload"`
+	Signature       string `json:"signature"`
+	CreatedAt       string `json:"created_at"`
+	Uuid            string `json:"uuid"`
 }
 
 const (
-	URL               = "https://%s.keybase.pub/NextID/0x%s.json"
+	URL = "https://%s.keybase.pub/NextID/0x%s.json"
 )
 
 var (
-	l  = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "keybase"})
+	l = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "keybase"})
 )
 
 func Init() {
@@ -42,7 +45,7 @@ func Init() {
 		validator.PlatformFactories = make(map[types.Platform]func(*validator.Base) validator.IValidator)
 	}
 	validator.PlatformFactories[types.Platforms.Keybase] = func(base *validator.Base) validator.IValidator {
-		kb := Keybase { base }
+		kb := Keybase{base}
 		return &kb
 	}
 }
@@ -51,12 +54,14 @@ func (kb *Keybase) GeneratePostPayload() (post string) {
 	kb.Identity = strings.ToLower(kb.Identity)
 	payload := KeybasePayload{
 		Version:         "1",
-		Comment:        "Here's an NextID proof of this Keybase account.",
-		Comment2:       "To validate, base64.decode the signature, and recover pubkey from it using sign_payload with ethereum personal_sign algo.",
+		Comment:         "Here's an NextID proof of this Keybase account.",
+		Comment2:        "To validate, base64.decode the signature, and recover pubkey from it using sign_payload with ethereum personal_sign algo.",
 		Persona:         "0x" + mycrypto.CompressedPubkeyHex(kb.Pubkey),
 		KeybaseUsername: kb.Identity,
 		SignPayload:     kb.GenerateSignPayload(),
 		Signature:       "%%SIG_BASE64%%",
+		CreatedAt:       util.TimeToTimestampString(kb.CreatedAt),
+		Uuid:            kb.Uuid.String(),
 	}
 	payload_json, _ := json.MarshalIndent(payload, "", "\t")
 	return string(payload_json)
@@ -65,10 +70,12 @@ func (kb *Keybase) GeneratePostPayload() (post string) {
 func (kb *Keybase) GenerateSignPayload() (payload string) {
 	kb.Identity = strings.ToLower(kb.Identity)
 	payloadStruct := validator.H{
-		"action":   string(kb.Action),
-		"identity": kb.Identity,
-		"platform": string(types.Platforms.Keybase),
-		"prev":     nil,
+		"action":     string(kb.Action),
+		"identity":   kb.Identity,
+		"platform":   string(types.Platforms.Keybase),
+		"prev":       nil,
+		"created_at": util.TimeToTimestampString(kb.CreatedAt),
+		"uuid":       kb.Uuid.String(),
 	}
 	if kb.Previous != "" {
 		payloadStruct["prev"] = kb.Previous

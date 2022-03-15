@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/util"
 	"github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
 	"github.com/sirupsen/logrus"
@@ -28,6 +29,8 @@ type gistPayload struct {
 	GithubUsername string `json:"github_username"`
 	SignPayload    string `json:"sign_payload"`
 	Signature      string `json:"signature"`
+	CreatedAt      string `json:"created_at"`
+	Uuid           string `json:"uuid"`
 }
 
 var (
@@ -39,7 +42,7 @@ func Init() {
 		validator.PlatformFactories = make(map[types.Platform]func(*validator.Base) validator.IValidator)
 	}
 	validator.PlatformFactories[types.Platforms.Github] = func(base *validator.Base) validator.IValidator {
-		gh := Github { base }
+		gh := Github{base}
 		return &gh
 	}
 }
@@ -54,6 +57,8 @@ func (gh *Github) GeneratePostPayload() (post string) {
 		GithubUsername: gh.Identity,
 		SignPayload:    gh.GenerateSignPayload(),
 		Signature:      "%%SIG_BASE64%%",
+		CreatedAt:      util.TimeToTimestampString(gh.CreatedAt),
+		Uuid:           gh.Uuid.String(),
 	}
 
 	payload_json, _ := json.MarshalIndent(payload, "", "\t")
@@ -67,6 +72,8 @@ func (gh *Github) GenerateSignPayload() (payload string) {
 		"identity": gh.Identity,
 		"platform": string(types.Platforms.Github),
 		"prev":     nil,
+		"created_at":      util.TimeToTimestampString(gh.CreatedAt),
+		"uuid":           gh.Uuid.String(),
 	}
 	if gh.Previous != "" {
 		payloadStruct["prev"] = gh.Previous
