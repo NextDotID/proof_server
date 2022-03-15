@@ -28,6 +28,7 @@ type ProofChain struct {
 	Signature        string         `gorm:"not null"`
 	SignaturePayload string         `gorm:"column:signature_payload"`
 	Extra            datatypes.JSON `gorm:"default:'{}'"`
+	Uuid             string         `gorm:"index;column:uuid"`
 	PreviousID       sql.NullInt64  `gorm:"index"`
 	Previous         *ProofChain
 }
@@ -118,14 +119,14 @@ func (pc *ProofChain) RestoreValidator() (v *validator.Base, err error) {
 	}
 
 	v = &validator.Base{
-		Platform:         pc.Platform,
-		Previous:         previous_sig,
-		Action:           pc.Action,
-		Pubkey:           pc.Pubkey(),
-		Identity:         pc.Identity,
-		ProofLocation:    pc.Location,
-		Signature:        pc.SignatureBytes(),
-		Extra:            extra,
+		Platform:      pc.Platform,
+		Previous:      previous_sig,
+		Action:        pc.Action,
+		Pubkey:        pc.Pubkey(),
+		Identity:      pc.Identity,
+		ProofLocation: pc.Location,
+		Signature:     pc.SignatureBytes(),
+		Extra:         extra,
 	}
 
 	return v, nil
@@ -185,6 +186,8 @@ func ProofChainCreateFromValidator(validator *validator.Base) (pc *ProofChain, e
 		Location:         validator.ProofLocation,
 		Signature:        MarshalSignature(validator.Signature),
 		SignaturePayload: validator.SignaturePayload,
+		CreatedAt:        validator.CreatedAt,
+		Uuid:             validator.Uuid.String(),
 		Previous:         nil,
 	}
 

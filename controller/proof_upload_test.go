@@ -16,8 +16,10 @@ func Test_ProofUpload(t *testing.T) {
 			Action:        types.Actions.Create,
 			Platform:      types.Platforms.Twitter,
 			Identity:      "yeiwb",
-			ProofLocation: "1469221200140574721",
-			PublicKey:     "0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3",
+			ProofLocation: "1503630530465599488",
+			PublicKey:     "0x037b721d6d84b474edbdab4d0746e9c777f60c414f9b0e651dd08272cb30ed6232",
+			CreatedAt:     "1647327932",
+			Uuid:          "ed9f421d-92e1-4c80-9bff-8516ef46ff43",
 		}
 		resp := ErrorResponse{}
 		APITestCall(Engine, "POST", "/v1/proof", &req, &resp)

@@ -3,8 +3,10 @@ package keybase
 import (
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/util"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
 	"github.com/sirupsen/logrus"
@@ -17,14 +19,18 @@ func before_each(t *testing.T) {
 }
 
 func generate() Keybase {
-	pubkey, _ := mycrypto.StringToPubkey("0x033d2c5c16bc24ced47619bd3471cef57c8ea8ecce9268700286d61de0d9f3f2dd")
+	pubkey, _ := mycrypto.StringToPubkey("0x02a68c664d4165a7abbb0b4221831153c5f3b0ecb6f994ba95c696eb64ca37eebc")
+	created_at, _ := util.TimestampStringToTime("1647329002")
+
 	return Keybase{
 		Base: &validator.Base{
-			Previous: "",
-			Action:   "create",
-			Pubkey:   pubkey,
-			Identity: "nykma",
-			Platform: types.Platforms.Keybase,
+			Previous:  "",
+			Action:    "create",
+			Pubkey:    pubkey,
+			Identity:  "nykma",
+			Platform:  types.Platforms.Keybase,
+			CreatedAt: created_at,
+			Uuid:      uuid.MustParse("909ee81f-4c5e-4319-affa-90d95eca614d"),
 		},
 	}
 }

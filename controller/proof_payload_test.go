@@ -30,6 +30,9 @@ func Test_proofPayload(t *testing.T) {
 		assert.Contains(t, resp.PostContent, req.PublicKey)
 		assert.Contains(t, resp.PostContent, "Signature:")
 		assert.Contains(t, resp.PostContent, "%SIG_BASE64%")
+
+		assert.True(t, len(resp.Uuid) > 0)
+		assert.True(t, len(resp.CreatedAt) > 0)
 	})
 
 	t.Run("with previous", func(t *testing.T) {

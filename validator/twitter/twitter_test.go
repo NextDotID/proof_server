@@ -1,11 +1,12 @@
 package twitter
 
 import (
-	"strings"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/util"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
 	"github.com/sirupsen/logrus"
@@ -18,16 +19,19 @@ func before_each(t *testing.T) {
 }
 
 func generate() Twitter {
-	pubkey, _ := mycrypto.StringToPubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
+	pubkey, _ := mycrypto.StringToPubkey("0x037b721d6d84b474edbdab4d0746e9c777f60c414f9b0e651dd08272cb30ed6232")
+	created_at, _ := util.TimestampStringToTime("1647327932")
 	return Twitter{
 		Base: &validator.Base{
 			Platform:      types.Platforms.Twitter,
 			Previous:      "",
 			Action:        types.Actions.Create,
 			Pubkey:        pubkey,
-			Identity:      "YEIwb",
-			ProofLocation: "1469221200140574721",
+			Identity:      "yeiwb",
+			ProofLocation: "1503630530465599488",
 			Text:          "",
+			Uuid:          uuid.MustParse("ed9f421d-92e1-4c80-9bff-8516ef46ff43"),
+			CreatedAt:     created_at,
 		},
 	}
 }
@@ -38,9 +42,9 @@ func Test_GeneratePostPayload(t *testing.T) {
 
 		tweet := generate()
 		result := tweet.GeneratePostPayload()
-		assert.True(t, strings.Contains(result, "Prove myself"))
-		assert.True(t, strings.Contains(result, mycrypto.CompressedPubkeyHex(tweet.Pubkey)))
-		assert.True(t, strings.Contains(result, "%SIG_BASE64%"))
+		assert.Contains(t, result, "Prove myself")
+		assert.Contains(t, result, mycrypto.CompressedPubkeyHex(tweet.Pubkey))
+		assert.Contains(t, result, "%SIG_BASE64%")
 	})
 }
 

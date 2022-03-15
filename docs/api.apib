@@ -2,6 +2,7 @@ FORMAT: 1A
 
 # Changelog
 
+  - <2022-03-15 Tue> :: POST /v1/proof{,/payload}: `uuid` and `created_at`
   - <2022-03-14 Mon> ::
     - GET /v1/proof -> `pagination`
     - GET /v1/proof/exists
@@ -83,12 +84,16 @@ See [README.md](./README.md)
 
     + post_content (string, required) - Post to let user send / save to target platform. Placeholders should be replaced by frontend / client. See table above.
     + sign_payload (string, required) - Raw string to be sent to `personal_sign`
+    + uuid (string, required) - UUID of this chain link. Send this UUID to `POST /v1/proof` as-is.
+    + created_at (string, required) - Creation time of this chain link (UNIX timestamp, unit: second). Send this to `POST /v1/proof` as-is.
 
   + Body
 
         {
           "post_content": "Prove myself: I'm 0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3 on NextID. Signature: %SIG_BASE64%",
           "sign_payload": "{\"action\":\"add\",\"identity\":\"my_twitter_screen_name\",\"platform\":\"twitter\",\"prev\":null}"
+          "uuid": "ed9f421d-92e1-4c80-9bff-8516ef46ff43",
+          "created_at": "1647332405"
         }
 
 ## Create a proof modification [POST /v1/proof]
@@ -105,6 +110,8 @@ See [README.md](./README.md)
     + extra (object, optional) - Extra info for specific platform needed.
       + wallet_signature (string, optional) - (needed for `platform: ethereum`) Signature signed by ETH wallet (w/ same sign payload), BASE64-ed.
       + signature (string, optional) - (needed for `platform: ethereum`) Signature signed by Persona private key (w/ same sign payload), BASE64-ed.
+    + uuid (string, required) - UUID of this chain link. Use the exact value from `POST /v1/proof/payload`.
+    + created_at (string, required) - Creation time of this chain link (UNIX timestamp, unit: second). Use the exact value from `POST /v1/proof/payload`.
 
   + Body
 
@@ -114,7 +121,9 @@ See [README.md](./README.md)
           "identity": "my_twitter_screen_name",
           "proof_location": "1415362679095635970",
           "public_key": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575",
-          "extra": {}
+          "extra": {},
+          "uuid": "ed9f421d-92e1-4c80-9bff-8516ef46ff43",
+          "created_at": "1647332405"
         }
 
 + Response 201 (application/json)
