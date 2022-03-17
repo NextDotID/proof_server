@@ -5,6 +5,7 @@ import (
 
 	"github.com/nextdotid/proof-server/model"
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,10 +17,10 @@ func Test_ProofUpload(t *testing.T) {
 			Action:        types.Actions.Create,
 			Platform:      types.Platforms.Twitter,
 			Identity:      "yeiwb",
-			ProofLocation: "1503630530465599488",
-			PublicKey:     "0x037b721d6d84b474edbdab4d0746e9c777f60c414f9b0e651dd08272cb30ed6232",
-			CreatedAt:     "1647327932",
-			Uuid:          "ed9f421d-92e1-4c80-9bff-8516ef46ff43",
+			ProofLocation: "1504363098328924163",
+			PublicKey:     "0x03666b700aeb6a6429f13cbb263e1bc566cd975a118b61bc796204109c1b351d19",
+			CreatedAt:     "1647503071",
+			Uuid:          "c6fa1483-1bad-4f07-b661-678b191ab4b3",
 		}
 		resp := ErrorResponse{}
 		APITestCall(Engine, "POST", "/v1/proof", &req, &resp)
@@ -34,6 +35,8 @@ func Test_ProofUpload(t *testing.T) {
 		model.DB.Where(&pc).First(&pc)
 		assert.Greater(t, pc.ID, int64(0))
 		assert.Equal(t, req.PublicKey, pc.Persona)
+		orig_created_at, _ := util.TimestampStringToTime(req.CreatedAt)
+		assert.Equal(t, pc.CreatedAt, orig_created_at)
 
 		proof := model.Proof{
 			Platform: req.Platform,

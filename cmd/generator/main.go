@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
+	"github.com/google/uuid"
 	"github.com/nextdotid/proof-server/controller"
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
@@ -28,7 +30,7 @@ var (
 	flag_previous       = flag.String("previous", "", "Previous proof chain signature (Base64)")
 	flag_action         = flag.String("action", "create", "Action (create / delete)")
 
-	post_regex = regexp.MustCompile("%%SIG_BASE64%%")
+	post_regex = regexp.MustCompile("%SIG_BASE64%")
 )
 
 func init_validators() {
@@ -64,11 +66,13 @@ func main() {
 	}
 
 	base := validator.Base{
-		Platform: platform,
-		Previous: *flag_previous,
-		Action:   get_action(),
-		Pubkey:   &secret_key.PublicKey,
-		Identity: strings.ToLower(*flag_identity),
+		Platform:  platform,
+		Previous:  *flag_previous,
+		Action:    get_action(),
+		Pubkey:    &secret_key.PublicKey,
+		Identity:  strings.ToLower(*flag_identity),
+		CreatedAt: time.Now(),
+		Uuid:      uuid.New(),
 	}
 	validator := platform_factory(&base)
 
@@ -84,8 +88,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	post := post_regex.ReplaceAll([]byte(raw_post), []byte(base64.StdEncoding.EncodeToString(signature)))
-	fmt.Printf("Post payload: vvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", post)
+	for lang_code, payload := range raw_post {
+		fmt.Printf(
+			"Post payload [%s]: vvvvvvv\n%s\n^^^^^^^^^^\n\n",
+			lang_code,
+			string(post_regex.ReplaceAll([]byte(payload), []byte(base64.StdEncoding.EncodeToString(signature)))),
+		)
+	}
 }
 
 func generate_ethereum(sign_payload string, persona_sk *ecdsa.PrivateKey) {

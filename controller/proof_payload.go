@@ -23,10 +23,10 @@ type ProofPayloadRequest struct {
 }
 
 type ProofPayloadResponse struct {
-	PostContent string `json:"post_content"`
-	SignPayload string `json:"sign_payload"`
-	Uuid        string `json:"uuid"`
-	CreatedAt   string `json:"created_at"`
+	PostContent map[string]string `json:"post_content"`
+	SignPayload string            `json:"sign_payload"`
+	Uuid        string            `json:"uuid"`
+	CreatedAt   string            `json:"created_at"`
 }
 
 type ProofPayloadRequestExtra struct {

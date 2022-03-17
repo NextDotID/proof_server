@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/xerrors"
-	"gorm.io/datatypes"
-
+	"github.com/google/uuid"
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
+	"golang.org/x/xerrors"
+	"gorm.io/datatypes"
 )
 
 //  ProofChain is a chain of a persona's proof modification log.
@@ -105,9 +105,9 @@ func (pc *ProofChain) SignatureBytes() (sig []byte) {
 
 // RestoreValidator rebuilds `validator.Base` from current `ProofChain` record.
 func (pc *ProofChain) RestoreValidator() (v *validator.Base, err error) {
-	previous_sig := ""
+	previousSig := ""
 	if pc.Previous != nil {
-		previous_sig = pc.Previous.Signature
+		previousSig = pc.Previous.Signature
 	}
 
 	extra := map[string]string{}
@@ -117,16 +117,21 @@ func (pc *ProofChain) RestoreValidator() (v *validator.Base, err error) {
 			return nil, xerrors.Errorf("%w", err)
 		}
 	}
-
+	parsedUuid, err := uuid.Parse(pc.Uuid)
+	if err != nil {
+		return nil, xerrors.Errorf("UUID parse error: %w", err)
+	}
 	v = &validator.Base{
 		Platform:      pc.Platform,
-		Previous:      previous_sig,
+		Previous:      previousSig,
 		Action:        pc.Action,
 		Pubkey:        pc.Pubkey(),
 		Identity:      pc.Identity,
 		ProofLocation: pc.Location,
 		Signature:     pc.SignatureBytes(),
 		Extra:         extra,
+		Uuid:          parsedUuid,
+		CreatedAt:     pc.CreatedAt,
 	}
 
 	return v, nil

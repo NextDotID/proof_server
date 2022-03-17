@@ -47,7 +47,7 @@ func Init() {
 	}
 }
 
-func (gh *Github) GeneratePostPayload() (post string) {
+func (gh *Github) GeneratePostPayload() (post map[string]string) {
 	gh.Identity = strings.ToLower(gh.Identity)
 	payload := gistPayload{
 		Version:        "1",
@@ -62,7 +62,7 @@ func (gh *Github) GeneratePostPayload() (post string) {
 	}
 
 	payload_json, _ := json.MarshalIndent(payload, "", "\t")
-	return string(payload_json)
+	return map[string]string{"default": string(payload_json)}
 }
 
 func (gh *Github) GenerateSignPayload() (payload string) {

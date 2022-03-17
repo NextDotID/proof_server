@@ -41,10 +41,9 @@ func Test_GeneratePostPayload(t *testing.T) {
 
 		kb := generate()
 		result := kb.GeneratePostPayload()
-		assert.Contains(t, result, "To validate")
-		assert.Contains(t, result, mycrypto.CompressedPubkeyHex(kb.Pubkey))
-		assert.Contains(t, result, "%%SIG_BASE64%%")
-		t.Logf("%+v", result)
+		assert.Contains(t, result["default"], "To validate")
+		assert.Contains(t, result["default"], mycrypto.CompressedPubkeyHex(kb.Pubkey))
+		assert.Contains(t, result["default"], "%%SIG_BASE64%%")
 	})
 }
 

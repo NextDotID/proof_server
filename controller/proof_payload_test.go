@@ -26,10 +26,10 @@ func Test_proofPayload(t *testing.T) {
 		assert.Contains(t, resp.SignPayload, "\"identity\":\"yeiwb\"")
 		assert.Contains(t, resp.SignPayload, "\"prev\":null")
 
-		assert.Contains(t, resp.PostContent, "Prove myself:")
-		assert.Contains(t, resp.PostContent, req.PublicKey)
-		assert.Contains(t, resp.PostContent, "Signature:")
-		assert.Contains(t, resp.PostContent, "%SIG_BASE64%")
+		assert.Contains(t, resp.PostContent["default"], "Verifying my Twitter ID")
+		assert.Contains(t, resp.PostContent["default"], req.Identity)
+		assert.Contains(t, resp.PostContent["default"], "Sig:")
+		assert.Contains(t, resp.PostContent["default"], "%SIG_BASE64%")
 
 		assert.True(t, len(resp.Uuid) > 0)
 		assert.True(t, len(resp.CreatedAt) > 0)

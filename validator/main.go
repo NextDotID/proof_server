@@ -16,7 +16,7 @@ var (
 type IValidator interface {
 	// GeneratePostPayload gives a post structure (with
 	// placeholders) for user to post on target platform.
-	GeneratePostPayload() (post string)
+	GeneratePostPayload() (post map[string]string)
 	// GenerateSignPayload generates a string to be signed.
 	GenerateSignPayload() (payload string)
 

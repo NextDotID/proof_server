@@ -1,6 +1,7 @@
 package twitter
 
 import (
+	"bufio"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -10,7 +11,6 @@ import (
 
 	t "github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util"
@@ -26,14 +26,18 @@ type Twitter struct {
 }
 
 const (
-	MATCH_TEMPLATE = "^Prove myself: I'm 0x([0-9a-f]{66}) on NextID. Signature: (.*)$"
-	POST_STRUCT    = "Prove myself: I'm 0x%s on NextID. Signature: %%SIG_BASE64%%"
+	MATCH_TEMPLATE = "^Sig: (.*)$"
 )
 
 var (
-	client *t.Client
-	l      = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "twitter"})
-	re     = regexp.MustCompile(MATCH_TEMPLATE)
+	client      *t.Client
+	l           = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "twitter"})
+	re          = regexp.MustCompile(MATCH_TEMPLATE)
+	POST_STRUCT = map[string]string{
+		"default": "Verifying my Twitter ID @%s for my Next.ID @NextDotID.\nSig: %%SIG_BASE64%%\n\nInstall Mask.io to try your Web 3.0 DID.\n",
+		"en_US":   "Verifying my Twitter ID @%s for my Next.ID @NextDotID.\nSig: %%SIG_BASE64%%\n\nInstall Mask.io to try your Web 3.0 DID.\n",
+		"zh_CN":   "验证推特账号 @%s 的 Next.ID 身份 @NextDotID 。\nSig: %%SIG_BASE64%%\n\n请下载安装 mask.io 去使用您 Web 3.0 的去中心化身份。\n",
+	}
 )
 
 func Init() {
@@ -48,8 +52,13 @@ func Init() {
 	}
 }
 
-func (twitter *Twitter) GeneratePostPayload() (post string) {
-	return fmt.Sprintf(POST_STRUCT, mycrypto.CompressedPubkeyHex(twitter.Pubkey))
+func (twitter *Twitter) GeneratePostPayload() (post map[string]string) {
+	post = make(map[string]string, 0)
+	for lang_code, template := range POST_STRUCT {
+		post[lang_code] = fmt.Sprintf(template, twitter.Identity)
+	}
+
+	return post
 }
 
 func (twitter *Twitter) GenerateSignPayload() (payload string) {
@@ -104,27 +113,22 @@ func (twitter *Twitter) Validate() (err error) {
 }
 
 func (twitter *Twitter) validateText() (err error) {
-	matched := re.FindStringSubmatch(twitter.Text)
-	if len(matched) < 3 {
-		return xerrors.Errorf("Tweet struct mismatch. Found: %+v", matched)
-	}
+	scanner := bufio.NewScanner(strings.NewReader(twitter.Text))
+	for scanner.Scan() {
+		matched := re.FindStringSubmatch(scanner.Text())
+		if len(matched) < 2 {
+			continue // Search for next line
+		}
 
-	pubkeyHex := matched[1]
-	pubkeyRecovered, err := mycrypto.StringToPubkey(pubkeyHex)
-	if err != nil {
-		return xerrors.Errorf("Pubkey recover failed: %s", err.Error())
+		sigBase64 := matched[1]
+		sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
+		if err != nil {
+			return xerrors.Errorf("Error when decoding signature %s: %s", sigBase64, err.Error())
+		}
+		twitter.Signature = sigBytes
+		return mycrypto.ValidatePersonalSignature(twitter.SignaturePayload, sigBytes, twitter.Pubkey)
 	}
-	if crypto.PubkeyToAddress(*twitter.Pubkey) != crypto.PubkeyToAddress(*pubkeyRecovered) {
-		return xerrors.Errorf("Pubkey mismatch")
-	}
-
-	sigBase64 := matched[2]
-	sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
-	if err != nil {
-		return xerrors.Errorf("Error when decoding signature %s: %s", sigBase64, err.Error())
-	}
-	twitter.Signature = sigBytes
-	return mycrypto.ValidatePersonalSignature(twitter.SignaturePayload, sigBytes, pubkeyRecovered)
+	return xerrors.Errorf("Signature not found in tweet text.")
 }
 
 func initClient() {

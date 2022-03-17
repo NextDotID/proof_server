@@ -19,8 +19,8 @@ func before_each(t *testing.T) {
 }
 
 func generate() Twitter {
-	pubkey, _ := mycrypto.StringToPubkey("0x037b721d6d84b474edbdab4d0746e9c777f60c414f9b0e651dd08272cb30ed6232")
-	created_at, _ := util.TimestampStringToTime("1647327932")
+	pubkey, _ := mycrypto.StringToPubkey("0x04666b700aeb6a6429f13cbb263e1bc566cd975a118b61bc796204109c1b351d19b7df23cc47f004e10fef41df82bad646b027578f8881f5f1d2f70c80dfcd8031")
+	created_at, _ := util.TimestampStringToTime("1647503071")
 	return Twitter{
 		Base: &validator.Base{
 			Platform:      types.Platforms.Twitter,
@@ -28,9 +28,9 @@ func generate() Twitter {
 			Action:        types.Actions.Create,
 			Pubkey:        pubkey,
 			Identity:      "yeiwb",
-			ProofLocation: "1503630530465599488",
+			ProofLocation: "1504363098328924163",
 			Text:          "",
-			Uuid:          uuid.MustParse("ed9f421d-92e1-4c80-9bff-8516ef46ff43"),
+			Uuid:          uuid.MustParse("c6fa1483-1bad-4f07-b661-678b191ab4b3"),
 			CreatedAt:     created_at,
 		},
 	}
@@ -42,9 +42,9 @@ func Test_GeneratePostPayload(t *testing.T) {
 
 		tweet := generate()
 		result := tweet.GeneratePostPayload()
-		assert.Contains(t, result, "Prove myself")
-		assert.Contains(t, result, mycrypto.CompressedPubkeyHex(tweet.Pubkey))
-		assert.Contains(t, result, "%SIG_BASE64%")
+		assert.Contains(t, result["default"], "Verifying my Twitter ID")
+		assert.Contains(t, result["default"], tweet.Identity)
+		assert.Contains(t, result["default"], "%SIG_BASE64%")
 	})
 }
 

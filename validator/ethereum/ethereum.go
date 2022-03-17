@@ -40,8 +40,8 @@ func Init() {
 }
 
 // Not used by etheruem (for now).
-func (*Ethereum) GeneratePostPayload() (post string) {
-	return ""
+func (*Ethereum) GeneratePostPayload() (post map[string]string) {
+	return map[string]string{"default": ""}
 }
 
 func (et *Ethereum) GenerateSignPayload() (payload string) {

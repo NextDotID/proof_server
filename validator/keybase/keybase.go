@@ -50,7 +50,7 @@ func Init() {
 	}
 }
 
-func (kb *Keybase) GeneratePostPayload() (post string) {
+func (kb *Keybase) GeneratePostPayload() (post map[string]string) {
 	kb.Identity = strings.ToLower(kb.Identity)
 	payload := KeybasePayload{
 		Version:         "1",
@@ -64,7 +64,7 @@ func (kb *Keybase) GeneratePostPayload() (post string) {
 		Uuid:            kb.Uuid.String(),
 	}
 	payload_json, _ := json.MarshalIndent(payload, "", "\t")
-	return string(payload_json)
+	return map[string]string{"default": string(payload_json)}
 }
 
 func (kb *Keybase) GenerateSignPayload() (payload string) {

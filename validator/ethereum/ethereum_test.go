@@ -61,7 +61,7 @@ func Test_GeneratePostPayload(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
 		eth := generate()
-		assert.Equal(t, "", eth.GeneratePostPayload())
+		assert.Equal(t, "", eth.GeneratePostPayload()["default"])
 	})
 }
 
