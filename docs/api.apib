@@ -2,6 +2,7 @@ FORMAT: 1A
 
 # Changelog
 
+  - <2022-03-17 Thu> :: POST /v1/proof/payload: i18n-ed `post_content`
   - <2022-03-15 Tue> :: POST /v1/proof{,/payload}: `uuid` and `created_at`
   - <2022-03-14 Mon> ::
     - GET /v1/proof -> `pagination`
@@ -82,7 +83,10 @@ See [README.md](./README.md)
 
   + Attributes (object)
 
-    + post_content (string, required) - Post to let user send / save to target platform. Placeholders should be replaced by frontend / client. See table above.
+    + post_content (object, required) - Post (in different languages) to let user send / save to target platform.
+        Placeholders should be replaced by frontend / client.
+        Language code follows BCP-47 standard (i.e. https://docs.microsoft.com/en-us/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a ).
+        Note: there is always a `default` content.
     + sign_payload (string, required) - Raw string to be sent to `personal_sign`
     + uuid (string, required) - UUID of this chain link. Send this UUID to `POST /v1/proof` as-is.
     + created_at (string, required) - Creation time of this chain link (UNIX timestamp, unit: second). Send this to `POST /v1/proof` as-is.
@@ -90,7 +94,10 @@ See [README.md](./README.md)
   + Body
 
         {
-          "post_content": "Prove myself: I'm 0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3 on NextID. Signature: %SIG_BASE64%",
+          "post_content": {
+            "default": "Prove myself: I'm 0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3 on NextID. Signature: %SIG_BASE64%"
+            "zh_CN": "验证推特账号 @my_twitter_screen_name 的 Next.ID 身份 @NextDotID 。\nSig: %SIG_BASE64%\n\n请下载安装 mask.io 去使用您 Web 3.0 的去中心化身份。\n"
+          },
           "sign_payload": "{\"action\":\"add\",\"identity\":\"my_twitter_screen_name\",\"platform\":\"twitter\",\"prev\":null}"
           "uuid": "ed9f421d-92e1-4c80-9bff-8516ef46ff43",
           "created_at": "1647332405"
