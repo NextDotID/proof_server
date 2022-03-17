@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nextdotid/proof-server/model"
@@ -44,7 +45,7 @@ func proofExists(c *gin.Context) {
 		"persona = ? AND platform = ? AND identity = ?",
 		model.MarshalPersona(personaPubkey),
 		req.Platform,
-		req.Identity,
+		strings.ToLower(req.Identity),
 	).Find(&found)
 
 	if tx.Error != nil {
