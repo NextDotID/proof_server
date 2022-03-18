@@ -34,9 +34,9 @@ var (
 	l           = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "twitter"})
 	re          = regexp.MustCompile(MATCH_TEMPLATE)
 	POST_STRUCT = map[string]string{
-		"default": "Verifying my Twitter ID @%s for my Next.ID @NextDotID.\nSig: %%SIG_BASE64%%\n\nInstall Mask.io to try your Web 3.0 DID.\n",
-		"en_US":   "Verifying my Twitter ID @%s for my Next.ID @NextDotID.\nSig: %%SIG_BASE64%%\n\nInstall Mask.io to try your Web 3.0 DID.\n",
-		"zh_CN":   "验证推特账号 @%s 的 Next.ID 身份 @NextDotID 。\nSig: %%SIG_BASE64%%\n\n请下载安装 mask.io 去使用您 Web 3.0 的去中心化身份。\n",
+		"default": "🎭 Verifying my Twitter ID @%s for @NextDotID.\nSig: %%SIG_BASE64%%\n\nInstall Mask.io to enhance your Web3 experience.\n",
+		"en_US":   "🎭 Verifying my Twitter ID @%s for @NextDotID.\nSig: %%SIG_BASE64%%\n\nInstall Mask.io to enhance your Web3 experience.\n",
+		"zh_CN":   "🎭 正在通过 @NextDotID 验证我的 Twitter 帐号 @%s 。\nSig: %%SIG_BASE64%%\n\n请下载安装 Mask.io 去增强您 Web3 的体验。\n",
 	}
 )
 
