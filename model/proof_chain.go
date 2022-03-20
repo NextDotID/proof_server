@@ -139,7 +139,7 @@ func (pc *ProofChain) RestoreValidator() (v *validator.Base, err error) {
 
 // MarshalPersona accepts *ecdsa.Pubkey | string type of pubkey,
 // returns a string to be stored into DB.
-func MarshalPersona(persona interface{}) string {
+func MarshalPersona(persona any) string {
 	switch p := persona.(type) {
 	case *ecdsa.PublicKey:
 		return "0x" + crypto.CompressedPubkeyHex(p)

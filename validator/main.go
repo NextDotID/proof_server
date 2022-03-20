@@ -56,4 +56,4 @@ func BaseToInterface(v *Base) IValidator {
 }
 
 // H for JSON builder.
-type H map[string]interface{}
+type H map[string]any

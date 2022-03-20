@@ -38,7 +38,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func APITestCall(engine *gin.Engine, method, url string, body interface{}, response interface{}) *httptest.ResponseRecorder {
+func APITestCall(engine *gin.Engine, method, url string, body any, response any) *httptest.ResponseRecorder {
 	body_bytes, _ := json.Marshal(body)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(method, url, bytes.NewReader(body_bytes))

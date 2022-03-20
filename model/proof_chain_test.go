@@ -252,7 +252,7 @@ func Test_ProofChain_RestoreValidator(t *testing.T) {
 			Location:  "1504363098328924163",
 			Platform:  types.Platforms.Twitter,
 			Signature: "D8i0UOXKrHJ23zCQe6USZDrw7fOjwm4R/eVX0AZXKgomynWWm+Px4Y7I1wtbsHwKj0t9psFqm87EnM93DXOmhwE=",
-			Uuid: "c6fa1483-1bad-4f07-b661-678b191ab4b3",
+			Uuid:      "c6fa1483-1bad-4f07-b661-678b191ab4b3",
 			CreatedAt: created_at,
 		}
 		tx := DB.Create(&pc)
