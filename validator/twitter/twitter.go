@@ -36,7 +36,7 @@ var (
 	POST_STRUCT = map[string]string{
 		"default": "🎭 Verifying my Twitter ID @%s for @NextDotID.\nSig: %%SIG_BASE64%%\n\nInstall Mask.io to enhance your Web3 experience.\n",
 		"en_US":   "🎭 Verifying my Twitter ID @%s for @NextDotID.\nSig: %%SIG_BASE64%%\n\nInstall Mask.io to enhance your Web3 experience.\n",
-		"zh_CN":   "🎭 正在通过 @NextDotID 验证我的 Twitter 帐号 @%s 。\nSig: %%SIG_BASE64%%\n\n请下载安装 Mask.io 去增强您 Web3 的体验。\n",
+		"zh_CN":   "🎭 正在通过 @NextDotID 验证我的 Twitter 帐号 @%s 。\nSig: %%SIG_BASE64%%\n\n请下载安装 Mask.io 去增强您的 Web3 体验。\n",
 	}
 )
 
