@@ -3,6 +3,7 @@ module github.com/nextdotid/proof-server
 go 1.18
 
 require (
+	github.com/aws/aws-lambda-go v1.28.0
 	github.com/aws/aws-sdk-go-v2 v1.15.0
 	github.com/aws/aws-sdk-go-v2/config v1.15.0
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.15.1
@@ -13,7 +14,6 @@ require (
 )
 
 require (
-	github.com/aws/aws-lambda-go v1.28.0 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.10.0 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.6 // indirect
@@ -53,7 +53,7 @@ require (
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	gorm.io/driver/mysql v1.3.2 // indirect
