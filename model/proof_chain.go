@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
+	"strconv"
 	"strings"
 	"time"
 
@@ -31,6 +32,19 @@ type ProofChain struct {
 	Uuid             string         `gorm:"index;column:uuid"`
 	PreviousID       sql.NullInt64  `gorm:"index"`
 	Previous         *ProofChain
+}
+
+// Output version of the proof chain
+type ProofChainItem struct {
+	Action           types.Action   `json:"action"`
+	Platform         types.Platform `json:"platform"`
+	Identity         string         `json:"identity"`
+	ProofLocation    string         `json:"proof_location"`
+	CreatedAt        string         `json:"created_at"`
+	Signature        string         `json:"signature"`
+	SignaturePayload string         `json:"signature_payload"`
+	Uuid             string         `json:"uuid"`
+	Extra            datatypes.JSON `json:"extra"`
 }
 
 func (ProofChain) TableName() string {
@@ -219,4 +233,40 @@ func ProofChainCreateFromValidator(validator *validator.Base) (pc *ProofChain, e
 	}
 
 	return pc, nil
+}
+
+func ProofChainFindByPersona(persona string, all_data bool, from int, limit int) (total int64, rs []ProofChainItem, err error) {
+	rs = make([]ProofChainItem, 0, 0)
+	proofs := make([]ProofChain, 0, 0)
+
+	tx := DB.Model(&ProofChain{})
+	tx = tx.Where("persona = ?", persona)
+
+	countTx := tx // Value-copy another query for total amount calculation
+	countTx.Count(&total)
+
+	if !all_data {
+		tx = tx.Offset(from).Limit(limit).Find(&proofs)
+	} else {
+		tx = tx.Find(&proofs)
+	}
+
+	if tx.Error != nil || tx.RowsAffected == int64(0) || len(proofs) == 0 {
+		return total, rs, tx.Error
+	}
+
+	for _, item := range proofs {
+		rs = append(rs, ProofChainItem{
+			Action:           item.Action,
+			Platform:         item.Platform,
+			Identity:         item.Identity,
+			ProofLocation:    item.Location,
+			CreatedAt:        strconv.FormatInt(item.CreatedAt.Unix(), 10),
+			Signature:        item.Signature,
+			SignaturePayload: item.SignaturePayload,
+			Uuid:             item.Uuid,
+			Extra:            item.Extra,
+		})
+	}
+	return total, rs, nil
 }

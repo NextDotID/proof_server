@@ -6,3 +6,5 @@ build/
 
 config/*.json
 !config/config.sample.json
+
+.idea

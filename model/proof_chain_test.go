@@ -3,13 +3,13 @@ package model
 import (
 	"database/sql"
 	"encoding/base64"
-	"testing"
-
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util"
 	"github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
 	"github.com/stretchr/testify/assert"
+	"reflect"
+	"testing"
 )
 
 func Test_ProofChainFindLatest(t *testing.T) {
@@ -264,4 +264,45 @@ func Test_ProofChain_RestoreValidator(t *testing.T) {
 		assert.Equal(t, v.Identity, pc.Identity)
 		assert.Equal(t, len(v.Signature), 65)
 	})
+}
+
+func TestProofChainFindByPersona(t *testing.T) {
+	//pk, _ := crypto.StringToPubkey("0x04666b700aeb6a6429f13cbb263e1bc566cd975a118b61bc796204109c1b351d19b7df23cc47f004e10fef41df82bad646b027578f8881f5f1d2f70c80dfcd8031")
+	type args struct {
+		persona  string
+		all_data bool
+		from     int
+		limit    int
+	}
+	tests := []struct {
+		name      string
+		args      args
+		wantTotal int64
+		wantRs    []ProofChainItem
+		wantErr   bool
+	}{
+		{
+			name : "empty result",
+			args: args{persona: "234234", all_data: false, from: 0, limit: 10},
+			wantTotal:0,
+			wantRs: []ProofChainItem{},
+			wantErr: false,
+
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotTotal, gotRs, err := ProofChainFindByPersona(tt.args.persona, tt.args.all_data, tt.args.from, tt.args.limit)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ProofChainFindByPersona() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotTotal != tt.wantTotal {
+				t.Errorf("ProofChainFindByPersona() gotTotal = %v, want %v", gotTotal, tt.wantTotal)
+			}
+			if !reflect.DeepEqual(gotRs, tt.wantRs) {
+				t.Errorf("ProofChainFindByPersona() gotRs = %v, want %v", gotRs, tt.wantRs)
+			}
+		})
+	}
 }

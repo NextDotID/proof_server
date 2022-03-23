@@ -1,7 +1,7 @@
 FORMAT: 1A
 
 # Changelog
-
+  - <2022-03-23 Wed> :: GET /v1/proofchain: api for get the proof chain items
   - <2022-03-17 Thu> :: POST /v1/proof/payload: i18n-ed `post_content`
   - <2022-03-15 Tue> :: POST /v1/proof{,/payload}: `uuid` and `created_at`
   - <2022-03-14 Mon> ::
@@ -262,6 +262,80 @@ Found.
 + Response 404 (application/json)
 
 Not found.
+
+  + Attributes
+
+    + message (string, required) - Message of which part goes wrong.
+
+## get the proof chain items [GET /v1/proofchain]
+
++ Request
+
+  + Parameters
+    + public_key (string, required) - Public key of NextID Persona to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`)
+    + page (number, optional) - Pagination. First page is number `1`.
+
+  + Example
+
+    `GET /v1/proofchain?public_key=0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3&page=1`
+
++ Response 200 (application/json)
+
+Found.
+
+  + Attributes
+
+    + pagination (object, required) - Pagination info
+      + total (number, required) - Total amount of results.
+      + per (number, required) - How many `proof item` results per page.
+      + current (number, required) - current page number.
+      + next (number, required) - Next page. `0` if current page is the last one.
+
+    + proof_chain (array[object], required) - Will be empty array if not found.
+        + action (string, required) - Action(create / delete)
+        + platform (string, required) - Target platform. See table above for all available platforms. See table above for all available values.
+        + identity (string, required) - Identity on that platform
+        + proof_location (string, required) - Location where public-accessable proof post is set. See [README.md](./README.md).
+        + created_at (string, required) - Creation time of this proof. (timestamp, unit: second)
+        + signature (string, required) - generate signature_payload and persona_private_key
+        + signature_payload (string, required) - Raw string to be sent to `personal_sign`
+        + extra (string, optional) -  Extra info for specific platform needed.
+        + uuid (string, required) - UUID of this chain link. Use the exact value from `POST /v1/proof/payload`.
+
+
+  + Body
+
+        {
+            "pagination":{
+                "total":1,
+                "per":20,
+                "current":1,
+                "next":0
+            },
+            "proof_chain":[
+                {
+                    "action":"create",
+                    "platform":"twitter",
+                    "identity":"yeiwb",
+                    "proof_location":"1469221200140574720",
+                    "created_at":"1648023422",
+                    "signature":"gMUJ75eewkdaNrFp7bafzckv9+rlW7rVaxkB7/sYzYgFdFltYG+gn0lYzVNgrAdHWZPmu2giwJniGG7HG9iNigE=",
+                    "signature_payload":"",
+                    "uuid":"",
+                    "extra":{
+
+                    }
+                }
+            ]
+        }
+
++ Response 400 (application/json)
+
+Params error.
+
++ Response 500 (application/json)
+
+Internal error.
 
   + Attributes
 
