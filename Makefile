@@ -64,3 +64,17 @@ lambda-create-production: lambda-pack-production
 		--role ${aws-lambda-role} \
 		--runtime go1.x \
 		--zip-file "fileb://./build/lambda.zip"
+
+lambda-build-worker-staging:
+	@go clean
+	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build \
+	-v -x \
+	-ldflags "-X 'github.com/nextdotid/proof-server/common.Environment=staging' -X 'github.com/nextdotid/proof-server/common.Revision=${commit}' -X 'github.com/nextdotid/proof-server/common.BuildTime=${time}'" \
+	-o ./build/lambda \
+	./cmd/lambda_worker
+
+lambda-pack-worker-staging: lambda-build-worker-staging
+	@cd ./build && zip lambda.zip lambda
+
+lambda-update-worker-staging: lambda-pack-worker-staging
+	@aws lambda update-function-code --function-name ${aws-lambda-function-worker-staging} --zip-file 'fileb://./build/lambda.zip'
