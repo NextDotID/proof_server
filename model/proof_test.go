@@ -1,17 +1,23 @@
 package model
 
 import (
+	"encoding/base64"
+	"strings"
 	"testing"
+	"time"
 
+	ethcrypto "github.com/ethereum/go-ethereum/crypto"
+	"github.com/google/uuid"
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util"
 	"github.com/nextdotid/proof-server/util/crypto"
+	"github.com/nextdotid/proof-server/validator"
+	"github.com/nextdotid/proof-server/validator/ethereum"
 	"github.com/nextdotid/proof-server/validator/twitter"
 	"github.com/stretchr/testify/assert"
-	// "gorm.io/datatypes"
 )
 
-func Test_Proof_Validate(t *testing.T) {
+func Test_Proof_Revalidate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
 		twitter.Init()
@@ -55,6 +61,7 @@ func Test_Proof_Validate(t *testing.T) {
 			Location:  "1469221200140574720",
 			Platform:  types.Platforms.Twitter,
 			Signature: "gMUJ75eewkdaNrFp7bafzckv9+rlW7rVaxkB7/sYzYgFdFltYG+gn0lYzVNgrAdHWZPmu2giwJniGG7HG9iNigE=",
+			Uuid:      uuid.New().String(),
 		}
 		tx := DB.Create(&pc)
 		assert.Nil(t, tx.Error)

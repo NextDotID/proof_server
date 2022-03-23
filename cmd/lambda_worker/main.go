@@ -20,6 +20,7 @@ import (
 	"github.com/nextdotid/proof-server/validator/keybase"
 	"github.com/nextdotid/proof-server/validator/twitter"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/xerrors"
 )
 
 var initialized = false
@@ -42,7 +43,9 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) error {
 		if err != nil {
 			return err
 		}
-
+		if message.Action != types.QueueActions.Revalidate {
+			continue
+		}
 		if err := do_single(ctx, &message); err != nil {
 			return err
 		}
@@ -51,9 +54,17 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) error {
 }
 
 func do_single(ctx context.Context, message *types.QueueMessage) error {
-	return nil // TODO
+	proof := model.Proof{}
+	tx := model.DB.Preload("ProofChain.Previous").First(&proof, message.ProofID)
+	if tx.Error != nil {
+		return xerrors.Errorf("%w", tx.Error)
+	}
+	_, err := proof.Revalidate()
+	if err != nil {
+		return xerrors.Errorf("%w", err)
+	}
+	return nil
 }
-
 
 func init_db(cfg aws.Config) {
 	model.Init()
@@ -69,7 +80,6 @@ func init_validators() {
 func init() {
 	cfg, err := config.LoadDefaultConfig(
 		context.Background(),
-		// TODO: change region
 		config.WithRegion("ap-east-1"),
 	)
 	if err != nil {
