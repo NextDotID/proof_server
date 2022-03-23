@@ -21,7 +21,7 @@ type ProofChainResponse struct {
 
 type ProofItem struct {
 	ID            int64          `json:"id"`
-	Prev          int64          `json:"prev"`
+	PrevID        int64          `json:"prev_id"`
 	Action        types.Action   `json:"action"`
 	Platform      types.Platform `json:"platform"`
 	Identity      string         `json:"identity"`
@@ -75,19 +75,19 @@ func performProofChainQuery(req ProofChainRequest) ([]ProofItem, ProofChainPagin
 
 	countTx := tx // Value-copy another query for total amount calculation
 	countTx.Count(&pagination.Total)
-
 	if pagination.Total > int64(pagination.Per*pagination.Current) {
 		pagination.Next = pagination.Current + 1
 	}
-	tx = tx.Offset(offsetCount).Limit(pagination.Per).Find(&proofs)
 
+	tx = tx.Offset(offsetCount).Limit(pagination.Per).Find(&proofs)
 	if tx.Error != nil || tx.RowsAffected == int64(0) || len(proofs) == 0 {
 		return rs, pagination
 	}
+
 	for _, item := range proofs {
 		rs = append(rs, ProofItem{
 			ID:            item.ID,
-			Prev:          item.PreviousID.Int64,
+			PrevID:        item.PreviousID.Int64,
 			Action:        item.Action,
 			Platform:      item.Platform,
 			Identity:      item.Identity,
