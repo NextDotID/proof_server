@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nextdotid/proof-server/model"
 	"github.com/nextdotid/proof-server/types"
+	"github.com/samber/lo"
 	"golang.org/x/xerrors"
 )
 
@@ -121,32 +122,30 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 		return result, pagination
 	}
 
-	// proofs.group_by(&:persona)
-	persona_proof_map := make(map[string][]model.Proof, 0)
-	for _, p := range proofs {
-		persona_proof, ok := persona_proof_map[p.Persona]
-		if ok {
-			persona_proof_map[p.Persona] = append(persona_proof, p)
-		} else {
-			persona_proof_map[p.Persona] = append(make([]model.Proof, 0, 0), p)
-		}
-	}
+	personas := lo.Map(proofs, func(p model.Proof, _index int) string {
+		return p.Persona
+	})
+	personas = lo.Uniq(personas)
 
-	for persona, proofs := range persona_proof_map {
+	for _, persona := range personas {
+		proofs, err := model.FindAllProofByPersona(persona)
+		if err != nil {
+			return result, pagination
+		}
 		single := ProofQueryResponseSingle{
 			Persona: persona,
-			Proofs:  make([]ProofQueryResponseSingleProof, 0),
+			Proofs: lo.Map(proofs, func(proof model.Proof, _index int) ProofQueryResponseSingleProof {
+				return ProofQueryResponseSingleProof{
+					Platform:      proof.Platform,
+					Identity:      proof.Identity,
+					CreatedAt:     strconv.FormatInt(proof.CreatedAt.Unix(), 10),
+					LastCheckedAt: strconv.FormatInt(proof.LastCheckedAt.Unix(), 10),
+					IsValid:       proof.IsValid,
+					InvalidReason: proof.InvalidReason,
+				}
+			}),
 		}
-		for _, p := range proofs {
-			single.Proofs = append(single.Proofs, ProofQueryResponseSingleProof{
-				Platform:      p.Platform,
-				Identity:      p.Identity,
-				CreatedAt:     strconv.FormatInt(p.CreatedAt.Unix(), 10),
-				LastCheckedAt: strconv.FormatInt(p.LastCheckedAt.Unix(), 10),
-				IsValid:       p.IsValid,
-				InvalidReason: p.InvalidReason,
-			})
-		}
+
 		result = append(result, single)
 	}
 
