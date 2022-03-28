@@ -6,12 +6,9 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"regexp"
-	"strings"
-	"time"
-
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/google/uuid"
+	"github.com/nextdotid/proof-server/cmd/cli/query"
 	"github.com/nextdotid/proof-server/controller"
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
@@ -20,6 +17,9 @@ import (
 	"github.com/nextdotid/proof-server/validator/github"
 	"github.com/nextdotid/proof-server/validator/keybase"
 	"github.com/nextdotid/proof-server/validator/twitter"
+	"regexp"
+	"strings"
+	"time"
 )
 
 var (
@@ -29,6 +29,7 @@ var (
 	flag_eth_secret_key = flag.String("eth-sk", "", "Secret key of eth wallet (if platform = ethereum)")
 	flag_previous       = flag.String("previous", "", "Previous proof chain signature (Base64)")
 	flag_action         = flag.String("action", "create", "Action (create / delete)")
+	flag_operation      = flag.String("operation", "create", "Action (generate/ create / delete / query)")
 
 	post_regex = regexp.MustCompile("%SIG_BASE64%")
 )
@@ -53,6 +54,16 @@ func get_action() types.Action {
 
 func main() {
 	flag.Parse()
+
+	switch *flag_operation {
+	case "generate":
+		generatePayload()
+	case "query":
+		query.QueryProof(*flag_platform, *flag_identity)
+	}
+}
+
+func generatePayload() {
 	init_validators()
 	secret_key, err := ethcrypto.HexToECDSA(*flag_secret_key)
 	if err != nil {
