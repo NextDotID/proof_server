@@ -90,7 +90,7 @@ func Test_proofQuery(t *testing.T) {
 		require.Equal(t, 1, len(resp.IDs))
 		found := resp.IDs[0]
 		require.Equal(t, persona, found.Persona)
-		require.Equal(t, 1, len(found.Proofs))
+		require.Equal(t, 2, len(found.Proofs))
 		require.Equal(t, 0, resp.Pagination.Next)
 		require.Equal(t, int64(1), resp.Pagination.Total)
 		require.Equal(t, 1, resp.Pagination.Current)
@@ -101,7 +101,7 @@ func Test_proofQuery(t *testing.T) {
 		require.Equal(t, 1, len(resp.IDs))
 		found = partial_resp.IDs[0]
 		require.Equal(t, persona, found.Persona)
-		require.Equal(t, 1, len(found.Proofs))
+		require.Equal(t, 2, len(found.Proofs))
 
 		empty_resp := ProofQueryResponse{}
 		APITestCall(Engine, "GET", "/v1/proof?platform=keybase&identity=yeiwb", "", &empty_resp)

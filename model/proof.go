@@ -29,6 +29,16 @@ func (Proof) TableName() string {
 	return "proof"
 }
 
+func FindAllProofByPersona(persona any) (proofs []Proof, err error) {
+	marshaled_persona := MarshalPersona(persona)
+	proofs = make([]Proof, 0)
+	tx := DB.Model(&Proof{}).Where("persona = ?", marshaled_persona).Find(&proofs)
+	if tx.Error != nil {
+		return nil, xerrors.Errorf("error when finding proofs: %w", err)
+	}
+	return proofs, nil
+}
+
 // Revalidate validates current proof, will update `IsValid` and
 // `LastCheckedAt`. Must be used after `DB.Preload("ProofChain")`.
 func (proof *Proof) Revalidate() (result bool, err error) {
