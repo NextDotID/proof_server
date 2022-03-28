@@ -9,7 +9,7 @@ import (
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -44,10 +44,10 @@ func insert_proof(t *testing.T) {
 
 	for _, b := range validators {
 		pc, err := model.ProofChainCreateFromValidator(&b)
-		assert.Nil(t, err)
+		require.Nil(t, err)
 
 		err = pc.Apply()
-		assert.Nil(t, err)
+		require.Nil(t, err)
 	}
 }
 
@@ -67,9 +67,9 @@ func insert_eth_proof(t *testing.T, eth_pub_key *ecdsa.PublicKey) {
 		Extra:            map[string]string{},
 	}
 	pc, err := model.ProofChainCreateFromValidator(&validator)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	err = pc.Apply()
-	assert.Nil(t, err)
+	require.Nil(t, err)
 }
 
 func Test_proofQuery(t *testing.T) {
@@ -78,7 +78,7 @@ func Test_proofQuery(t *testing.T) {
 		resp := ProofQueryResponse{}
 
 		APITestCall(Engine, "GET", "/v1/proof?platform=twitter&identity=yeiwb", "", &resp)
-		assert.Equal(t, 0, len(resp.IDs))
+		require.Equal(t, 0, len(resp.IDs))
 	})
 
 	t.Run("success", func(t *testing.T) {
@@ -87,25 +87,25 @@ func Test_proofQuery(t *testing.T) {
 
 		resp := ProofQueryResponse{}
 		APITestCall(Engine, "GET", "/v1/proof?platform=twitter&identity=yeiwb", "", &resp)
-		assert.Equal(t, 1, len(resp.IDs))
+		require.Equal(t, 1, len(resp.IDs))
 		found := resp.IDs[0]
-		assert.Equal(t, persona, found.Persona)
-		assert.Equal(t, 1, len(found.Proofs))
-		assert.Equal(t, 0, resp.Pagination.Next)
-		assert.Equal(t, int64(1), resp.Pagination.Total)
-		assert.Equal(t, 1, resp.Pagination.Current)
-		assert.Equal(t, PER_PAGE, resp.Pagination.Per)
+		require.Equal(t, persona, found.Persona)
+		require.Equal(t, 1, len(found.Proofs))
+		require.Equal(t, 0, resp.Pagination.Next)
+		require.Equal(t, int64(1), resp.Pagination.Total)
+		require.Equal(t, 1, resp.Pagination.Current)
+		require.Equal(t, PER_PAGE, resp.Pagination.Per)
 
 		partial_resp := ProofQueryResponse{}
 		APITestCall(Engine, "GET", "/v1/proof?platform=twitter&identity=eiw", "", &partial_resp)
-		assert.Equal(t, 1, len(resp.IDs))
+		require.Equal(t, 1, len(resp.IDs))
 		found = partial_resp.IDs[0]
-		assert.Equal(t, persona, found.Persona)
-		assert.Equal(t, 1, len(found.Proofs))
+		require.Equal(t, persona, found.Persona)
+		require.Equal(t, 1, len(found.Proofs))
 
 		empty_resp := ProofQueryResponse{}
 		APITestCall(Engine, "GET", "/v1/proof?platform=keybase&identity=yeiwb", "", &empty_resp)
-		assert.Equal(t, 0, len(empty_resp.IDs))
+		require.Equal(t, 0, len(empty_resp.IDs))
 	})
 
 	t.Run("all platform result", func(t *testing.T) {
@@ -114,10 +114,10 @@ func Test_proofQuery(t *testing.T) {
 
 		resp := ProofQueryResponse{}
 		APITestCall(Engine, "GET", "/v1/proof?identity=eiwb", "", &resp)
-		assert.Equal(t, 1, len(resp.IDs))
+		require.Equal(t, 1, len(resp.IDs))
 		found := resp.IDs[0]
-		assert.Equal(t, persona, found.Persona)
-		assert.Equal(t, 1, len(found.Proofs))
+		require.Equal(t, persona, found.Persona)
+		require.Equal(t, 2, len(found.Proofs))
 	})
 
 	t.Run("multiple identity + fuzzy", func(t *testing.T) {
@@ -126,8 +126,8 @@ func Test_proofQuery(t *testing.T) {
 
 		resp := ProofQueryResponse{}
 		APITestCall(Engine, "GET", "/v1/proof?identity=eiw,0xd5f630652d4", "", &resp)
-		assert.Equal(t, 1, len(resp.IDs))
-		assert.Equal(t, 2, len(resp.IDs[0].Proofs))
+		require.Equal(t, 1, len(resp.IDs))
+		require.Equal(t, 2, len(resp.IDs[0].Proofs))
 	})
 
 	t.Run("persona", func(t *testing.T) {
@@ -136,8 +136,8 @@ func Test_proofQuery(t *testing.T) {
 
 		resp := ProofQueryResponse{}
 		APITestCall(Engine, "GET", "/v1/proof?identity="+persona+"&platform=nextid", "", &resp)
-		assert.Equal(t, 1, len(resp.IDs))
-		assert.Equal(t, 2, len(resp.IDs[0].Proofs))
+		require.Equal(t, 1, len(resp.IDs))
+		require.Equal(t, 2, len(resp.IDs[0].Proofs))
 	})
 
 	t.Run("patination", func(t *testing.T) {
@@ -150,21 +150,21 @@ func Test_proofQuery(t *testing.T) {
 
 		resp_page1 := ProofQueryResponse{} // Page not given
 		APITestCall(Engine, "GET", url, nil, &resp_page1)
-		assert.Equal(t, int64(45), resp_page1.Pagination.Total)
-		assert.Equal(t, 1, resp_page1.Pagination.Current)
-		assert.Equal(t, 2, resp_page1.Pagination.Next)
-		assert.Equal(t, PER_PAGE, len(resp_page1.IDs))
+		require.Equal(t, int64(45), resp_page1.Pagination.Total)
+		require.Equal(t, 1, resp_page1.Pagination.Current)
+		require.Equal(t, 2, resp_page1.Pagination.Next)
+		require.Equal(t, PER_PAGE, len(resp_page1.IDs))
 
 		resp_page3 := ProofQueryResponse{} // Last page
 		APITestCall(Engine, "GET", url+"&page=3", nil, &resp_page3)
-		assert.Equal(t, 3, resp_page3.Pagination.Current)
-		assert.Equal(t, 0, resp_page3.Pagination.Next)
-		assert.Equal(t, 5, len(resp_page3.IDs))
+		require.Equal(t, 3, resp_page3.Pagination.Current)
+		require.Equal(t, 0, resp_page3.Pagination.Next)
+		require.Equal(t, 5, len(resp_page3.IDs))
 
 		resp_page4 := ProofQueryResponse{} // Page overflow
 		APITestCall(Engine, "GET", url+"&page=4", nil, &resp_page4)
-		assert.Equal(t, 4, resp_page4.Pagination.Current)
-		assert.Equal(t, 0, resp_page4.Pagination.Next)
-		assert.Equal(t, 0, len(resp_page4.IDs))
+		require.Equal(t, 4, resp_page4.Pagination.Current)
+		require.Equal(t, 0, resp_page4.Pagination.Next)
+		require.Equal(t, 0, len(resp_page4.IDs))
 	})
 }

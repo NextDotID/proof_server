@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nextdotid/proof-server/model"
 	"github.com/nextdotid/proof-server/types"
+	"github.com/samber/lo"
 	"golang.org/x/xerrors"
 )
 
@@ -121,16 +122,9 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 		return result, pagination
 	}
 
-	// proofs.group_by(&:persona)
-	persona_proof_map := make(map[string][]model.Proof, 0)
-	for _, p := range proofs {
-		persona_proof, ok := persona_proof_map[p.Persona]
-		if ok {
-			persona_proof_map[p.Persona] = append(persona_proof, p)
-		} else {
-			persona_proof_map[p.Persona] = append(make([]model.Proof, 0, 0), p)
-		}
-	}
+	persona_proof_map := lo.GroupBy(proofs, func(p model.Proof) string {
+		return p.Persona
+	});
 
 	for persona, proofs := range persona_proof_map {
 		single := ProofQueryResponseSingle{
