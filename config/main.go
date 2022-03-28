@@ -38,6 +38,12 @@ type EthereumPlatformConfig struct {
 	RPCServer string `json:"rpc_server"`
 }
 
+type CliConfig struct {
+	ServerURL  string `json:"server_url"`
+	UploadPath string `json:"upload_url"`
+	QueryPath  string `json:"query_url"`
+}
+
 var (
 	C *Config = new(Config)
 )
@@ -55,6 +61,21 @@ func Init(configPath string) {
 	if err != nil {
 		logrus.Fatalf("Error duriong unmarshaling config file: %v", err)
 	}
+}
+
+func GetConfigOfCli(configPath string) CliConfig {
+	configContent, err := ioutil.ReadFile(configPath)
+	if err != nil {
+		logrus.Fatalf("Error during opening config file! %v", err)
+	}
+
+	cfg := CliConfig{}
+	err = json.Unmarshal(configContent, &cfg)
+	if err != nil {
+		logrus.Fatalf("Error duriong unmarshaling config file: %v", err)
+		return cfg
+	}
+	return cfg
 }
 
 func GetDatabaseDSN() string {
