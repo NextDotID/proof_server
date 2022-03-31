@@ -3,7 +3,9 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/spf13/viper"
 	"io/ioutil"
+	"os"
 
 	"github.com/sirupsen/logrus"
 )
@@ -45,7 +47,8 @@ type CliConfig struct {
 }
 
 var (
-	C *Config = new(Config)
+	C     *Config = new(Config)
+	Viper *viper.Viper
 )
 
 func Init(configPath string) {
@@ -63,19 +66,20 @@ func Init(configPath string) {
 	}
 }
 
-func GetConfigOfCli(configPath string) CliConfig {
-	configContent, err := ioutil.ReadFile(configPath)
-	if err != nil {
-		logrus.Fatalf("Error during opening config file! %v", err)
-	}
+func InitCliConfig() {
+	Viper = viper.New()
 
-	cfg := CliConfig{}
-	err = json.Unmarshal(configContent, &cfg)
+	Viper.SetConfigName("cli") // config file name without extension
+	Viper.SetConfigType("toml")
+	//viper.AddConfigPath(".")
+	Viper.AddConfigPath("./config/") // config file path
+	//viper.AutomaticEnv()             // read value ENV variable
+
+	err := Viper.ReadInConfig()
 	if err != nil {
-		logrus.Fatalf("Error duriong unmarshaling config file: %v", err)
-		return cfg
+		fmt.Printf("fatal error config file: cli err:%v \n", err)
+		os.Exit(1)
 	}
-	return cfg
 }
 
 func GetDatabaseDSN() string {

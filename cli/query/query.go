@@ -3,7 +3,7 @@ package query
 import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
-	"github.com/nextdotid/proof-server/cli"
+	"github.com/nextdotid/proof-server/config"
 	"github.com/spf13/cast"
 )
 
@@ -14,7 +14,7 @@ type QueryParams struct {
 }
 
 func QueryProof() {
-	cli.InitConfig()
+	config.InitCliConfig()
 	params := initParams()
 	req := make(map[string]string)
 	req["platform"] = params.Platform
@@ -31,12 +31,12 @@ func QueryProof() {
 
 func initParams() QueryParams {
 	return QueryParams{
-		Platform: cli.Viper.GetString("cli.params.platform"),
-		Identity: cli.Viper.GetString("cli.params.identity"),
-		Page:     cli.Viper.GetInt("cli.params.page"),
+		Platform: config.Viper.GetString("cli.params.platform"),
+		Identity: config.Viper.GetString("cli.params.identity"),
+		Page:     config.Viper.GetInt("cli.params.page"),
 	}
 }
 
 func getQueryUrl() string {
-	return cli.Viper.GetString("server.hostname") + cli.Viper.GetString("server.query_path")
+	return config.Viper.GetString("server.hostname") + config.Viper.GetString("server.query_path")
 }

@@ -3,7 +3,7 @@ package upload
 import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
-	"github.com/nextdotid/proof-server/cli"
+	"github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/controller"
 	"github.com/nextdotid/proof-server/types"
 	"strings"
@@ -22,7 +22,7 @@ type UploadParams struct {
 }
 
 func UploadToProof() {
-	cli.InitConfig()
+	config.InitCliConfig()
 	params := initParams()
 	req := controller.ProofUploadRequest{
 		Action:        types.Action(params.Action),
@@ -48,19 +48,19 @@ func UploadToProof() {
 }
 
 func getUploadUrl() string {
-	return cli.Viper.GetString("server.hostname") + cli.Viper.GetString("server.upload_path")
+	return config.Viper.GetString("server.hostname") + config.Viper.GetString("server.upload_path")
 }
 
 func initParams() UploadParams {
 	return UploadParams{
-		Platform:                cli.Viper.GetString("cli.params.platform"),
-		Identity:                cli.Viper.GetString("cli.params.identity"),
-		Action:                  cli.Viper.GetString("cli.params.action"),
-		PersonaSignature:        cli.Viper.GetString("cli.params.persona_signature"),
-		EthereumWalletSignature: cli.Viper.GetString("cli.params.ethereum_wallet_signature"),
-		CreatedAt:               cli.Viper.GetString("cli.params.create_at"),
-		Uuid:                    cli.Viper.GetString("cli.params.uuid"),
-		ProofLocation:           cli.Viper.GetString("cli.params.proof_location"),
-		PublicKey:               cli.Viper.GetString("cli.params.public_key"),
+		Platform:                config.Viper.GetString("cli.params.platform"),
+		Identity:                config.Viper.GetString("cli.params.identity"),
+		Action:                  config.Viper.GetString("cli.params.action"),
+		PersonaSignature:        config.Viper.GetString("cli.params.persona_signature"),
+		EthereumWalletSignature: config.Viper.GetString("cli.params.ethereum_wallet_signature"),
+		CreatedAt:               config.Viper.GetString("cli.params.create_at"),
+		Uuid:                    config.Viper.GetString("cli.params.uuid"),
+		ProofLocation:           config.Viper.GetString("cli.params.proof_location"),
+		PublicKey:               config.Viper.GetString("cli.params.public_key"),
 	}
 }
