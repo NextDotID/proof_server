@@ -86,12 +86,13 @@ func GeneratePayload() {
 		fmt.Printf("Persona sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(signature))
 	}
 
-	fmt.Printf("Need to upload the proof?\n 1. yes\n 2. no\n")
+	fmt.Printf("Need to upload the proof?\n 1. yes\n 2. no\n Press the number:\n")
 	input := bufio.NewScanner(os.Stdin)
 	input.Scan()
 	nextStep := cast.ToInt(input.Text())
 
 	if nextStep != 1 {
+		fmt.Println("no need to continue...")
 		os.Exit(0)
 	}
 

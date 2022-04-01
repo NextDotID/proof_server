@@ -8,6 +8,7 @@ import (
 	"github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/controller"
 	"github.com/nextdotid/proof-server/types"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -41,8 +42,12 @@ func UploadToProof(gp GenerateParams, ppk string, createAt string, uuid string, 
 	client := resty.New()
 	resp, err := client.R().SetBody(req).EnableTrace().Post(url)
 
-	fmt.Println(resp)
-	fmt.Println(err)
+	if resp.StatusCode() == http.StatusCreated {
+		fmt.Println("Upload succeed!!")
+	} else {
+		fmt.Printf("Oops, some error occured err:%v", err)
+	}
+
 }
 
 func getUploadUrl() string {
