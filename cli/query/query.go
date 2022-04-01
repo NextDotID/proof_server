@@ -1,10 +1,12 @@
 package query
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"github.com/nextdotid/proof-server/config"
 	"github.com/spf13/cast"
+	"os"
 )
 
 type QueryParams struct {
@@ -30,10 +32,22 @@ func QueryProof() {
 }
 
 func initParams() QueryParams {
+	input := bufio.NewScanner(os.Stdin)
+	fmt.Println("For the query process, we could have platform/identity/page as the query condition\n")
+	fmt.Println("Platform (find out a support platform at README.md):")
+	input.Scan()
+	platform := input.Text()
+	fmt.Println("\nIdentity (find out the identity of each platform at README.md):")
+	input.Scan()
+	identity := input.Text()
+	fmt.Println("\nPage (We will give maximum 20 results for each query, you can give a page number for getting more results):")
+	input.Scan()
+	page := input.Text()
+
 	return QueryParams{
-		Platform: config.Viper.GetString("cli.params.platform"),
-		Identity: config.Viper.GetString("cli.params.identity"),
-		Page:     config.Viper.GetInt("cli.params.page"),
+		Platform: platform,
+		Identity: identity,
+		Page:     cast.ToInt(page),
 	}
 }
 

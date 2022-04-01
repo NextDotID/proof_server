@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"bufio"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -10,30 +11,25 @@ import (
 	"github.com/nextdotid/proof-server/controller"
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
+	"github.com/spf13/cast"
+	"os"
 	"regexp"
 )
 
 var post_regex = regexp.MustCompile("%SIG_BASE64%")
 
 type GenerateParams struct {
-	Platform           string `json:"platform"`
-	Previous           string `json:"previous"`
-	Action             string `json:"action"`
-	PersonaPrivateKey  string `json:"persona_private_key"`
-	EthereumPrivateKey string `json:"ethereum_private_key"`
-
-	Identity string `json:"identity"` // Identity on target platform.
-
-	Signature       string `json:"signature"`
-	WalletSignature string `json:"wallet_signature"`
-
-	CreatedAt string `json:"created_at"`
-	Uuid      string `json:"uuid"` // Uuid gives this link an unique identifier, to let other
+	Platform           string
+	Action             string
+	PersonaPrivateKey  string
+	EthereumPrivateKey string
+	Identity           string
 }
 
 func GeneratePayload() {
 	config.InitCliConfig()
 	params := initParams()
+
 	personaPrivateKey, err := ethcrypto.HexToECDSA(params.PersonaPrivateKey)
 	if err != nil {
 		fmt.Printf("Get Persona PrivateKey Error, err:%v", err)
@@ -42,11 +38,12 @@ func GeneratePayload() {
 
 	url := getPayloadUrl()
 	personaPublicKey := &personaPrivateKey.PublicKey
+	personaPublicKeyParams := "0x" + crypto.CompressedPubkeyHex(personaPublicKey)
 	req := controller.ProofPayloadRequest{
 		Action:    types.Action(params.Action),
 		Platform:  types.Platform(params.Platform),
 		Identity:  params.Identity,
-		PublicKey: "0x" + crypto.CompressedPubkeyHex(personaPublicKey),
+		PublicKey: personaPublicKeyParams,
 	}
 
 	client := resty.New()
@@ -59,7 +56,9 @@ func GeneratePayload() {
 		return
 	}
 
-	signature, err := crypto.SignPersonal([]byte(respPayload.SignPayload), personaPrivateKey)
+	var signature, walletSignature []byte
+
+	signature, err = crypto.SignPersonal([]byte(respPayload.SignPayload), personaPrivateKey)
 	if err != nil {
 		fmt.Printf("SignPayload Error, err:%v", err)
 		return
@@ -81,21 +80,55 @@ func GeneratePayload() {
 		if err != nil {
 			panic(fmt.Sprintf("ETH secret key failed: %s", err.Error()))
 		}
-		walletSignature, _ := crypto.SignPersonal([]byte(respPayload.SignPayload), ethereumPrivateKey)
+		walletSignature, _ = crypto.SignPersonal([]byte(respPayload.SignPayload), ethereumPrivateKey)
 		fmt.Printf("Wallet sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(walletSignature))
+	} else {
+		fmt.Printf("Persona sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(signature))
 	}
 
-	fmt.Printf("CreateAt time:  vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", respPayload.CreatedAt)
-	fmt.Printf("UUID:  vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", respPayload.Uuid)
+	fmt.Printf("Need to upload the proof?\n 1. yes\n 2. no\n")
+	input := bufio.NewScanner(os.Stdin)
+	input.Scan()
+	nextStep := cast.ToInt(input.Text())
+
+	if nextStep != 1 {
+		os.Exit(0)
+	}
+
+	UploadToProof(params, personaPublicKeyParams, respPayload.CreatedAt, respPayload.Uuid, signature, walletSignature)
 }
 
 func initParams() GenerateParams {
+	input := bufio.NewScanner(os.Stdin)
+	fmt.Println("For the generate signature process, need your Persona Private Key at first step, Persona Private Key:")
+	input.Scan()
+	pk := input.Text()
+
+	fmt.Println("\nThe following facts also need to generate signature process")
+	fmt.Println("Platform (find out a support platform at README.md):")
+	input.Scan()
+	platform := input.Text()
+	fmt.Println("\nIdentity (find out the identity of each platform at README.md):")
+	input.Scan()
+	identity := input.Text()
+
+	fmt.Println("\nAction (create or delete):")
+	input.Scan()
+	action := input.Text()
+
+	ek := ""
+	if types.Platform(platform) == types.Platforms.Ethereum {
+		fmt.Println("\nEthereum Private Key:")
+		input.Scan()
+		ek = input.Text()
+	}
+
 	return GenerateParams{
-		Platform:           config.Viper.GetString("cli.params.platform"),
-		Identity:           config.Viper.GetString("cli.params.identity"),
-		Action:             config.Viper.GetString("cli.params.action"),
-		PersonaPrivateKey:  config.Viper.GetString("cli.params.persona_private_key"),
-		EthereumPrivateKey: config.Viper.GetString("cli.params.ethereum_private_key"),
+		Platform:           platform,
+		Identity:           identity,
+		Action:             action,
+		PersonaPrivateKey:  pk,
+		EthereumPrivateKey: ek,
 	}
 }
 
