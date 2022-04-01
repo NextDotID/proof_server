@@ -18,7 +18,7 @@ func UploadToProof(gp GenerateParams, ppk string, createAt string, uuid string, 
 	var pl string
 	if types.Platform(gp.Platform) != types.Platforms.Ethereum {
 		input := bufio.NewScanner(os.Stdin)
-		fmt.Println("Proof Location (find out how to get the proof location at README.md)::")
+		fmt.Println("Proof Location (find out how to get the proof location for each platform at README.md)::")
 		input.Scan()
 		pl = input.Text()
 	}
@@ -47,7 +47,7 @@ func UploadToProof(gp GenerateParams, ppk string, createAt string, uuid string, 
 	} else {
 		fmt.Printf("Oops, some error occured err:%v", err)
 	}
-
+	os.Exit(1)
 }
 
 func getUploadUrl() string {

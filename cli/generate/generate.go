@@ -2,6 +2,7 @@ package generate
 
 import (
 	"bufio"
+	"crypto/ecdsa"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
 	"github.com/spf13/cast"
+	"net/http"
 	"os"
 	"regexp"
 )
@@ -21,7 +23,7 @@ var post_regex = regexp.MustCompile("%SIG_BASE64%")
 type GenerateParams struct {
 	Platform           string
 	Action             string
-	PersonaPrivateKey  string
+	PersonaPrivateKey  *ecdsa.PrivateKey
 	EthereumPrivateKey string
 	Identity           string
 }
@@ -30,15 +32,10 @@ func GeneratePayload() {
 	config.InitCliConfig()
 	params := initParams()
 
-	personaPrivateKey, err := ethcrypto.HexToECDSA(params.PersonaPrivateKey)
-	if err != nil {
-		fmt.Printf("Get Persona PrivateKey Error, err:%v", err)
-		return
-	}
-
 	url := getPayloadUrl()
-	personaPublicKey := &personaPrivateKey.PublicKey
+	personaPublicKey := &params.PersonaPrivateKey.PublicKey
 	personaPublicKeyParams := "0x" + crypto.CompressedPubkeyHex(personaPublicKey)
+
 	req := controller.ProofPayloadRequest{
 		Action:    types.Action(params.Action),
 		Platform:  types.Platform(params.Platform),
@@ -49,19 +46,20 @@ func GeneratePayload() {
 	client := resty.New()
 	resp, err := client.R().SetBody(req).EnableTrace().Post(url)
 	respPayload := controller.ProofPayloadResponse{}
+	if err != nil || resp.StatusCode() != http.StatusOK {
+		panic(fmt.Sprintf("fail to get the response resp:%v err:%v", resp, err))
+	}
 
 	err = json.Unmarshal(resp.Body(), &respPayload)
 	if err != nil {
-		fmt.Printf("Unmarshal Payload Response Error, err:%v", err)
-		return
+		panic(fmt.Sprintf("Unmarshal Payload Response Error, err:%v", err))
 	}
 
 	var signature, walletSignature []byte
 
-	signature, err = crypto.SignPersonal([]byte(respPayload.SignPayload), personaPrivateKey)
+	signature, err = crypto.SignPersonal([]byte(respPayload.SignPayload), params.PersonaPrivateKey)
 	if err != nil {
-		fmt.Printf("SignPayload Error, err:%v", err)
-		return
+		panic(fmt.Sprintf("SignPayload Error, err:%v", err))
 	}
 
 	if types.Platform(params.Platform) == types.Platforms.Twitter {
@@ -73,7 +71,6 @@ func GeneratePayload() {
 			)
 		}
 	} else if types.Platform(params.Platform) == types.Platforms.Ethereum {
-		//persona_sig, _ := crypto.SignPersonal([]byte(sign_payload), personaPrivateKey)
 		fmt.Printf("Persona sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(signature))
 
 		ethereumPrivateKey, err := ethcrypto.HexToECDSA(params.EthereumPrivateKey)
@@ -104,8 +101,12 @@ func initParams() GenerateParams {
 	fmt.Println("For the generate signature process, need your Persona Private Key at first step, Persona Private Key:")
 	input.Scan()
 	pk := input.Text()
+	personaPrivateKey, err := ethcrypto.HexToECDSA(pk)
+	if err != nil {
+		panic(fmt.Sprintf("Get Persona PrivateKey Error, err:%v", err))
+	}
 
-	fmt.Println("\nThe following facts also need to generate signature process")
+	fmt.Println("\nThe following facts also need to use in signature generation process")
 	fmt.Println("Platform (find out a support platform at README.md):")
 	input.Scan()
 	platform := input.Text()
@@ -128,7 +129,7 @@ func initParams() GenerateParams {
 		Platform:           platform,
 		Identity:           identity,
 		Action:             action,
-		PersonaPrivateKey:  pk,
+		PersonaPrivateKey:  personaPrivateKey,
 		EthereumPrivateKey: ek,
 	}
 }
