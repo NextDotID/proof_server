@@ -3,7 +3,9 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/spf13/viper"
 	"io/ioutil"
+	"os"
 
 	"github.com/sirupsen/logrus"
 )
@@ -38,8 +40,15 @@ type EthereumPlatformConfig struct {
 	RPCServer string `json:"rpc_server"`
 }
 
+type CliConfig struct {
+	ServerURL  string `json:"server_url"`
+	UploadPath string `json:"upload_url"`
+	QueryPath  string `json:"query_url"`
+}
+
 var (
-	C *Config = new(Config)
+	C     *Config = new(Config)
+	Viper *viper.Viper
 )
 
 func Init(configPath string) {
@@ -54,6 +63,22 @@ func Init(configPath string) {
 	err = json.Unmarshal(configContent, C)
 	if err != nil {
 		logrus.Fatalf("Error duriong unmarshaling config file: %v", err)
+	}
+}
+
+func InitCliConfig() {
+	Viper = viper.New()
+
+	Viper.SetConfigName("cli") // config file name without extension
+	Viper.SetConfigType("toml")
+	//viper.AddConfigPath(".")
+	Viper.AddConfigPath("./config/") // config file path
+	//viper.AutomaticEnv()             // read value ENV variable
+
+	err := Viper.ReadInConfig()
+	if err != nil {
+		fmt.Printf("fatal error config file: cli err:%v \n", err)
+		os.Exit(1)
 	}
 }
 

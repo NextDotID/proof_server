@@ -6,11 +6,9 @@ import (
 	"testing"
 )
 
-
 func Test_proofChainQuery(t *testing.T) {
-	before_each(t)
-
 	t.Run("success", func(t *testing.T) {
+		before_each(t)
 		insert_proof(t)
 		resp_body := ProofChainResponse{}
 		resp := APITestCall(
@@ -26,6 +24,7 @@ func Test_proofChainQuery(t *testing.T) {
 	})
 
 	t.Run("empty result", func(t *testing.T) {
+		before_each(t)
 		resp_body := ProofChainResponse{}
 		resp := APITestCall(
 			Engine,
@@ -40,6 +39,7 @@ func Test_proofChainQuery(t *testing.T) {
 	})
 
 	t.Run("patination", func(t *testing.T) {
+		before_each(t)
 		for i := 0; i < 22; i++ { // Create 44 records
 			insert_proof(t)
 		}
