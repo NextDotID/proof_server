@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/nextdotid/proof-server/cli/generate"
 	"github.com/nextdotid/proof-server/cli/query"
-	"github.com/spf13/cast"
 	"os"
+	"strconv"
 )
 
 const (
@@ -15,12 +15,11 @@ const (
 )
 
 func main() {
-	//params := initParams()
 	input := bufio.NewScanner(os.Stdin)
 	fmt.Println("Choose the process\n 1. query the exists proof\n 2. generate the signature and upload to proof service\nEnter the number of above process")
 
 	input.Scan()
-	operation := cast.ToInt(input.Text())
+	operation, _ := strconv.Atoi(input.Text())
 
 	switch operation {
 	case OPERATION_QUERY:
@@ -32,4 +31,3 @@ func main() {
 		os.Exit(-1)
 	}
 }
-

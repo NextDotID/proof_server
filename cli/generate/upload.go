@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func UploadToProof(gp GenerateParams, ppk string, createAt string, uuid string, sg []byte, wg []byte) {
+func UploadToProof(gp GenerateParams, personaPublicKey string, createAt string, uuid string, signature []byte, walletSignature []byte) {
 	config.InitCliConfig()
 	var pl string
 	if types.Platform(gp.Platform) != types.Platforms.Ethereum {
@@ -27,15 +27,15 @@ func UploadToProof(gp GenerateParams, ppk string, createAt string, uuid string, 
 		Action:        types.Action(gp.Action),
 		Platform:      types.Platform(gp.Platform),
 		Identity:      strings.ToLower(gp.Identity),
-		PublicKey:     ppk,
+		PublicKey:     personaPublicKey,
 		CreatedAt:     createAt,
 		Uuid:          uuid,
 		ProofLocation: pl,
 	}
 
-	req.Extra.Signature = base64.StdEncoding.EncodeToString((sg))
+	req.Extra.Signature = base64.StdEncoding.EncodeToString((signature))
 	if types.Platform(gp.Platform) == types.Platforms.Ethereum {
-		req.Extra.EthereumWalletSignature = base64.StdEncoding.EncodeToString((wg))
+		req.Extra.EthereumWalletSignature = base64.StdEncoding.EncodeToString((walletSignature))
 	}
 
 	url := getUploadUrl()
@@ -45,9 +45,9 @@ func UploadToProof(gp GenerateParams, ppk string, createAt string, uuid string, 
 	if resp.StatusCode() == http.StatusCreated {
 		fmt.Println("Upload succeed!!")
 	} else {
-		fmt.Printf("Oops, some error occured err:%v", err)
+		panic(fmt.Sprintf("Oops, some error occured err:%v", err))
 	}
-	os.Exit(1)
+	os.Exit(0)
 }
 
 func getUploadUrl() string {

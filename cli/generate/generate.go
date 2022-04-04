@@ -12,10 +12,10 @@ import (
 	"github.com/nextdotid/proof-server/controller"
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
-	"github.com/spf13/cast"
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 )
 
 var post_regex = regexp.MustCompile("%SIG_BASE64%")
@@ -24,7 +24,7 @@ type GenerateParams struct {
 	Platform           string
 	Action             string
 	PersonaPrivateKey  *ecdsa.PrivateKey
-	EthereumPrivateKey string
+	EthereumPrivateKey *ecdsa.PrivateKey
 	Identity           string
 }
 
@@ -72,12 +72,7 @@ func GeneratePayload() {
 		}
 	} else if types.Platform(params.Platform) == types.Platforms.Ethereum {
 		fmt.Printf("Persona sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(signature))
-
-		ethereumPrivateKey, err := ethcrypto.HexToECDSA(params.EthereumPrivateKey)
-		if err != nil {
-			panic(fmt.Sprintf("ETH secret key failed: %s", err.Error()))
-		}
-		walletSignature, _ = crypto.SignPersonal([]byte(respPayload.SignPayload), ethereumPrivateKey)
+		walletSignature, _ = crypto.SignPersonal([]byte(respPayload.SignPayload), params.EthereumPrivateKey)
 		fmt.Printf("Wallet sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(walletSignature))
 	} else {
 		fmt.Printf("Persona sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(signature))
@@ -86,7 +81,7 @@ func GeneratePayload() {
 	fmt.Printf("Need to upload the proof?\n 1. yes\n 2. no\n Press the number:\n")
 	input := bufio.NewScanner(os.Stdin)
 	input.Scan()
-	nextStep := cast.ToInt(input.Text())
+	nextStep, _ := strconv.Atoi(input.Text())
 
 	if nextStep != 1 {
 		fmt.Println("no need to continue...")
@@ -98,7 +93,7 @@ func GeneratePayload() {
 
 func initParams() GenerateParams {
 	input := bufio.NewScanner(os.Stdin)
-	fmt.Println("For the generate signature process, need your Persona Private Key at first step, Persona Private Key:")
+	fmt.Println("For the generate signature process, need your Persona Private Key at first step. Please enter your Persona Private Key (without 0x prefix):")
 	input.Scan()
 	pk := input.Text()
 	personaPrivateKey, err := ethcrypto.HexToECDSA(pk)
@@ -107,7 +102,7 @@ func initParams() GenerateParams {
 	}
 
 	fmt.Println("\nThe following facts also need to use in signature generation process")
-	fmt.Println("Platform (find out a support platform at README.md):")
+	fmt.Println("Platform (find out the support platform at README.md):")
 	input.Scan()
 	platform := input.Text()
 	fmt.Println("\nIdentity (find out the identity of each platform at README.md):")
@@ -118,20 +113,25 @@ func initParams() GenerateParams {
 	input.Scan()
 	action := input.Text()
 
-	ek := ""
-	if types.Platform(platform) == types.Platforms.Ethereum {
-		fmt.Println("\nEthereum Private Key:")
-		input.Scan()
-		ek = input.Text()
+	gp := GenerateParams{
+		Platform:          platform,
+		Identity:          identity,
+		Action:            action,
+		PersonaPrivateKey: personaPrivateKey,
 	}
 
-	return GenerateParams{
-		Platform:           platform,
-		Identity:           identity,
-		Action:             action,
-		PersonaPrivateKey:  personaPrivateKey,
-		EthereumPrivateKey: ek,
+	if types.Platform(platform) == types.Platforms.Ethereum {
+		fmt.Println("\nEthereum Private Key (without 0x prefix):")
+		input.Scan()
+		ek := input.Text()
+		ethereumPrivateKey, err := ethcrypto.HexToECDSA(ek)
+		if err != nil {
+			panic(fmt.Sprintf("Get Persona PrivateKey Error, err:%v", err))
+		}
+		gp.EthereumPrivateKey = ethereumPrivateKey
 	}
+
+	return gp
 }
 
 func getPayloadUrl() string {
