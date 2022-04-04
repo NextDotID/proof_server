@@ -45,7 +45,7 @@ func QueryProof() {
 			req["page"] = page
 			getAndPrintData(req)
 		case "3":
-			os.Exit(1)
+			os.Exit(0)
 		default:
 			panic(fmt.Sprintf("Unknown Operation %s", nextStep))
 		}

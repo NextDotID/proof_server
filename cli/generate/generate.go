@@ -93,7 +93,7 @@ func GeneratePayload() {
 
 func initParams() GenerateParams {
 	input := bufio.NewScanner(os.Stdin)
-	fmt.Println("For the generate signature process, need your Persona Private Key at first step. Please enter your Persona Private Key (without 0x prefix):")
+	fmt.Println("For the generate signature process, need your Persona Private Key at first step.Please enter your Persona Private Key (without 0x prefix):")
 	input.Scan()
 	pk := input.Text()
 	personaPrivateKey, err := ethcrypto.HexToECDSA(pk)
