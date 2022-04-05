@@ -62,7 +62,11 @@ func GeneratePayload() {
 		panic(fmt.Sprintf("SignPayload Error, err:%v", err))
 	}
 
-	if types.Platform(params.Platform) == types.Platforms.Twitter {
+	if types.Platform(params.Platform) == types.Platforms.Ethereum {
+		fmt.Printf("Post payload: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(signature))
+		walletSignature, _ = crypto.SignPersonal([]byte(respPayload.SignPayload), params.EthereumPrivateKey)
+		fmt.Printf("Wallet sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(walletSignature))
+	} else {
 		for lang_code, payload := range respPayload.PostContent {
 			fmt.Printf(
 				"Post payload [%s]: vvvvvvv\n%s\n^^^^^^^^^^\n\n",
@@ -70,12 +74,6 @@ func GeneratePayload() {
 				string(post_regex.ReplaceAll([]byte(payload), []byte(base64.StdEncoding.EncodeToString(signature)))),
 			)
 		}
-	} else if types.Platform(params.Platform) == types.Platforms.Ethereum {
-		fmt.Printf("Persona sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(signature))
-		walletSignature, _ = crypto.SignPersonal([]byte(respPayload.SignPayload), params.EthereumPrivateKey)
-		fmt.Printf("Wallet sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(walletSignature))
-	} else {
-		fmt.Printf("Persona sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(signature))
 	}
 
 	fmt.Printf("Need to upload the proof?\n 1. yes\n 2. no\n Press the number:\n")

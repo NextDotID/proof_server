@@ -59,7 +59,7 @@ func (kb *Keybase) GeneratePostPayload() (post map[string]string) {
 		Persona:         "0x" + mycrypto.CompressedPubkeyHex(kb.Pubkey),
 		KeybaseUsername: kb.Identity,
 		SignPayload:     kb.GenerateSignPayload(),
-		Signature:       "%%SIG_BASE64%%",
+		Signature:       "%SIG_BASE64%",
 		CreatedAt:       util.TimeToTimestampString(kb.CreatedAt),
 		Uuid:            kb.Uuid.String(),
 	}

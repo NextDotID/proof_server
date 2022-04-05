@@ -18,7 +18,7 @@ func UploadToProof(gp GenerateParams, personaPublicKey string, createAt string, 
 	var pl string
 	if types.Platform(gp.Platform) != types.Platforms.Ethereum {
 		input := bufio.NewScanner(os.Stdin)
-		fmt.Println("Proof Location (find out how to get the proof location for each platform at README.md)::")
+		fmt.Println("Proof Location (find out how to get the proof location for each platform at README.md):")
 		input.Scan()
 		pl = input.Text()
 	}
