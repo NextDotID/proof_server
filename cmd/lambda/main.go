@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"github.com/nextdotid/proof-server/validator/discord"
 	"os"
 
 	"github.com/akrylysov/algnhsa"
@@ -32,6 +33,7 @@ func init_validators() {
 	ethereum.Init()
 	keybase.Init()
 	github.Init()
+	discord.Init()
 }
 
 func init() {

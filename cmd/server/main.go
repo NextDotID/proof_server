@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/nextdotid/proof-server/validator/discord"
 
 	"github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/controller"
@@ -24,6 +25,7 @@ func init_validators() {
 	ethereum.Init()
 	keybase.Init()
 	github.Init()
+	discord.Init()
 }
 
 func main() {

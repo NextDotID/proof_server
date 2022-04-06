@@ -3,6 +3,7 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/nextdotid/proof-server/validator/discord"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -32,6 +33,7 @@ func TestMain(m *testing.M) {
 	keybase.Init()
 	ethereum.Init()
 	github.Init()
+	discord.Init()
 
 	before_each(nil)
 

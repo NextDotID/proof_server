@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/nextdotid/proof-server/validator/discord"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -75,6 +76,7 @@ func init_validators() {
 	ethereum.Init()
 	keybase.Init()
 	github.Init()
+	discord.Init()
 }
 
 func init() {
