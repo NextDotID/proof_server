@@ -56,7 +56,7 @@ func (gh *Github) GeneratePostPayload() (post map[string]string) {
 		Persona:        "0x" + crypto.CompressedPubkeyHex(gh.Pubkey),
 		GithubUsername: gh.Identity,
 		SignPayload:    gh.GenerateSignPayload(),
-		Signature:      "%%SIG_BASE64%%",
+		Signature:      "%SIG_BASE64%",
 		CreatedAt:      util.TimeToTimestampString(gh.CreatedAt),
 		Uuid:           gh.Uuid.String(),
 	}

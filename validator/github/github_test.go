@@ -32,6 +32,24 @@ func generate() Github {
 	}
 }
 
+func generate2() Github {
+	pubkey, _ := crypto.StringToPubkey("0x02d7c5e01bedf1c993f40ec302d9bf162620daea93a7155cd9a8019ae3a2c2a476")
+
+	created_at, _ := util.TimestampStringToTime("1649060702")
+	return Github{
+		Base: &validator.Base{
+			Platform:      types.Platforms.Github,
+			Previous:      "",
+			Action:        types.Actions.Create,
+			Pubkey:        pubkey,
+			Identity:      "fengshanshan",
+			ProofLocation: "31bb28bcf312b0eccd8202650b19e02e",
+			CreatedAt:     created_at,
+			Uuid:          uuid.MustParse("ca1e6a6f-3089-48d6-9214-74d9fb82bf82"),
+		},
+	}
+}
+
 func Test_Validate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		github := generate()
