@@ -16,7 +16,7 @@ you on any supported platform.
 | Keybase  | `keybase`        | `keybase_username`           | N/A (use `https://your_identity.keybase.pub/NextID/COMPRESSED_PUBKEY_HEX.txt`) |                                                         |
 | Ethereum | `ethereum`       | Wallet address `0x123AbC...` | N/A (Two-way signatures created from persona sk and wallet sk)                |                                                         |
 | Github   | `github`         | `github_username`            | Public visible Gist ID `a6dddd2811af21b671fd`                                 | Gist should contains `0xPUBKEY_COMRESSED_HEX.json` file |
-| Discord  | `discord`        | `discord_username`           | message link (`https://discord.com/channels/DIGITS/DIGITS/DIGITS`)            |                                                         |
+| Discord  | `discord`        | `UserName#0000`              | message link (`https://discord.com/channels/DIGITS/DIGITS/DIGITS`)            |                                                         |
 
 ### Planning
 

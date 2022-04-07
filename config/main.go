@@ -48,8 +48,6 @@ type CliConfig struct {
 }
 
 type DiscordPlatformConfig struct {
-	ApplicationID        string `json:"application_id"`
-	PublicKey            string `json:"public_key"`
 	BotToken             string `json:"bot_token"`
 	ProofServerChannelID string `json:"proof_server_channel_id"`
 }

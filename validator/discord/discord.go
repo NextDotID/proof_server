@@ -28,7 +28,7 @@ var (
 	POST_TEMPLATE = map[string]string{
 		"default": "Verifying my discord ID: %s on NextID. \nSig: %%SIG_BASE64%%",
 		"en-US":   "Verifying my discord ID: %s on NextID. \nSig: %%SIG_BASE64%%",
-		"zh-CN":   "在NextID上认证我的账号:%s。\nSig: %%SIG_BASE64%%",
+		"zh-CN":   "在NextID上认证我的账号：%s。\nSig: %%SIG_BASE64%%",
 	}
 )
 
@@ -78,24 +78,27 @@ func (dc *Discord) Validate() (err error) {
 	u, err := url.Parse(dc.ProofLocation)
 	urlPath := path.Clean(u.Path)
 	pathArr := strings.Split(strings.TrimSpace(urlPath), "/")
+
 	//proof location will be like: https://discord.com/channels/960708146706395176/960708146706395179/961458176719487076
 	if len(pathArr) != 5 {
-		return xerrors.Errorf("haven't got right proof location, err=%v", err)
+		return xerrors.Errorf("Error on getting right proof location: %w", err)
 	}
 
-	dg, err := discordgo.New("Bot " + config.C.Platform.Discord.BotToken)
+	client, err := discordgo.New("Bot " + config.C.Platform.Discord.BotToken)
 	if err != nil {
-		return xerrors.Errorf("error creating Discord session, err= %v", err)
-	}
-	rs, err := dg.ChannelMessage(pathArr[3], pathArr[4])
-	if err != nil {
-		return xerrors.Errorf("cannot get the proof err=%v", err)
-	}
-	if strings.ToLower(fmt.Sprintf("%s", rs.Author)) != dc.Identity {
-		return xerrors.Errorf("User name mismatch: expect %s - actual %s", dc.Identity, rs.Author)
+		return xerrors.Errorf("Error creating Discord session: %w", err)
 	}
 
-	dc.Text = rs.Content
+	msgResp, err := client.ChannelMessage(pathArr[3], pathArr[4])
+	if err != nil {
+		return xerrors.Errorf("Error when get the proof: %w", err)
+	}
+
+	if strings.ToLower(fmt.Sprintf("%s", msgResp.Author)) != dc.Identity {
+		return xerrors.Errorf("User name mismatch: expect %s - actual %s", dc.Identity, msgResp.Author)
+	}
+
+	dc.Text = msgResp.Content
 	return dc.validateText()
 }
 
