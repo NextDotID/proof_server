@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/nextdotid/proof-server/config"
+	"github.com/nextdotid/proof-server/util"
 	"golang.org/x/xerrors"
 	"net/url"
 	"path"
@@ -18,7 +19,6 @@ import (
 	"github.com/nextdotid/proof-server/validator"
 )
 
-// Discord.Identity: Discord User ID (digits, not Name#1234)
 type Discord struct {
 	*validator.Base
 }
@@ -26,9 +26,9 @@ type Discord struct {
 var (
 	re            = regexp.MustCompile(MATCH_TEMPLATE)
 	POST_TEMPLATE = map[string]string{
-		"default": "Verifying my discord ID: %s on NextID. \nSignature: %%SIG_BASE64%%",
-		"en-US":   "Verifying my discord ID: %s on NextID. \nSignature: %%SIG_BASE64%%",
-		"zh-CN":   "在NextID上认证我的账号:%s。\nsig%%SIG_BASE64%%",
+		"default": "Verifying my discord ID: %s on NextID. \nSig: %%SIG_BASE64%%",
+		"en-US":   "Verifying my discord ID: %s on NextID. \nSig: %%SIG_BASE64%%",
+		"zh-CN":   "在NextID上认证我的账号:%s。\nSig: %%SIG_BASE64%%",
 	}
 )
 
@@ -56,10 +56,12 @@ func (dc *Discord) GeneratePostPayload() (post map[string]string) {
 
 func (dc *Discord) GenerateSignPayload() (payload string) {
 	payloadStruct := validator.H{
-		"action":   string(dc.Action),
-		"identity": dc.Identity,
-		"platform": string(types.Platforms.Discord),
-		"prev":     nil,
+		"action":     string(dc.Action),
+		"identity":   strings.ToLower(dc.Identity),
+		"platform":   string(types.Platforms.Discord),
+		"prev":       nil,
+		"created_at": util.TimeToTimestampString(dc.CreatedAt),
+		"uuid":       dc.Uuid.String(),
 	}
 
 	if dc.Previous != "" {
@@ -71,35 +73,39 @@ func (dc *Discord) GenerateSignPayload() (payload string) {
 }
 
 func (dc *Discord) Validate() (err error) {
-	dg, err := discordgo.New("Bot " + config.C.Platform.Discord.BotToken)
-	if err != nil {
-		fmt.Println("error creating Discord session,", err)
-		return
-	}
+	dc.SignaturePayload = dc.GenerateSignPayload()
 
 	u, err := url.Parse(dc.ProofLocation)
-	fmt.Println(path.Clean(u.Path))
 	urlPath := path.Clean(u.Path)
 	pathArr := strings.Split(strings.TrimSpace(urlPath), "/")
+	//proof location will be like: https://discord.com/channels/960708146706395176/960708146706395179/961458176719487076
+	if len(pathArr) != 5 {
+		return xerrors.Errorf("haven't got right proof location, err=%v", err)
+	}
 
+	dg, err := discordgo.New("Bot " + config.C.Platform.Discord.BotToken)
+	if err != nil {
+		return xerrors.Errorf("error creating Discord session, err= %v", err)
+	}
 	rs, err := dg.ChannelMessage(pathArr[3], pathArr[4])
 	if err != nil {
 		return xerrors.Errorf("cannot get the proof err=%v", err)
 	}
-	if fmt.Sprintf("%s", rs.Author) != dc.Identity {
+	if strings.ToLower(fmt.Sprintf("%s", rs.Author)) != dc.Identity {
 		return xerrors.Errorf("User name mismatch: expect %s - actual %s", dc.Identity, rs.Author)
 	}
-	return dc.validateText(rs.Content)
+
+	dc.Text = rs.Content
+	return dc.validateText()
 }
 
-func (dc *Discord) validateText(content string) (err error) {
-	scanner := bufio.NewScanner(strings.NewReader(content))
+func (dc *Discord) validateText() (err error) {
+	scanner := bufio.NewScanner(strings.NewReader(dc.Text))
 	for scanner.Scan() {
 		matched := re.FindStringSubmatch(scanner.Text())
 		if len(matched) < 2 {
 			continue // Search for next line
 		}
-
 		sigBase64 := matched[1]
 		sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
 		if err != nil {
