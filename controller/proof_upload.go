@@ -52,12 +52,12 @@ func proofUpload(c *gin.Context) {
 
 	validator, err := validateProof(req, previous_pc, pubkey)
 	if err != nil {
-		errorResp(c, 400, xerrors.Errorf("%v", err))
+		errorResp(c, 400, xerrors.Errorf("%w", err))
 		return
 	}
 
 	if err = applyUpload(&validator); err != nil {
-		errorResp(c, 400, xerrors.Errorf("%v", err))
+		errorResp(c, 400, xerrors.Errorf("%w", err))
 		return
 	}
 
