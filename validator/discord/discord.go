@@ -28,7 +28,7 @@ var (
 	POST_TEMPLATE = map[string]string{
 		"default": "Verifying my discord ID: %s on NextID. \nSig: %%SIG_BASE64%%",
 		"en-US":   "Verifying my discord ID: %s on NextID. \nSig: %%SIG_BASE64%%",
-		"zh-CN":   "在NextID上认证我的账号：%s。\nSig: %%SIG_BASE64%%",
+		"zh-CN":   "在NextID上认证我的账号： %s \nSig: %%SIG_BASE64%%",
 	}
 )
 
