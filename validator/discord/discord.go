@@ -81,7 +81,7 @@ func (dc *Discord) Validate() (err error) {
 
 	//proof location will be like: https://discord.com/channels/960708146706395176/960708146706395179/961458176719487076
 	if len(pathArr) != 5 {
-		return xerrors.Errorf("Error on getting right proof location: %w", err)
+		return xerrors.Errorf("Error getting right proof location: %w", err)
 	}
 
 	client, err := discordgo.New("Bot " + config.C.Platform.Discord.BotToken)
@@ -91,7 +91,7 @@ func (dc *Discord) Validate() (err error) {
 
 	msgResp, err := client.ChannelMessage(pathArr[3], pathArr[4])
 	if err != nil {
-		return xerrors.Errorf("Error when get the proof: %w", err)
+		return xerrors.Errorf("Error getting the message from discord: %w", err)
 	}
 
 	if strings.ToLower(fmt.Sprintf("%s", msgResp.Author)) != dc.Identity {
