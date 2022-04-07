@@ -45,7 +45,7 @@ func UploadToProof(gp GenerateParams, personaPublicKey string, createAt string, 
 	if resp.StatusCode() == http.StatusCreated {
 		fmt.Println("Upload succeed!!")
 	} else {
-		panic(fmt.Sprintf("Oops, some error occured err:%v", err))
+		panic(fmt.Sprintf("Oops, some error occured. resp:%v err:%v", resp, err))
 	}
 	os.Exit(0)
 }

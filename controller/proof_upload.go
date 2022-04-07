@@ -56,7 +56,7 @@ func proofUpload(c *gin.Context) {
 		return
 	}
 
-	if err := applyUpload(&validator); err != nil {
+	if err = applyUpload(&validator); err != nil {
 		errorResp(c, 400, xerrors.Errorf("%w", err))
 		return
 	}
