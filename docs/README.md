@@ -10,12 +10,13 @@ you on any supported platform.
 
 ### Supported
 
-| Platform | `platform` value | `identity` value             | `proof_location` value                                                         | Misc.                                                   |
-|----------|------------------|------------------------------|--------------------------------------------------------------------------------|---------------------------------------------------------|
-| Twitter  | `twitter`        | `twitter_username`           | Proof tweet ID (`1415362679095635970`)                                         |                                                         |
+| Platform | `platform` value | `identity` value             | `proof_location` value                                                        | Misc.                                                   |
+|----------|------------------|------------------------------|-------------------------------------------------------------------------------|---------------------------------------------------------|
+| Twitter  | `twitter`        | `twitter_username`           | Proof tweet ID (`1415362679095635970`)                                        |                                                         |
 | Keybase  | `keybase`        | `keybase_username`           | N/A (use `https://your_identity.keybase.pub/NextID/COMPRESSED_PUBKEY_HEX.txt`) |                                                         |
-| Ethereum | `ethereum`       | Wallet address `0x123AbC...` | N/A (Two-way signatures created from persona sk and wallet sk)                 |                                                         |
-| Github   | `github`         | `github_username`            | Public visible Gist ID `a6dddd2811af21b671fd`                                  | Gist should contains `0xPUBKEY_COMRESSED_HEX.json` file |
+| Ethereum | `ethereum`       | Wallet address `0x123AbC...` | N/A (Two-way signatures created from persona sk and wallet sk)                |                                                         |
+| Github   | `github`         | `github_username`            | Public visible Gist ID `a6dddd2811af21b671fd`                                 | Gist should contains `0xPUBKEY_COMRESSED_HEX.json` file |
+| Discord  | `discord`        | `discord_username`           | message link (`https://discord.com/channels/DIGITS/DIGITS/DIGITS`)            |                                                         |
 
 ### Planning
 
@@ -24,7 +25,6 @@ you on any supported platform.
 | [Facebook](https://www.facebook.com) | `facebook`       | Username in link (i.e. `Meta` in `https://www.facebook.com/Meta`) | Post ID (`460695145492083`)                            |       |
 | [Minds](https://www.minds.com)       | `minds`          | `minds`                                                           | Newsfeed ID (`1309718521097228301`)                    |       |
 | [Telegram](https://telegram.org)     | `telegram`       | `telegram`                                                        | `https://t.me/some_public_group/CHAT_ID_DIGITS`        |       |
-| [Discord](https://discord.com)       | `discord`        | `Discord#0000`                                                    | `https://discord.com/channels/DIGITS/DIGITS/DIGITS`    |       |
 | DNS (TXT field)                      | `dns`            | `example.com`                                                     | N/A (use `dig example.com TXT`)                        |       |
 | ENS                                  | `ens`            | `myens.eth`                                                       | N/A (use `id.next.proof` record in ENS to store proof) |       |
 | Decentrialized Account Systems       | `das`            |                                                                   |                                                        |       |
