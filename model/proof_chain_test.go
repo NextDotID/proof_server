@@ -282,12 +282,11 @@ func TestProofChainFindByPersona(t *testing.T) {
 		wantErr   bool
 	}{
 		{
-			name : "empty result",
-			args: args{persona: "234234", all_data: false, from: 0, limit: 10},
-			wantTotal:0,
-			wantRs: []ProofChainItem{},
-			wantErr: false,
-
+			name:      "empty result",
+			args:      args{persona: "234234", all_data: false, from: 0, limit: 10},
+			wantTotal: 0,
+			wantRs:    []ProofChainItem{},
+			wantErr:   false,
 		},
 	}
 	for _, tt := range tests {

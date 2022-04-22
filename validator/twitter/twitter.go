@@ -2,7 +2,6 @@ package twitter
 
 import (
 	"bufio"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"regexp"
@@ -121,7 +120,7 @@ func (twitter *Twitter) validateText() (err error) {
 		}
 
 		sigBase64 := matched[1]
-		sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
+		sigBytes, err := util.DecodeString(sigBase64)
 		if err != nil {
 			return xerrors.Errorf("Error when decoding signature %s: %s", sigBase64, err.Error())
 		}
