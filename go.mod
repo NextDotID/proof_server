@@ -82,7 +82,7 @@ require (
 	github.com/gin-contrib/cors v1.3.1
 	github.com/google/go-github/v41 v41.0.0
 	github.com/google/uuid v1.3.0
-	github.com/samber/lo v1.11.0
+	github.com/samber/lo v1.14.0
 	github.com/stretchr/testify v1.7.1
 	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1

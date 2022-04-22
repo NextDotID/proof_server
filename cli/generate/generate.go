@@ -65,11 +65,9 @@ func GeneratePayload() {
 
 	if types.Platform(params.Platform) == types.Platforms.Ethereum {
 		fmt.Printf("Post base64 encode payload: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(signature))
+		fmt.Printf("Post base1024 encode payload: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base1024.EncodeToString(signature))
 		walletSignature, _ = crypto.SignPersonal([]byte(respPayload.SignPayload), params.EthereumPrivateKey)
 		fmt.Printf("Wallet base64 sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(walletSignature))
-
-		fmt.Printf("Post base1024 encode payload: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base1024.EncodeToString(signature))
-		fmt.Printf("Wallet base1024 sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base1024.EncodeToString(walletSignature))
 	} else {
 		for lang_code, payload := range respPayload.PostContent {
 			fmt.Printf(

@@ -10,10 +10,15 @@ func DecodeString(s string) ([]byte, error) {
 
 	// Decode input string
 	//points := Array.from(input).map((emoji: string) => EMOJIS.indexOf(emoji))
-	points := []uint8{1, 2, 4, 5, 6, 2, 53, 33, 4, 234, 24}
+	points := make([]int, 0)
+	//for _, item := s {
+	//	points = append(points, lo.IndexOf(Emojis, item))
+	//}
+
+	//points := []uint8{1, 2, 4, 5, 6, 2, 53, 33, 4, 234, 24}
 	remainder := len(points) % 4
 	safe := len(points) - remainder
-	source := make([]uint8, 0)
+	source := make([]int, 0)
 	//const source: number[] = []
 	var i int
 	for i = 0; i <= safe; i += 4 {
@@ -25,6 +30,8 @@ func DecodeString(s string) ([]byte, error) {
 		if i < safe {
 			source = append(source, alpha, beta, gamma, delta, epsilon)
 		} else if i >= safe && remainder != 0 {
+			source = append(source, alpha, beta, gamma, delta, epsilon)
+			source = source[0:remainder]
 			//source.push(...[alpha, beta, gamma, delta, epsilon].slice(0, remainder))
 		}
 	}
