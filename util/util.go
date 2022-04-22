@@ -27,9 +27,5 @@ func DecodeString(s string) ([]byte, error) {
 	if err == nil {
 		return sigBytes, nil
 	}
-	sigBytes, err2 := base1024.DecodeString(s)
-	if err2 != nil {
-		return nil, err2
-	}
-	return sigBytes, nil
+	return base1024.DecodeString(s)
 }
