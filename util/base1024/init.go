@@ -1,36 +1,36 @@
 package base1024
 
 import (
-	"golang.org/x/xerrors"
+	"fmt"
+	"html"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 )
 
-var Emojis []uint8
+const TAIL = "\\ud83c\\udfad"
 
-func Init() error {
-	//get from json file
-	f, err := os.Open("./emoji.json")
+var Emojis []string
+
+func init() {
+	f, err := os.Open("./emojis.json")
 	if err != nil {
-		return xerrors.Errorf("Open file error: %w", err)
+		fmt.Println(err)
 	}
 	fd, err := ioutil.ReadAll(f)
 	if err != nil {
-		return xerrors.Errorf("Read file error: %w", err)
+		fmt.Println(err)
 	}
 	content := string(fd)
-	contentArr := strings.Split(content, ",")
-
-	//const values = _points.split(',').map((value) => Number.parseInt(value, 36))
-	//const points: number[] = Array(1024).fill(1)
-	values := make([]uint8, 0)
-	for i, item := range contentArr {
-		tmp, _ := strconv.ParseUint(item, 36, 64)
-		values[i] = uint8(tmp)
+	arr := strings.Split(content, ",")
+	values := make([]int64, 0)
+	for _, item := range arr {
+		tmp, _ := strconv.ParseInt(item, 36, 64)
+		values = append(values, tmp)
 	}
-	points := make([]uint8, 1024)
+
+	points := make([]int64, 1024)
 	for i, _ := range points {
 		points[i] = 1
 	}
@@ -43,8 +43,10 @@ func Init() error {
 	for i := 1; i < len(points); i += 1 {
 		points[i] = points[i-1] + points[i]
 	}
-	//return Array.from(String.fromCodePoint.apply(null, points)) ???
-	// TODO
-	Emojis = points
-	return nil
+
+	for _, item := range points {
+		tmp := html.UnescapeString(string(rune(item)))
+		Emojis = append(Emojis, tmp)
+	}
+
 }
