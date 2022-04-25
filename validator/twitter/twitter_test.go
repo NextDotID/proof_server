@@ -36,6 +36,24 @@ func generate() Twitter {
 	}
 }
 
+func generateBase1024Encode() Twitter {
+	pubkey, _ := mycrypto.StringToPubkey("0x04d7c5e01bedf1c993f40ec302d9bf162620daea93a7155cd9a8019ae3a2c2a476873e66c7ab9c5dbf9a6bd24ef4432298e70c5c7e7b148a54724a1d7b59e06bd8")
+	created_at, _ := util.TimestampStringToTime("1650883741")
+	return Twitter{
+		Base: &validator.Base{
+			Platform:      types.Platforms.Twitter,
+			Previous:      "",
+			Action:        types.Actions.Create,
+			Pubkey:        pubkey,
+			Identity:      "SannieInMeta",
+			ProofLocation: "1518542666987819009",
+			Text:          "",
+			Uuid:          uuid.MustParse("223a5c86-540b-49b7-8674-94e04a390cd0"),
+			CreatedAt:     created_at,
+		},
+	}
+}
+
 func Test_GeneratePostPayload(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
@@ -59,6 +77,15 @@ func Test_Validate(t *testing.T) {
 		assert.Equal(t, "yeiwb", tweet.Identity)
 	})
 
+	t.Run("success on encode base1024", func(t *testing.T) {
+		before_each(t)
+		tweet := generateBase1024Encode()
+		assert.Nil(t, tweet.Validate())
+		assert.Greater(t, len(tweet.Text), 10)
+		assert.NotEmpty(t, tweet.Text)
+		assert.Equal(t, "sannieinmeta", tweet.Identity)
+	})
+
 	t.Run("should return identity error", func(t *testing.T) {
 		before_each(t)
 
@@ -69,7 +96,6 @@ func Test_Validate(t *testing.T) {
 
 	t.Run("should return proof location not found", func(t *testing.T) {
 		before_each(t)
-
 		tweet := generate()
 		tweet.ProofLocation = "123456"
 		assert.NotNil(t, tweet.Validate())
