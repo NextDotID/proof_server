@@ -45,10 +45,9 @@ func EncodeToString(input []byte) string {
 		}
 	}
 
-	resList := lo.Map[int, string](points, func(x int, _ int) string {
+	resList := lo.Map(points, func(x int, _ int) string {
 		return Emojis[x]
 	})
-
 	resStr := strings.Join(resList, "")
 	if remainder == 4 {
 		resStr += TAIL

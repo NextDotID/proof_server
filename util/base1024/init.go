@@ -14,7 +14,7 @@ var Emojis []string
 func init() {
 	base1024EmojiAlphabetList := strings.Split(Base1024EmojiAlphabet, ",")
 	values := make([]int64, 0)
-	values = lo.Map[string, int64](base1024EmojiAlphabetList, func(x string, _ int) int64 {
+	values = lo.Map(base1024EmojiAlphabetList, func(x string, _ int) int64 {
 		tmp, _ := strconv.ParseInt(x, 36, 64)
 		return tmp
 	})
@@ -32,7 +32,7 @@ func init() {
 		points[i] = points[i-1] + points[i]
 	}
 
-	Emojis = lo.Map[int64, string](points, func(x int64, _ int) string {
+	Emojis = lo.Map(points, func(x int64, _ int) string {
 		return html.UnescapeString(string(rune(x)))
 	})
 }
