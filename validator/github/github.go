@@ -2,7 +2,6 @@ package github
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -124,7 +123,7 @@ func (gh *Github) Validate() (err error) {
 	if err != nil {
 		return xerrors.Errorf("error when recovering pubkey: %w", err)
 	}
-	signature, err := base64.StdEncoding.DecodeString(payload.Signature)
+	signature, err := util.DecodeString(payload.Signature)
 	if err != nil {
 		return xerrors.Errorf("error when decoding signature: %w", err)
 	}

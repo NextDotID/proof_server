@@ -1,7 +1,6 @@
 package keybase
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -121,7 +120,7 @@ func (kb *Keybase) validateBody(payload *KeybasePayload) error {
 		return xerrors.Errorf("Persona mismatch")
 	}
 
-	sig_bytes, err := base64.StdEncoding.DecodeString(payload.Signature)
+	sig_bytes, err := util.DecodeString(payload.Signature)
 	if err != nil {
 		return xerrors.Errorf("error when decoding sig: %w", err)
 	}
