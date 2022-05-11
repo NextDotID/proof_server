@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -132,6 +133,9 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 		if err != nil {
 			return result, pagination
 		}
+		proofs = lo.UniqBy(proofs, func(p model.Proof) string {
+			return fmt.Sprintf("%s|%s", p.Platform, p.Identity)
+		})
 		single := ProofQueryResponseSingle{
 			Persona: persona,
 			Proofs: lo.Map(proofs, func(proof model.Proof, _index int) ProofQueryResponseSingleProof {
