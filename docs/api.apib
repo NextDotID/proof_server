@@ -112,7 +112,7 @@ See [README.md](./README.md)
     + action (string, required) - Action (`create` / `delete`)
     + platform (string, required) - Target platform. See table above for all available platforms. See table above for all available values.
     + identity (string, required) - Identity in target platform to proof. Usually a "username" or "screen name". See [README.md](./README.md).
-    + proof_location (string, optional) - Location where public-accessable proof post is set. See [README.md](./README.md).
+    + proof_location (string, optional) - Location where public-accessible proof post is set. See [README.md](./README.md).
     + public_key (string, required) - Public key of NextID Persona to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
     + extra (object, optional) - Extra info for specific platform needed.
       + wallet_signature (string, optional) - (needed for `platform: ethereum`) Signature signed by ETH wallet (w/ same sign payload), BASE64-ed.
@@ -295,7 +295,7 @@ Found.
         + action (string, required) - Action(create / delete)
         + platform (string, required) - Target platform. See table above for all available platforms. See table above for all available values.
         + identity (string, required) - Identity on that platform
-        + proof_location (string, required) - Location where public-accessable proof post is set. See [README.md](./README.md).
+        + proof_location (string, required) - Location where public-accessible proof post is set. See [README.md](./README.md).
         + created_at (string, required) - Creation time of this proof. (timestamp, unit: second)
         + signature (string, required) - generate signature_payload and persona_private_key
         + signature_payload (string, required) - Raw string to be sent to `personal_sign`
