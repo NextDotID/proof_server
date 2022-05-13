@@ -15,13 +15,6 @@ import (
 
 func UploadToProof(gp GenerateParams, personaPublicKey string, createAt string, uuid string, signature []byte, walletSignature []byte) {
 	config.InitCliConfig()
-	var pl string
-	if types.Platform(gp.Platform) != types.Platforms.Ethereum {
-		input := bufio.NewScanner(os.Stdin)
-		fmt.Println("Proof Location (find out how to get the proof location for each platform at README.md):")
-		input.Scan()
-		pl = input.Text()
-	}
 
 	req := controller.ProofUploadRequest{
 		Action:        types.Action(gp.Action),
@@ -30,7 +23,14 @@ func UploadToProof(gp GenerateParams, personaPublicKey string, createAt string, 
 		PublicKey:     personaPublicKey,
 		CreatedAt:     createAt,
 		Uuid:          uuid,
-		ProofLocation: pl,
+		ProofLocation: "",
+	}
+
+	if types.Action(gp.Action) == types.Actions.Create && types.Platform(gp.Platform) != types.Platforms.Ethereum {
+		input := bufio.NewScanner(os.Stdin)
+		fmt.Println("Proof Location (find out how to get the proof location for each platform at README.md):")
+		input.Scan()
+		req.ProofLocation = input.Text()
 	}
 
 	req.Extra.Signature = base64.StdEncoding.EncodeToString((signature))
