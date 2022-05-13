@@ -74,6 +74,11 @@ func (dc *Discord) GenerateSignPayload() (payload string) {
 func (dc *Discord) Validate() (err error) {
 	dc.SignaturePayload = dc.GenerateSignPayload()
 
+	// Delete. No need to fetch content from platform.
+	if dc.Action == types.Actions.Delete {
+		return crypto.ValidatePersonalSignature(dc.SignaturePayload, dc.Signature, dc.Pubkey)
+	}
+
 	u, err := url.Parse(dc.ProofLocation)
 	urlPath := path.Clean(u.Path)
 	pathArr := strings.Split(strings.TrimSpace(urlPath), "/")

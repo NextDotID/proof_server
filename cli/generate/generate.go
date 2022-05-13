@@ -48,39 +48,41 @@ func GeneratePayload() {
 	resp, err := client.R().SetBody(req).EnableTrace().Post(url)
 	respPayload := controller.ProofPayloadResponse{}
 	if err != nil || resp.StatusCode() != http.StatusOK {
-		panic(fmt.Sprintf("fail to get the response resp:%v err:%v", resp, err))
+		panic(fmt.Sprintf("\nfail to get the response resp:%v err:%v", resp, err))
 	}
 
 	err = json.Unmarshal(resp.Body(), &respPayload)
 	if err != nil {
-		panic(fmt.Sprintf("Unmarshal Payload Response Error, err:%v", err))
+		panic(fmt.Sprintf("\nUnmarshal Payload Response Error, err:%v", err))
 	}
 
 	var signature, walletSignature []byte
 
 	signature, err = crypto.SignPersonal([]byte(respPayload.SignPayload), params.PersonaPrivateKey)
 	if err != nil {
-		panic(fmt.Sprintf("SignPayload Error, err:%v", err))
+		panic(fmt.Sprintf("\nSignPayload Error, err:%v", err))
 	}
 
-	if types.Platform(params.Platform) == types.Platforms.Ethereum {
-		fmt.Printf("Post base64 encode payload: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(signature))
-		fmt.Printf("Post base1024 encode payload: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base1024.EncodeToString(signature))
-		walletSignature, _ = crypto.SignPersonal([]byte(respPayload.SignPayload), params.EthereumPrivateKey)
-		fmt.Printf("Wallet base64 sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(walletSignature))
-	} else {
-		for lang_code, payload := range respPayload.PostContent {
-			fmt.Printf(
-				"Post base64 encode payload [%s]: vvvvvvv\n%s\n^^^^^^^^^^\n\n",
-				lang_code,
-				string(post_regex.ReplaceAll([]byte(payload), []byte(base64.StdEncoding.EncodeToString(signature)))),
-			)
+	if types.Action(params.Action) == types.Actions.Create {
+		if types.Platform(params.Platform) == types.Platforms.Ethereum {
+			fmt.Printf("\n\nPost base64 encode payload: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(signature))
+			fmt.Printf("Post base1024 encode payload: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base1024.EncodeToString(signature))
+			walletSignature, _ = crypto.SignPersonal([]byte(respPayload.SignPayload), params.EthereumPrivateKey)
+			fmt.Printf("Wallet base64 sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(walletSignature))
+		} else {
+			for lang_code, payload := range respPayload.PostContent {
+				fmt.Printf(
+					"Post base64 encode payload [%s]: vvvvvvv\n%s\n^^^^^^^^^^\n\n",
+					lang_code,
+					string(post_regex.ReplaceAll([]byte(payload), []byte(base64.StdEncoding.EncodeToString(signature)))),
+				)
 
-			fmt.Printf(
-				"Post base1024 encode payload [%s]: vvvvvvv\n%s\n^^^^^^^^^^\n\n",
-				lang_code,
-				string(post_regex.ReplaceAll([]byte(payload), []byte(base1024.EncodeToString(signature)))),
-			)
+				fmt.Printf(
+					"Post base1024 encode payload [%s]: vvvvvvv\n%s\n^^^^^^^^^^\n\n",
+					lang_code,
+					string(post_regex.ReplaceAll([]byte(payload), []byte(base1024.EncodeToString(signature)))),
+				)
+			}
 		}
 	}
 
