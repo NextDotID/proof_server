@@ -10,6 +10,7 @@ var Platforms = struct {
 	Keybase  Platform
 	Ethereum Platform
 	Discord  Platform
+	Das      Platform
 }{
 	Github:   "github",
 	NextID:   "nextid",
@@ -17,4 +18,5 @@ var Platforms = struct {
 	Keybase:  "keybase",
 	Ethereum: "ethereum",
 	Discord:  "discord",
+	Das:      "das",
 }
