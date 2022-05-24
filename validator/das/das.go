@@ -60,7 +60,7 @@ const (
 	// v1 API.
 	URL         = "https://register-api.did.id/v1/account/records"
 	LocationURL = "https://data.did.id/%s"
-	KeyName     = "nextid_proof"
+	KeyPrefix   = "nextid_proof_"
 )
 
 var (
@@ -152,10 +152,11 @@ func (das *Das) validateRecord(resp *DasResponse) error {
 	if resp.ErrorNumber != 0 {
 		return xerrors.Errorf("err_no %d: %s", resp.ErrorNumber, resp.ErrorMessage)
 	}
+	keyName := KeyPrefix + "0x" + mycrypto.CompressedPubkeyHex(das.Pubkey)
 	value := ""
 	for _, r := range resp.Data.Records {
 		// Case sensitive
-		if r.Key == KeyName {
+		if r.Key == keyName {
 			value = r.Value
 			break
 		}
