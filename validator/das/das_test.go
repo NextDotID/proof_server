@@ -41,8 +41,6 @@ func Test_GeneratePostPayload(t *testing.T) {
 
 		das := generate()
 		result := das.GeneratePostPayload()
-		assert.Contains(t, result["default"], "To validate")
-		assert.Contains(t, result["default"], mycrypto.CompressedPubkeyHex(das.Pubkey))
 		assert.Contains(t, result["default"], "%SIG_BASE64%")
 	})
 }
