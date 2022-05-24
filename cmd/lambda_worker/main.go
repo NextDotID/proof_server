@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/nextdotid/proof-server/validator/discord"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -16,6 +15,8 @@ import (
 	myconfig "github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/model"
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/validator/das"
+	"github.com/nextdotid/proof-server/validator/discord"
 	"github.com/nextdotid/proof-server/validator/ethereum"
 	"github.com/nextdotid/proof-server/validator/github"
 	"github.com/nextdotid/proof-server/validator/keybase"
@@ -77,6 +78,7 @@ func init_validators() {
 	keybase.Init()
 	github.Init()
 	discord.Init()
+	das.Init()
 }
 
 func init() {
