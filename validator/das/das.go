@@ -12,13 +12,10 @@ import (
 	"github.com/nextdotid/proof-server/util"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
+	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
-
-type Keybase struct {
-	*validator.Base
-}
 
 type Das struct {
 	*validator.Base
@@ -64,7 +61,7 @@ const (
 )
 
 var (
-	l = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "das"})
+	l = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "dotbit"})
 )
 
 func Init() {
@@ -77,21 +74,8 @@ func Init() {
 	}
 }
 
-func (das *Das) GeneratePostPayload() (post map[string]string) {
-	das.Identity = strings.ToLower(das.Identity)
-	payload := DasSignPayload{
-		Version:     "1",
-		Comment:     "Here's an NextID proof of this DAS account.",
-		Comment2:    "To validate, base64.decode the signature, and recover pubkey from it using sign_payload with ethereum personal_sign algo.",
-		Persona:     "0x" + mycrypto.CompressedPubkeyHex(das.Pubkey),
-		BitAddress:  das.Identity,
-		SignPayload: das.GenerateSignPayload(),
-		Signature:   "%SIG_BASE64%",
-		CreatedAt:   util.TimeToTimestampString(das.CreatedAt),
-		Uuid:        das.Uuid.String(),
-	}
-	payload_json, _ := json.MarshalIndent(payload, "", "\t")
-	return map[string]string{"default": string(payload_json)}
+func (das *Das) GeneratePostPayload() (_ map[string]string) {
+	return map[string]string{"default": "%SIG_BASE64%"}
 }
 
 func (das *Das) GenerateSignPayload() (payload string) {
@@ -134,6 +118,7 @@ func (das *Das) Validate() (err error) {
 	if resp.StatusCode != 200 {
 		return xerrors.Errorf("Error when requesting proof: Status code %d", resp.StatusCode)
 	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return xerrors.Errorf("Error when getting resp body")
@@ -153,19 +138,14 @@ func (das *Das) validateRecord(resp *DasResponse) error {
 		return xerrors.Errorf("err_no %d: %s", resp.ErrorNumber, resp.ErrorMessage)
 	}
 	keyName := KeyPrefix + "0x" + mycrypto.CompressedPubkeyHex(das.Pubkey)
-	value := ""
-	for _, r := range resp.Data.Records {
-		// Case sensitive
-		if r.Key == keyName {
-			value = r.Value
-			break
-		}
-	}
-	if value == "" {
+	record, ok := lo.Find(resp.Data.Records, func(i DasRecord) bool {
+		return i.Key == keyName
+	})
+	if !ok || record.Value == "" {
 		return xerrors.New("no key found")
 	}
 
-	sig_bytes, err := util.DecodeString(value)
+	sig_bytes, err := util.DecodeString(record.Value)
 	if err != nil {
 		return xerrors.Errorf("error when decoding sig: %w", err)
 	}

@@ -18,5 +18,5 @@ var Platforms = struct {
 	Keybase:  "keybase",
 	Ethereum: "ethereum",
 	Discord:  "discord",
-	Das:      "das",
+	Das:      "dotbit",
 }
