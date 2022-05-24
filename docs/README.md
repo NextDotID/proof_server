@@ -17,6 +17,7 @@ you on any supported platform.
 | Ethereum | `ethereum`       | Wallet address `0x123AbC...` | N/A (Two-way signatures created from persona sk and wallet sk)                |                                                         |
 | Github   | `github`         | `github_username`            | Public visible Gist ID `a6dddd2811af21b671fd`                                 | Gist should contains `0xPUBKEY_COMRESSED_HEX.json` file |
 | Discord  | `discord`        | `UserName#0000`              | message link (`https://discord.com/channels/DIGITS/DIGITS/DIGITS`)            |                                                         |
+| DotBit   | `dotbit`         | `address.bit`                | Custom type Record (`nextid_proof_0xPUBKEY_COMRESSED_HEX`)                    | Formerly known as DAS (Decentralized Account System)    |
 
 ### Planning
 
@@ -27,7 +28,6 @@ you on any supported platform.
 | [Telegram](https://telegram.org)     | `telegram`       | `telegram`                                                        | `https://t.me/some_public_group/CHAT_ID_DIGITS`        |       |
 | DNS (TXT field)                      | `dns`            | `example.com`                                                     | N/A (use `dig example.com TXT`)                        |       |
 | ENS                                  | `ens`            | `myens.eth`                                                       | N/A (use `id.next.proof` record in ENS to store proof) |       |
-| Decentrialized Account Systems       | `das`            |                                                                   |                                                        |       |
 | Email                                | `email`          | `mail_address@example.com`                                        | A public mailing list `mbox` download URL (?)          |       |
 
 ## How?
