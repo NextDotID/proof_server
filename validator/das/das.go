@@ -3,7 +3,6 @@ package das
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -55,9 +54,8 @@ type DasRecord struct {
 
 const (
 	// v1 API.
-	URL         = "https://register-api.did.id/v1/account/records"
-	LocationURL = "https://data.did.id/%s"
-	KeyPrefix   = "nextid_proof_"
+	URL       = "https://register-api.did.id/v1/account/records"
+	KeyPrefix = "nextid_proof_"
 )
 
 var (
@@ -105,7 +103,7 @@ func (das *Das) Validate() (err error) {
 	das.Identity = strings.ToLower(das.Identity)
 	das.SignaturePayload = das.GenerateSignPayload()
 
-	das.ProofLocation = fmt.Sprintf(LocationURL, das.Identity)
+	das.ProofLocation = KeyPrefix + "0x" + mycrypto.CompressedPubkeyHex(das.Pubkey)
 	req, err := json.Marshal(DasRequest{Account: das.Identity})
 	if err != nil {
 		return xerrors.Errorf("Error when marshalling request: %w", err)
