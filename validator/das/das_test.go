@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/nextdotid/proof-server/config"
-	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
@@ -19,18 +18,18 @@ func before_each(t *testing.T) {
 }
 
 func generate() Das {
-	pubkey, _ := mycrypto.StringToPubkey("0x02fb41da2bf18b9a32afbe9f5163a4390e2de93c421ceb461658b1f83775cdcbc5")
-	created_at, _ := util.TimestampStringToTime("1653305520")
+	pubkey, _ := mycrypto.StringToPubkey("0x03b0b5900f2106475027b9f80d249916baa3d0fb57071b9b41980a65868519f825")
+	created_at, _ := util.TimestampStringToTime("1653842234")
 
 	return Das{
 		Base: &validator.Base{
 			Previous:  "",
 			Action:    "create",
 			Pubkey:    pubkey,
-			Identity:  "nykma.bit",
-			Platform:  types.Platforms.Das,
+			Identity:  "mitchatmask.bit",
+			Platform:  "dotbit",
 			CreatedAt: created_at,
-			Uuid:      uuid.MustParse("77261013-04a6-4464-9d4c-6549114a07a8"),
+			Uuid:      uuid.MustParse("e16a0021-80de-4d12-bea7-9cc021f5b847"),
 		},
 	}
 }
@@ -50,10 +49,10 @@ func Test_Validate(t *testing.T) {
 		before_each(t)
 
 		das := generate()
-		das.Identity = "NyKmA.BiT"
+		das.Identity = "mItCHaTmASk.BiT"
 		assert.Nil(t, das.Validate())
 		assert.Greater(t, len(das.Signature), 10)
-		assert.Equal(t, "nykma.bit", das.Identity)
+		assert.Equal(t, "mitchatmask.bit", das.Identity)
 	})
 
 	// Do not test validation by ProofLocation, since it is unnecessary.
