@@ -130,6 +130,10 @@ func validateWalletSignature(payload, sig, address string) error {
 	if err != nil {
 		return xerrors.Errorf("error when decoding signature: %w", err)
 	}
+
+	// It is simply an UTF8 byte array representing the payload text
+	// Furthermore, the byte array will be hashed with SHA512 according to tweetnacl docs
+	// See https://github.com/solana-labs/wallet-adapter/blob/master/FAQ.md#how-can-i-sign-and-verify-messages
 	if !signature.Verify(pubkey, []byte(payload)) {
 		return xerrors.Errorf("solana wallet signature validation failed")
 	}
