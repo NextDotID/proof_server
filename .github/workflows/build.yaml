@@ -1,0 +1,92 @@
+name: build
+on:
+  push:
+
+jobs:
+  build:
+    concurrency: ${{ matrix.appcmd }}
+    strategy:
+      matrix:
+        go: ['1.18']
+        appcmd: ['server', 'lambda', 'lambda_worker']
+        appenv: ['staging', 'production']
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup Go v1.x
+      uses: actions/setup-go@v3
+      with:
+        go-version: ${{ matrix.go }}
+
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Go mod package cache
+      uses: actions/cache@v3
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ matrix.go }}-${{ hashFiles('go.mod') }}
+
+    - name: Build
+      env:
+        CGO_ENABLED: '0'
+        GOARCH: amd64
+        GOOS: linux
+      run: go build -ldflags "-X 'github.com/nextdotid/proof-server/common.Environment=${{ matrix.appenv }}' -X 'github.com/nextdotid/proof-server/common.Revision=${{ github.sha }}' -X 'github.com/nextdotid/proof-server/common.BuildTime=$(date +%s)'" -o ./build/${{ matrix.appcmd }}_${{ matrix.appenv }} ./cmd/${{ matrix.appcmd }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.appcmd }}_${{ matrix.appenv }}
+        path: |
+          build/${{ matrix.appcmd }}_${{ matrix.appenv }}
+        retention-days: 3
+
+  deploy-staging:
+    needs: build
+    name: Deploy to AWS Lambda (staging)
+    if: github.ref_name == 'develop' && github.repository == 'nextdotid/proof-server'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download lambda binary
+      uses: actions/download-artifact@v3
+      with:
+        name: lambda_staging
+
+    - name: Package lambda binary into zip
+      run: mv lambda_staging lambda && zip lambda.zip lambda
+    - uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+    - name: Deploy to AWS Lambda
+      run: |
+        pip3 install awscli
+        aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME_STAGING }} --zip-file 'fileb://./lambda.zip' > /dev/null
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+  deploy-production:
+    needs: build
+    name: Deploy to AWS Lambda (production)
+    if: github.ref_name == 'master' && github.repository == 'nextdotid/proof-server'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download lambda binary
+      uses: actions/download-artifact@v3
+      with:
+        name: lambda_production
+
+    - name: Package lambda binary into zip
+      run: mv lambda_production lambda && zip lambda.zip lambda
+    - uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+    - name: Deploy to AWS Lambda
+      run: |
+        pip3 install awscli
+        aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME_PRODUCTION }} --zip-file 'fileb://./lambda.zip' > /dev/null
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
