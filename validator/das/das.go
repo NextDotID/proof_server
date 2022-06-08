@@ -104,7 +104,6 @@ func (das *Das) Validate() (err error) {
 	das.SignaturePayload = das.GenerateSignPayload()
 
 	// Find the record through API response instead of saving its 'location'.
-	das.ProofLocation = Key
 	req, err := json.Marshal(DasRequest{Account: das.Identity})
 	if err != nil {
 		return xerrors.Errorf("Error when marshalling request: %w", err)
