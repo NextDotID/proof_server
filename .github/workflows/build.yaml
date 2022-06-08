@@ -53,7 +53,7 @@ jobs:
         name: lambda_staging
 
     - name: Package lambda binary into zip
-      run: mv lambda_staging lambda && zip lambda.zip lambda
+      run: mv lambda_staging lambda && chmod a+x lambda && zip lambda.zip lambda
     - uses: actions/setup-python@v3
       with:
         python-version: '3.x'
@@ -78,7 +78,7 @@ jobs:
         name: lambda_production
 
     - name: Package lambda binary into zip
-      run: mv lambda_production lambda && zip lambda.zip lambda
+      run: mv lambda_production lambda && chmod a+x lambda && zip lambda.zip lambda
     - uses: actions/setup-python@v3
       with:
         python-version: '3.x'
