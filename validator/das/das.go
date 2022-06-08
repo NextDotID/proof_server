@@ -54,8 +54,8 @@ type DasRecord struct {
 
 const (
 	// v1 API.
-	URL       = "https://register-api.did.id/v1/account/records"
-	KeyPrefix = "nextid_proof_"
+	URL = "https://register-api.did.id/v1/account/records"
+	Key = "nextid"
 )
 
 var (
@@ -103,7 +103,8 @@ func (das *Das) Validate() (err error) {
 	das.Identity = strings.ToLower(das.Identity)
 	das.SignaturePayload = das.GenerateSignPayload()
 
-	das.ProofLocation = KeyPrefix + "0x" + mycrypto.CompressedPubkeyHex(das.Pubkey)
+	// Find the record through API response instead of saving its 'location'.
+	das.ProofLocation = Key
 	req, err := json.Marshal(DasRequest{Account: das.Identity})
 	if err != nil {
 		return xerrors.Errorf("Error when marshalling request: %w", err)
@@ -135,19 +136,26 @@ func (das *Das) validateRecord(resp *DasResponse) error {
 	if resp.ErrorNumber != 0 {
 		return xerrors.Errorf("err_no %d: %s", resp.ErrorNumber, resp.ErrorMessage)
 	}
-	keyName := KeyPrefix + "0x" + mycrypto.CompressedPubkeyHex(das.Pubkey)
+	// Colon as the separator between public key and signature.
+	valuePrefix := "0x" + mycrypto.CompressedPubkeyHex(das.Pubkey) + ":"
 	record, ok := lo.Find(resp.Data.Records, func(i DasRecord) bool {
-		return i.Key == keyName
+		// Find the first record starts with the public key.
+		return i.Key == Key && i.Type == "profile" && strings.HasPrefix(i.Value, valuePrefix)
 	})
-	if !ok || record.Value == "" {
+	if !ok {
 		return xerrors.New("no key found")
 	}
 
-	sig_bytes, err := util.DecodeString(record.Value)
+	_, sig, found := strings.Cut(record.Value, ":")
+	if !found || len(sig) == 0 {
+		return xerrors.New("invalid record value")
+	}
+
+	sigBytes, err := util.DecodeString(sig)
 	if err != nil {
 		return xerrors.Errorf("error when decoding sig: %w", err)
 	}
 
-	das.Signature = sig_bytes
-	return mycrypto.ValidatePersonalSignature(das.SignaturePayload, sig_bytes, das.Pubkey)
+	das.Signature = sigBytes
+	return mycrypto.ValidatePersonalSignature(das.SignaturePayload, sigBytes, das.Pubkey)
 }
