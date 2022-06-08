@@ -17,6 +17,7 @@ import (
 	"github.com/nextdotid/proof-server/validator/github"
 	"github.com/nextdotid/proof-server/validator/keybase"
 	"github.com/nextdotid/proof-server/validator/twitter"
+	"github.com/nextdotid/proof-server/validator/solana"
 	"github.com/sirupsen/logrus"
 )
 
@@ -34,6 +35,7 @@ func init_validators() {
 	keybase.Init()
 	github.Init()
 	discord.Init()
+	solana.Init()
 }
 
 func init() {
