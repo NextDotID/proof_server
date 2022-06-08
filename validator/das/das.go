@@ -73,7 +73,7 @@ func Init() {
 }
 
 func (das *Das) GeneratePostPayload() (_ map[string]string) {
-	return map[string]string{"default": "%SIG_BASE64%"}
+	return map[string]string{"default": "%COMPRESSED_PERSONA_PUBKEY_HEX%:%SIG_BASE64%"}
 }
 
 func (das *Das) GenerateSignPayload() (payload string) {
