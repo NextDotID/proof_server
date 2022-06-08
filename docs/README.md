@@ -10,14 +10,15 @@ you on any supported platform.
 
 ### Supported
 
-| Platform | `platform` value | `identity` value             | `proof_location` value                                                        | Misc.                                                   |
-|----------|------------------|------------------------------|-------------------------------------------------------------------------------|---------------------------------------------------------|
-| Twitter  | `twitter`        | `twitter_username`           | Proof tweet ID (`1415362679095635970`)                                        |                                                         |
+| Platform | `platform` value | `identity` value             | `proof_location` value                                                         | Misc.                                                   |
+|----------|------------------|------------------------------|--------------------------------------------------------------------------------|---------------------------------------------------------|
+| Twitter  | `twitter`        | `twitter_username`           | Proof tweet ID (`1415362679095635970`)                                         |                                                         |
 | Keybase  | `keybase`        | `keybase_username`           | N/A (use `https://your_identity.keybase.pub/NextID/COMPRESSED_PUBKEY_HEX.txt`) |                                                         |
-| Ethereum | `ethereum`       | Wallet address `0x123AbC...` | N/A (Two-way signatures created from persona sk and wallet sk)                |                                                         |
-| Github   | `github`         | `github_username`            | Public visible Gist ID `a6dddd2811af21b671fd`                                 | Gist should contains `0xPUBKEY_COMRESSED_HEX.json` file |
-| Discord  | `discord`        | `UserName#0000`              | message link (`https://discord.com/channels/DIGITS/DIGITS/DIGITS`)            |                                                         |
-| DotBit   | `dotbit`         | `address.bit`                | Custom type Record (`nextid_proof_0xPUBKEY_COMRESSED_HEX`)                    | Formerly known as DAS (Decentralized Account System)    |
+| Ethereum | `ethereum`       | Wallet address `0x123AbC...` | N/A (Two-way signatures created from persona sk and wallet sk)                 |                                                         |
+| Github   | `github`         | `github_username`            | Public visible Gist ID `a6dddd2811af21b671fd`                                  | Gist should contains `0xPUBKEY_COMRESSED_HEX.json` file |
+| Discord  | `discord`        | `UserName#0000`              | message link (`https://discord.com/channels/DIGITS/DIGITS/DIGITS`)             |                                                         |
+| DotBit   | `dotbit`         | `address.bit`                | Custom type Record (`nextid_proof_0xPUBKEY_COMRESSED_HEX`)                     | Formerly known as DAS (Decentralized Account System)    |
+| Solana   | `solana`         | Wallet address `AbCdEfG9...` | N/A (Two-way signatures created from persona sk and wallet sk)                 |                                                         |
 
 ### Planning
 
