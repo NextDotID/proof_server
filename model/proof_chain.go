@@ -30,6 +30,7 @@ type ProofChain struct {
 	SignaturePayload string         `gorm:"column:signature_payload"`
 	Extra            datatypes.JSON `gorm:"default:'{}'"`
 	Uuid             string         `gorm:"index;column:uuid"`
+	ArweaveID        string         `gorm:"column:arweave_id"`
 	PreviousID       sql.NullInt64  `gorm:"index"`
 	Previous         *ProofChain
 }
@@ -45,6 +46,7 @@ type ProofChainItem struct {
 	SignaturePayload string         `json:"signature_payload"`
 	Uuid             string         `json:"uuid"`
 	Extra            datatypes.JSON `json:"extra"`
+	ArweaveID        string         `json:"arweave_id"`
 }
 
 func (ProofChain) TableName() string {
