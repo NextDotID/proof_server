@@ -4,14 +4,15 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/bwmarrin/discordgo"
-	"github.com/nextdotid/proof-server/config"
-	"github.com/nextdotid/proof-server/util"
-	"golang.org/x/xerrors"
 	"net/url"
 	"path"
 	"regexp"
 	"strings"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/nextdotid/proof-server/config"
+	"github.com/nextdotid/proof-server/util"
+	"golang.org/x/xerrors"
 
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
@@ -56,7 +57,7 @@ func (dc *Discord) GeneratePostPayload() (post map[string]string) {
 func (dc *Discord) GenerateSignPayload() (payload string) {
 	payloadStruct := validator.H{
 		"action":     string(dc.Action),
-		"identity":   strings.ToLower(dc.Identity),
+		"identity":   dc.Identity,
 		"platform":   string(types.Platforms.Discord),
 		"prev":       nil,
 		"created_at": util.TimeToTimestampString(dc.CreatedAt),
@@ -98,7 +99,7 @@ func (dc *Discord) Validate() (err error) {
 		return xerrors.Errorf("Error getting the message from discord: %w", err)
 	}
 
-	if strings.ToLower(fmt.Sprintf("%s", msgResp.Author)) != dc.Identity {
+	if fmt.Sprintf("%s", msgResp.Author) != dc.Identity {
 		return xerrors.Errorf("User name mismatch: expect %s - actual %s", dc.Identity, msgResp.Author)
 	}
 

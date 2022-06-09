@@ -80,7 +80,7 @@ func (das *Das) GenerateSignPayload() (payload string) {
 	das.Identity = strings.ToLower(das.Identity)
 	payloadStruct := validator.H{
 		"action":     string(das.Action),
-		"identity":   das.Identity,
+		"identity":   strings.ToLower(das.Identity),
 		"platform":   string(types.Platforms.Das),
 		"prev":       nil,
 		"created_at": util.TimeToTimestampString(das.CreatedAt),
@@ -119,7 +119,7 @@ func (das *Das) Validate() (err error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return xerrors.Errorf("Error when getting resp body")
+		return xerrors.New("Error when getting resp body")
 	}
 
 	result := new(DasResponse)

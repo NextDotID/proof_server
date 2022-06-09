@@ -1,6 +1,8 @@
 package discord
 
 import (
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/types"
@@ -9,8 +11,6 @@ import (
 	"github.com/nextdotid/proof-server/validator"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"strings"
-	"testing"
 )
 
 func before_each() {
@@ -56,7 +56,7 @@ func TestDiscord_GenerateSignPayload(t *testing.T) {
 		before_each()
 		discord := generate()
 		signPayload := discord.GenerateSignPayload()
-		assert.Contains(t, signPayload, strings.ToLower(discord.Identity))
+		assert.Contains(t, signPayload, discord.Identity)
 		assert.Contains(t, signPayload, string(discord.Action))
 		assert.Contains(t, signPayload, string(discord.Platform))
 	})

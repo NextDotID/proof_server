@@ -200,7 +200,7 @@ func ProofChainCreateFromValidator(validator *validator.Base) (pc *ProofChain, e
 	pc = &ProofChain{
 		Action:           validator.Action,
 		Persona:          MarshalPersona(validator.Pubkey),
-		Identity:         strings.ToLower(validator.Identity), // TODO: exception may occur
+		Identity:         validator.Identity, // TODO: exception may occur
 		Platform:         validator.Platform,
 		Location:         validator.ProofLocation,
 		Signature:        MarshalSignature(validator.Signature),

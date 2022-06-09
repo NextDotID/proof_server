@@ -63,17 +63,11 @@ func (sol *Solana) Validate() (err error) {
 
 	switch sol.Action {
 	case types.Actions.Create:
-		{
-			return sol.validateCreate()
-		}
+		return sol.validateCreate()
 	case types.Actions.Delete:
-		{
-			return sol.validateDelete()
-		}
+		return sol.validateDelete()
 	default:
-		{
-			return xerrors.Errorf("unknown action: %s", sol.Action)
-		}
+		return xerrors.Errorf("unknown action: %s", sol.Action)
 	}
 }
 
