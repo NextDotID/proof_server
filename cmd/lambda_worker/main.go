@@ -12,6 +12,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
+	"github.com/everFinance/goar"
+	artypes "github.com/everFinance/goar/types"
 	myconfig "github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/model"
 	"github.com/nextdotid/proof-server/types"
@@ -25,7 +27,10 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var initialized = false
+var (
+	initialized = false
+	wallet      *goar.Wallet
+)
 
 func main() {
 	lambda.Start(handler)
@@ -45,17 +50,83 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) error {
 		if err != nil {
 			return err
 		}
-		if message.Action != types.QueueActions.Revalidate {
-			continue
-		}
-		if err := do_single(ctx, &message); err != nil {
-			return err
+
+		switch message.Action {
+		case types.QueueActions.ArweaveUpload:
+			if err := arweave_upload_single(ctx, &message); err != nil {
+				return err
+			}
+		case types.QueueActions.Revalidate:
+			if err := revalidate_single(ctx, &message); err != nil {
+				return err
+			}
+		default:
+			logrus.Warnf("unsupported queue action: %s", message.Action)
 		}
 	}
+
 	return nil
 }
 
-func do_single(ctx context.Context, message *types.QueueMessage) error {
+func arweave_upload_single(ctx context.Context, message *types.QueueMessage) error {
+	if wallet == nil {
+		return xerrors.New("wallet is not initialized")
+	}
+
+	pc := model.ProofChain{}
+	tx := model.DB.Preload("Previous").First(&pc, message.ProofID)
+	if tx.Error != nil {
+		return xerrors.Errorf("%w", tx.Error)
+	}
+
+	doc := model.ProofChainArweaveDocument{
+		Action:            pc.Action,
+		Platform:          pc.Platform,
+		Identity:          pc.Identity,
+		ProofLocation:     pc.Location,
+		CreatedAt:         pc.CreatedAt.String(),
+		Signature:         pc.Signature,
+		SignaturePayload:  pc.SignaturePayload,
+		Uuid:              pc.Uuid,
+		Extra:             pc.Extra,
+		PreviousUuid:      pc.Previous.Uuid,
+		PreviousArweaveID: pc.Previous.ArweaveID,
+	}
+
+	json, err := json.MarshalIndent(doc, "", "\t")
+	if err != nil {
+		return xerrors.Errorf("error marshalling document: %w", err)
+	}
+
+	artx, err := wallet.SendData(json, []artypes.Tag{
+		{
+			Name:  "ProofService-UUID",
+			Value: doc.Uuid,
+		},
+		{
+			Name:  "ProofService-PreviousUUID",
+			Value: doc.PreviousUuid,
+		},
+		{
+			Name:  "ProofService-PreviousArweaveID",
+			Value: doc.PreviousArweaveID,
+		},
+		{
+			Name:  "Content-Type",
+			Value: "application/json",
+		},
+	})
+
+	if err != nil {
+		return xerrors.Errorf("error sending data to arweave: %s: %w", artx.ID, err)
+	}
+
+	pc.ArweaveID = artx.ID
+
+	return nil
+}
+
+func revalidate_single(ctx context.Context, message *types.QueueMessage) error {
 	proof := model.Proof{}
 	tx := model.DB.Preload("ProofChain.Previous").First(&proof, message.ProofID)
 	if tx.Error != nil {
@@ -133,6 +204,13 @@ func init_config_from_aws_secret() {
 	if err != nil {
 		logrus.Fatalf("Error during parsing config JSON: %v", err)
 	}
+
+	// Arweave wallet initialize.
+	wallet, err = goar.NewWallet([]byte(myconfig.C.Arweave.Jwk), myconfig.C.Arweave.ClientUrl)
+	if err != nil {
+		logrus.Fatalf("Error during Arweave wallet initialization: %v", err)
+	}
+
 	initialized = true
 }
 
