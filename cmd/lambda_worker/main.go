@@ -79,6 +79,11 @@ func arweave_upload_single(ctx context.Context, message *types.QueueMessage) err
 		return xerrors.Errorf("%w", tx.Error)
 	}
 
+	// FIFO, prevent queue jumping.
+	if pc.PreviousID.Valid && pc.Previous.ArweaveID == "" {
+		return xerrors.Errorf("invalid previous proof chain due to empty arweave id: %d", pc.PreviousID.Int64)
+	}
+
 	doc := model.ProofChainArweaveDocument{
 		Action:            pc.Action,
 		Platform:          pc.Platform,
