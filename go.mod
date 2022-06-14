@@ -113,7 +113,7 @@ require (
 	github.com/samber/lo v1.15.0
 	github.com/stretchr/testify v1.7.1
 	golang.org/x/sys v0.0.0-20220422013727-9388b58f7150 // indirect
-	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f
+	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f
 	gorm.io/datatypes v1.0.6
 	gorm.io/driver/postgres v1.3.5
 	gorm.io/gorm v1.23.4
