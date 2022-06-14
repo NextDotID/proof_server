@@ -74,9 +74,9 @@ func arweave_upload_single(ctx context.Context, message *types.QueueMessage) err
 	}
 
 	proof := model.Proof{}
-	tx := model.DB.Preload("ProofChain").First(&proof, message.ProofID)
+	tx := model.DB.Preload("ProofChain").Preload("Previous").First(&proof, message.ProofID)
 	if tx.Error != nil {
-		return xerrors.Errorf("error reading proof reocrd: %w", tx.Error)
+		return xerrors.Errorf("error reading proof record: %w", tx.Error)
 	}
 
 	// FIFO, prevent queue jumping.
