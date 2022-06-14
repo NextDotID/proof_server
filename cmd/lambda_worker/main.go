@@ -73,13 +73,14 @@ func arweave_upload_single(ctx context.Context, message *types.QueueMessage) err
 		return xerrors.New("wallet is not initialized")
 	}
 
-	pc := model.ProofChain{}
-	tx := model.DB.Preload("Previous").First(&pc, message.ProofID)
+	proof := model.Proof{}
+	tx := model.DB.Preload("ProofChain").First(&proof, message.ProofID)
 	if tx.Error != nil {
-		return xerrors.Errorf("%w", tx.Error)
+		return xerrors.Errorf("error reading proof reocrd: %w", tx.Error)
 	}
 
 	// FIFO, prevent queue jumping.
+	pc := proof.ProofChain
 	if pc.PreviousID.Valid && pc.Previous.ArweaveID == "" {
 		return xerrors.Errorf("invalid previous proof chain due to empty arweave id: %d", pc.PreviousID.Int64)
 	}
