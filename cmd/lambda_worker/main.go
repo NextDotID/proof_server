@@ -118,10 +118,14 @@ func arweave_upload_single(ctx context.Context, message *types.QueueMessage) err
 	})
 
 	if err != nil {
-		return xerrors.Errorf("error sending data to arweave: %s: %w", artx.ID, err)
+		return xerrors.Errorf("error sending data to arweave: %s, %w", artx.ID, err)
 	}
 
 	pc.ArweaveID = artx.ID
+	tx = model.DB.Save(&pc)
+	if tx.Error != nil {
+		return xerrors.Errorf("error saving arweave id to database: %w", tx.Error)
+	}
 
 	return nil
 }
