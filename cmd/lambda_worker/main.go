@@ -20,6 +20,7 @@ import (
 	"github.com/nextdotid/proof-server/validator/ethereum"
 	"github.com/nextdotid/proof-server/validator/github"
 	"github.com/nextdotid/proof-server/validator/keybase"
+	"github.com/nextdotid/proof-server/validator/solana"
 	"github.com/nextdotid/proof-server/validator/twitter"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
@@ -79,6 +80,7 @@ func init_validators() {
 	github.Init()
 	discord.Init()
 	das.Init()
+	solana.Init()
 }
 
 func init() {

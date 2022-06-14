@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"github.com/nextdotid/proof-server/validator/discord"
 	"os"
+
+	"github.com/nextdotid/proof-server/validator/das"
+	"github.com/nextdotid/proof-server/validator/discord"
 
 	"github.com/akrylysov/algnhsa"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -16,8 +18,8 @@ import (
 	"github.com/nextdotid/proof-server/validator/ethereum"
 	"github.com/nextdotid/proof-server/validator/github"
 	"github.com/nextdotid/proof-server/validator/keybase"
-	"github.com/nextdotid/proof-server/validator/twitter"
 	"github.com/nextdotid/proof-server/validator/solana"
+	"github.com/nextdotid/proof-server/validator/twitter"
 	"github.com/sirupsen/logrus"
 )
 
@@ -35,6 +37,7 @@ func init_validators() {
 	keybase.Init()
 	github.Init()
 	discord.Init()
+	das.Init()
 	solana.Init()
 }
 
