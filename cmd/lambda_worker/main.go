@@ -91,8 +91,7 @@ func arweave_upload_many(message *types.QueueMessage) error {
 	}
 
 	for _, pc := range chains {
-		// Update empty record only.U
-		if pc.ArweaveID != "" {
+		if pc.ArweaveID != "" || (pc.PreviousID.Valid && pc.Previous.ArweaveID == "") {
 			continue
 		}
 
