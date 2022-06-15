@@ -96,13 +96,17 @@ func arweave_upload_many(message *types.QueueMessage) error {
 	}
 
 	for _, pc := range chains {
-		if pc.ArweaveID != "" || (pc.PreviousID.Valid && pc.Previous.ArweaveID == "") {
+		if pc.ArweaveID != "" {
 			continue
 		}
 
-		previous, _ := lo.Find(chains, func(item *model.ProofChain) bool {
+		previous, ok := lo.Find(chains, func(item *model.ProofChain) bool {
 			return pc.PreviousID.Valid && pc.PreviousID.Int64 == item.ID
 		})
+		if ok && previous.ArweaveID == "" {
+			logrus.Warnf("previous chain is not uploaded yet: %d", previous.ID)
+			break
+		}
 
 		if err := arweave_upload_single(pc, previous); err != nil {
 			logrus.Errorf("error uploading proof chain %s: %w", pc.Uuid, err)
