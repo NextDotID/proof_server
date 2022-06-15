@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -115,7 +116,7 @@ func arweave_upload_single(pc *model.ProofChain) error {
 		Platform:          pc.Platform,
 		Identity:          pc.Identity,
 		ProofLocation:     pc.Location,
-		CreatedAt:         pc.CreatedAt.String(),
+		CreatedAt:         strconv.FormatInt(pc.CreatedAt.Unix(), 10),
 		Signature:         pc.Signature,
 		SignaturePayload:  pc.SignaturePayload,
 		Uuid:              pc.Uuid,
