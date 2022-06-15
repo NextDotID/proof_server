@@ -35,8 +35,9 @@ type ProofQueryPaginationResponse struct {
 }
 
 type ProofQueryResponseSingle struct {
-	Persona string                          `json:"persona"`
-	Proofs  []ProofQueryResponseSingleProof `json:"proofs"`
+	Persona       string                          `json:"persona"`
+	LastArweaveID string                          `json:"last_arweave_id"`
+	Proofs        []ProofQueryResponseSingleProof `json:"proofs"`
 }
 
 type ProofQueryResponseSingleProof struct {
@@ -145,6 +146,14 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 				}
 			}),
 		}
+
+		lastPc := model.ProofChain{}
+		tx = model.DB.Where("persona = ?", persona).Last(&lastPc)
+		if tx.Error != nil {
+			return result, pagination
+		}
+
+		single.LastArweaveID = lastPc.ArweaveID
 
 		result = append(result, single)
 	}
