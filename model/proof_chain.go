@@ -30,7 +30,7 @@ type ProofChain struct {
 	SignaturePayload string         `gorm:"column:signature_payload"`
 	Extra            datatypes.JSON `gorm:"default:'{}'"`
 	Uuid             string         `gorm:"index;column:uuid"`
-	ArweaveID        string         `gorm:"column:arweave_id"`
+	ArweaveID        string         `gorm:"column:arweave_id;not null;default:''"`
 	PreviousID       sql.NullInt64  `gorm:"index"`
 	Previous         *ProofChain
 }
