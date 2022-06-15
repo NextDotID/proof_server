@@ -79,15 +79,15 @@ func arweave_upload_many(message *types.QueueMessage) error {
 	tx := model.DB.Begin()
 
 	chains := []model.ProofChain{}
-	err := tx.
+	findTx := tx.
 		Clauses(clause.Locking{Strength: "UPDATE"}).
 		Where("persona = ? AND arweave_id = ?", message.Persona, "").
 		Order("ID asc").
 		Preload("Previous").
 		Find(&chains)
-	if err != nil {
+	if findTx.Error != nil {
 		tx.Rollback()
-		return xerrors.Errorf("error when find and lock proof chains: %w", err)
+		return xerrors.Errorf("error when find and lock proof chains: %w", findTx.Error)
 	}
 
 	if len(chains) == 0 {
@@ -106,9 +106,9 @@ func arweave_upload_many(message *types.QueueMessage) error {
 		}
 	}
 
-	if err = tx.Save(&chains); err != nil {
+	if saveTx := tx.Save(&chains); saveTx.Error != nil {
 		tx.Rollback()
-		return xerrors.Errorf("error saving proof chains arweave id updates: %w", err)
+		return xerrors.Errorf("error saving proof chains arweave id updates: %w", saveTx.Error)
 	}
 
 	if commiTx := tx.Commit(); commiTx.Error != nil {
