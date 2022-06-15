@@ -78,7 +78,7 @@ func arweave_upload_many(message *types.QueueMessage) error {
 
 	tx := model.DB.Begin()
 
-	chains := []model.ProofChain{}
+	chains := []*model.ProofChain{}
 	findTx := tx.
 		Clauses(clause.Locking{Strength: "UPDATE"}).
 		Where("persona = ? AND arweave_id = ?", message.Persona, "").
@@ -91,7 +91,7 @@ func arweave_upload_many(message *types.QueueMessage) error {
 	}
 
 	if len(chains) == 0 {
-		// No chains to upload.
+		logrus.Warnf("no chains to upload: %s", message.Persona)
 		return nil
 	}
 
@@ -100,15 +100,15 @@ func arweave_upload_many(message *types.QueueMessage) error {
 			continue
 		}
 
-		if err := arweave_upload_single(&pc); err != nil {
+		if err := arweave_upload_single(pc); err != nil {
 			logrus.Errorf("error uploading proof chain %s: %w", pc.Uuid, err)
 			break
 		}
-	}
 
-	if saveTx := tx.Save(&chains); saveTx.Error != nil {
-		tx.Rollback()
-		return xerrors.Errorf("error saving proof chains arweave id updates: %w", saveTx.Error)
+		if saveTx := tx.Save(pc); saveTx.Error != nil {
+			tx.Rollback()
+			return xerrors.Errorf("error when save proof chain: %w", saveTx.Error)
+		}
 	}
 
 	if commiTx := tx.Commit(); commiTx.Error != nil {
