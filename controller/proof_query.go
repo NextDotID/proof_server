@@ -147,6 +147,7 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 			}),
 		}
 
+		// TODO: optimize performance here?
 		lastPc := model.ProofChain{}
 		tx = model.DB.Where("persona = ?", persona).Last(&lastPc)
 		if tx.Error != nil {

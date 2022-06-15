@@ -178,6 +178,7 @@ Request failed.
       + next (number, required) - Next page. `0` if current page is the last one.
     + ids (array[object], required) - All IDs found. Will be empty array if not found.
       + persona (string, required) - Persona public key
+      + last_arweave_id (string, required) - Arweave transaction ID of last proof this persona signed
       + proofs (array[object], required) - All proofs under this persona
         + platform (string, required) - Platform
         + identity (string, required) - Identity on that platform
@@ -301,6 +302,7 @@ Found.
         + signature_payload (string, required) - Raw string to be sent to `personal_sign`
         + extra (string, optional) -  Extra info for specific platform needed.
         + uuid (string, required) - UUID of this chain link. Use the exact value from `POST /v1/proof/payload`.
+        + arweave_id (string, required) - Arweave transaction ID of this proof
 
 
   + Body
