@@ -119,6 +119,13 @@ func arweave_upload_many(message *types.QueueMessage) error {
 }
 
 func arweave_upload_single(pc *model.ProofChain) error {
+	previousUuid := ""
+	previousArweaveID := ""
+	if pc.Previous != nil {
+		previousUuid = pc.Previous.Uuid
+		previousArweaveID = pc.Previous.ArweaveID
+	}
+
 	doc := model.ProofChainArweaveDocument{
 		Action:            pc.Action,
 		Platform:          pc.Platform,
@@ -129,8 +136,8 @@ func arweave_upload_single(pc *model.ProofChain) error {
 		SignaturePayload:  pc.SignaturePayload,
 		Uuid:              pc.Uuid,
 		Extra:             pc.Extra,
-		PreviousUuid:      pc.Previous.Uuid,
-		PreviousArweaveID: pc.Previous.ArweaveID,
+		PreviousUuid:      previousUuid,
+		PreviousArweaveID: previousArweaveID,
 	}
 
 	json, err := json.MarshalIndent(doc, "", "\t")
