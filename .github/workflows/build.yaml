@@ -50,9 +50,11 @@ jobs:
     - name: Download lambda binary
       uses: actions/download-artifact@v3
       with:
-        name: |
-          lambda_staging
-          lambda_worker_staging
+        name: lambda_staging
+    - name: Download lambda worker binary
+      uses: actions/download-artifact@v3
+      with:
+        name: lambda_worker_staging
 
     - name: Package lambda binary into zip
       run: |
