@@ -25,6 +25,7 @@ import (
 	"github.com/nextdotid/proof-server/validator/keybase"
 	"github.com/nextdotid/proof-server/validator/solana"
 	"github.com/nextdotid/proof-server/validator/twitter"
+	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"gorm.io/gorm/clause"
@@ -81,9 +82,8 @@ func arweave_upload_many(message *types.QueueMessage) error {
 	chains := []*model.ProofChain{}
 	findTx := tx.
 		Clauses(clause.Locking{Strength: "UPDATE"}).
-		Where("persona = ? AND arweave_id = ?", message.Persona, "").
+		Where("persona = ?", message.Persona).
 		Order("ID asc").
-		Preload("Previous").
 		Find(&chains)
 	if findTx.Error != nil {
 		tx.Rollback()
@@ -100,7 +100,11 @@ func arweave_upload_many(message *types.QueueMessage) error {
 			continue
 		}
 
-		if err := arweave_upload_single(pc); err != nil {
+		previous, _ := lo.Find(chains, func(item *model.ProofChain) bool {
+			return pc.PreviousID.Valid && pc.PreviousID.Int64 == item.ID
+		})
+
+		if err := arweave_upload_single(pc, previous); err != nil {
 			logrus.Errorf("error uploading proof chain %s: %w", pc.Uuid, err)
 			break
 		}
@@ -111,19 +115,19 @@ func arweave_upload_many(message *types.QueueMessage) error {
 		}
 	}
 
-	if commiTx := tx.Commit(); commiTx.Error != nil {
-		return xerrors.Errorf("error committing transaction: %w", commiTx.Error)
+	if commitTx := tx.Commit(); commitTx.Error != nil {
+		return xerrors.Errorf("error committing transaction: %w", commitTx.Error)
 	}
 
 	return nil
 }
 
-func arweave_upload_single(pc *model.ProofChain) error {
+func arweave_upload_single(pc *model.ProofChain, previous *model.ProofChain) error {
 	previousUuid := ""
 	previousArweaveID := ""
-	if pc.Previous != nil {
-		previousUuid = pc.Previous.Uuid
-		previousArweaveID = pc.Previous.ArweaveID
+	if previous != nil {
+		previousUuid = previous.Uuid
+		previousArweaveID = previous.ArweaveID
 	}
 
 	doc := model.ProofChainArweaveDocument{
