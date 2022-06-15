@@ -5,9 +5,6 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/nextdotid/proof-server/util/sqs"
-	"github.com/nextdotid/proof-server/validator/discord"
-
 	"github.com/akrylysov/algnhsa"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -20,6 +17,9 @@ import (
 	"github.com/nextdotid/proof-server/validator/keybase"
 	"github.com/nextdotid/proof-server/validator/solana"
 	"github.com/nextdotid/proof-server/validator/twitter"
+	"github.com/nextdotid/proof-server/validator/das"
+	"github.com/nextdotid/proof-server/validator/discord"
+	"github.com/nextdotid/proof-server/util/sqs"
 	"github.com/sirupsen/logrus"
 )
 
@@ -41,6 +41,7 @@ func init_validators() {
 	keybase.Init()
 	github.Init()
 	discord.Init()
+	das.Init()
 	solana.Init()
 }
 
