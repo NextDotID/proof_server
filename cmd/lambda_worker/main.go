@@ -75,15 +75,18 @@ func arweave_upload_many(message *types.QueueMessage) error {
 		return xerrors.New("wallet is not initialized")
 	}
 
+	tx := model.DB.Begin()
+
 	chains := []model.ProofChain{}
-	tx := model.DB.
+	err := tx.
 		Clauses(clause.Locking{Strength: "UPDATE"}).
 		Where("persona = ? AND arweave_id = ?", message.Persona, "").
 		Order("ID asc").
 		Preload("Previous").
 		Find(&chains)
-	if tx.Error != nil {
-		return xerrors.Errorf("error when find and lock proof chains: %w", tx.Error)
+	if err != nil {
+		tx.Rollback()
+		return xerrors.Errorf("error when find and lock proof chains: %w", err)
 	}
 
 	if len(chains) == 0 {
@@ -102,9 +105,13 @@ func arweave_upload_many(message *types.QueueMessage) error {
 		}
 	}
 
-	tx = model.DB.Save(&chains)
-	if tx.Error != nil {
-		return xerrors.Errorf("error saving proof chains arweave id updates: %w", tx.Error)
+	if err = tx.Save(&chains); err != nil {
+		tx.Rollback()
+		return xerrors.Errorf("error saving proof chains arweave id updates: %w", err)
+	}
+
+	if commiTx := tx.Commit(); commiTx.Error != nil {
+		return xerrors.Errorf("error committing transaction: %w", commiTx.Error)
 	}
 
 	return nil
