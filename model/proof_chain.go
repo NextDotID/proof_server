@@ -30,6 +30,7 @@ type ProofChain struct {
 	SignaturePayload string         `gorm:"column:signature_payload"`
 	Extra            datatypes.JSON `gorm:"default:'{}'"`
 	Uuid             string         `gorm:"index;column:uuid"`
+	ArweaveID        string         `gorm:"column:arweave_id"`
 	PreviousID       sql.NullInt64  `gorm:"index"`
 	Previous         *ProofChain
 }
@@ -45,6 +46,22 @@ type ProofChainItem struct {
 	SignaturePayload string         `json:"signature_payload"`
 	Uuid             string         `json:"uuid"`
 	Extra            datatypes.JSON `json:"extra"`
+	ArweaveID        string         `json:"arweave_id"`
+}
+
+// Arweave data ID
+type ProofChainArweaveDocument struct {
+	Action            types.Action   `json:"action"`
+	Platform          types.Platform `json:"platform"`
+	Identity          string         `json:"identity"`
+	ProofLocation     string         `json:"proof_location"`
+	CreatedAt         string         `json:"created_at"`
+	Signature         string         `json:"signature"`
+	SignaturePayload  string         `json:"signature_payload"`
+	Uuid              string         `json:"uuid"`
+	Extra             datatypes.JSON `json:"extra"`
+	PreviousUuid      string         `json:"previous_uuid"`
+	PreviousArweaveID string         `json:"previous_arweave_id"`
 }
 
 func (ProofChain) TableName() string {
@@ -208,6 +225,7 @@ func ProofChainCreateFromValidator(validator *validator.Base) (pc *ProofChain, e
 		CreatedAt:        validator.CreatedAt,
 		Uuid:             validator.Uuid.String(),
 		Previous:         nil,
+		ArweaveID:        "",
 	}
 
 	if validator.Previous != "" {
@@ -266,6 +284,7 @@ func ProofChainFindByPersona(persona string, all_data bool, from int, limit int)
 			SignaturePayload: item.SignaturePayload,
 			Uuid:             item.Uuid,
 			Extra:            item.Extra,
+			ArweaveID:        item.ArweaveID,
 		})
 	}
 	return total, rs, nil

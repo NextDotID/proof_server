@@ -7,10 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nextdotid/proof-server/common"
 	"github.com/nextdotid/proof-server/validator"
+	"github.com/sirupsen/logrus"
 )
 
 var (
 	Engine *gin.Engine
+	l      = logrus.WithFields(logrus.Fields{"module": "controller"})
 )
 
 type ErrorResponse struct {

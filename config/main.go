@@ -3,9 +3,10 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
+
+	"github.com/spf13/viper"
 
 	"github.com/sirupsen/logrus"
 )
@@ -13,6 +14,8 @@ import (
 type Config struct {
 	DB       DBConfig       `json:"db"`
 	Platform PlatformConfig `json:"platform"`
+	Arweave  ArweaveConfig  `json:"arweave"`
+	Sqs      SqsConfig      `json:"sqs"`
 }
 
 type DBConfig struct {
@@ -28,6 +31,15 @@ type PlatformConfig struct {
 	Twitter  TwitterPlatformConfig  `json:"twitter"`
 	Ethereum EthereumPlatformConfig `json:"ethereum"`
 	Discord  DiscordPlatformConfig  `json:"discord"`
+}
+
+type ArweaveConfig struct {
+	Jwk       string `json:"jwk"`
+	ClientUrl string `json:"client_url"`
+}
+
+type SqsConfig struct {
+	QueueName string `json:"queue_name"`
 }
 
 type TwitterPlatformConfig struct {

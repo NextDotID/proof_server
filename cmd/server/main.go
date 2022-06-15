@@ -4,14 +4,14 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/nextdotid/proof-server/validator/discord"
-	"github.com/nextdotid/proof-server/validator/solana"
 	"github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/controller"
 	"github.com/nextdotid/proof-server/model"
+	"github.com/nextdotid/proof-server/validator/discord"
 	"github.com/nextdotid/proof-server/validator/ethereum"
 	"github.com/nextdotid/proof-server/validator/github"
 	"github.com/nextdotid/proof-server/validator/keybase"
+	"github.com/nextdotid/proof-server/validator/solana"
 	"github.com/nextdotid/proof-server/validator/twitter"
 	"github.com/sirupsen/logrus"
 )
