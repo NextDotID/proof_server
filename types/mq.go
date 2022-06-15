@@ -12,6 +12,9 @@ var QueueActions = struct {
 
 // QueueMessage indicates structure of messages in Amazon SQS.
 type QueueMessage struct {
-	Action  QueueAction `json:"action"`
-	ProofID int64       `json:"proof_id"`
+	Action QueueAction `json:"action"`
+	// For revalidate.
+	ProofID int64 `json:"proof_id"`
+	// For Arweave upload.
+	Persona string `json:"persona"`
 }

@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"github.com/nextdotid/proof-server/validator/discord"
 	"os"
+
+	"github.com/nextdotid/proof-server/util/sqs"
+	"github.com/nextdotid/proof-server/validator/discord"
 
 	"github.com/akrylysov/algnhsa"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -16,8 +18,8 @@ import (
 	"github.com/nextdotid/proof-server/validator/ethereum"
 	"github.com/nextdotid/proof-server/validator/github"
 	"github.com/nextdotid/proof-server/validator/keybase"
-	"github.com/nextdotid/proof-server/validator/twitter"
 	"github.com/nextdotid/proof-server/validator/solana"
+	"github.com/nextdotid/proof-server/validator/twitter"
 	"github.com/sirupsen/logrus"
 )
 
@@ -27,6 +29,10 @@ var (
 
 func init_db(cfg aws.Config) {
 	model.Init()
+}
+
+func init_sqs(cfg aws.Config) {
+	sqs.Init(cfg)
 }
 
 func init_validators() {
@@ -51,6 +57,7 @@ func init() {
 	logrus.SetLevel(logrus.WarnLevel)
 
 	init_db(cfg)
+	init_sqs(cfg)
 	init_validators()
 	controller.Init()
 }

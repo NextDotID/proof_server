@@ -25,6 +25,7 @@ import (
 	"github.com/nextdotid/proof-server/validator/twitter"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
+	"gorm.io/gorm/clause"
 )
 
 var (
@@ -53,7 +54,7 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) error {
 
 		switch message.Action {
 		case types.QueueActions.ArweaveUpload:
-			if err := arweave_upload_single(ctx, &message); err != nil {
+			if err := arweave_upload_many(&message); err != nil {
 				return err
 			}
 		case types.QueueActions.Revalidate:
@@ -68,23 +69,42 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) error {
 	return nil
 }
 
-func arweave_upload_single(ctx context.Context, message *types.QueueMessage) error {
+func arweave_upload_many(message *types.QueueMessage) error {
 	if wallet == nil {
 		return xerrors.New("wallet is not initialized")
 	}
 
-	proof := model.Proof{}
-	tx := model.DB.Preload("ProofChain").Preload("Previous").First(&proof, message.ProofID)
+	chains := []model.ProofChain{}
+	tx := model.DB.
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("persona = ?", message.Persona).
+		Where("arweave_id = ?", "").
+		Order("ID asc").
+		Find(&chains)
 	if tx.Error != nil {
-		return xerrors.Errorf("error reading proof record: %w", tx.Error)
+		return xerrors.Errorf("error when find and lock proof chains: %w", tx.Error)
 	}
 
-	// FIFO, prevent queue jumping.
-	pc := proof.ProofChain
-	if pc.PreviousID.Valid && pc.Previous.ArweaveID == "" {
-		return xerrors.Errorf("invalid previous proof chain due to empty arweave id: %d", pc.PreviousID.Int64)
+	for _, pc := range chains {
+		// Update empty record only.U
+		if pc.ArweaveID != "" {
+			continue
+		}
+
+		if err := arweave_upload_single(&pc); err != nil {
+			break
+		}
 	}
 
+	tx = model.DB.Save(&chains)
+	if tx.Error != nil {
+		return xerrors.Errorf("error saving proof chains arweave id updates: %w", tx.Error)
+	}
+
+	return nil
+}
+
+func arweave_upload_single(pc *model.ProofChain) error {
 	doc := model.ProofChainArweaveDocument{
 		Action:            pc.Action,
 		Platform:          pc.Platform,
@@ -128,10 +148,6 @@ func arweave_upload_single(ctx context.Context, message *types.QueueMessage) err
 	}
 
 	pc.ArweaveID = artx.ID
-	tx = model.DB.Save(&pc)
-	if tx.Error != nil {
-		return xerrors.Errorf("error saving arweave id to database: %w", tx.Error)
-	}
 
 	return nil
 }
@@ -152,6 +168,10 @@ func revalidate_single(ctx context.Context, message *types.QueueMessage) error {
 func init_db(cfg aws.Config) {
 	model.Init()
 }
+
+// func init_sqs(cfg aws.Config) {
+// 	sqs.Init(cfg)
+// }
 
 func init_validators() {
 	twitter.Init()
@@ -174,6 +194,7 @@ func init() {
 	logrus.SetLevel(logrus.WarnLevel)
 
 	init_db(cfg)
+	// init_sqs(cfg)
 	init_validators()
 }
 
