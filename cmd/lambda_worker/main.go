@@ -77,12 +77,17 @@ func arweave_upload_many(message *types.QueueMessage) error {
 	chains := []model.ProofChain{}
 	tx := model.DB.
 		Clauses(clause.Locking{Strength: "UPDATE"}).
-		Where("persona = ?", message.Persona).
-		Where("arweave_id = ?", "").
+		Where("persona = ? AND arweave_id = ?", message.Persona, "").
 		Order("ID asc").
+		Preload("Previous").
 		Find(&chains)
 	if tx.Error != nil {
 		return xerrors.Errorf("error when find and lock proof chains: %w", tx.Error)
+	}
+
+	if len(chains) == 0 {
+		// No chains to upload.
+		return nil
 	}
 
 	for _, pc := range chains {
@@ -92,6 +97,7 @@ func arweave_upload_many(message *types.QueueMessage) error {
 		}
 
 		if err := arweave_upload_single(&pc); err != nil {
+			logrus.Errorf("error uploading proof chain %s: %w", pc.Uuid, err)
 			break
 		}
 	}
