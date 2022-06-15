@@ -53,14 +53,28 @@ jobs:
         name: lambda_staging
 
     - name: Package lambda binary into zip
-      run: mv lambda_staging lambda && chmod a+x lambda && zip lambda.zip lambda
+      run: |
+        mv lambda_staging lambda
+        mv lambda_worker_staging worker
+        chmod a+x lambda
+        zip lambda.zip lambda
+        chmod a+x worker
+        zip worker.zip worker
     - uses: actions/setup-python@v3
       with:
         python-version: '3.x'
-    - name: Deploy to AWS Lambda
+    - name: Deploy to AWS Lambda (main)
       run: |
         pip3 install awscli
         aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME_STAGING }} --zip-file 'fileb://./lambda.zip' > /dev/null
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+    - name: Deploy to AWS Lambda (worker)
+      run: |
+        pip3 install awscli
+        aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_WORKER_NAME_STAGING }} --zip-file 'fileb://./worker.zip' > /dev/null
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
