@@ -36,6 +36,7 @@ type ProofQueryPaginationResponse struct {
 
 type ProofQueryResponseSingle struct {
 	Persona       string                          `json:"persona"`
+	Avatar        string                          `json:"avatar"`
 	LastArweaveID string                          `json:"last_arweave_id"`
 	Proofs        []ProofQueryResponseSingleProof `json:"proofs"`
 }
@@ -135,6 +136,7 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 		}
 		single := ProofQueryResponseSingle{
 			Persona: persona,
+			Avatar:  persona,
 			Proofs: lo.Map(proofs, func(proof model.Proof, _index int) ProofQueryResponseSingleProof {
 				return ProofQueryResponseSingleProof{
 					Platform:      proof.Platform,

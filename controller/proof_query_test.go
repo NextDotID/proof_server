@@ -90,6 +90,7 @@ func Test_proofQuery(t *testing.T) {
 		require.Equal(t, 1, len(resp.IDs))
 		found := resp.IDs[0]
 		require.Equal(t, persona, found.Persona)
+		require.Equal(t, persona, found.Avatar)
 		require.Equal(t, 2, len(found.Proofs))
 		require.Equal(t, 0, resp.Pagination.Next)
 		require.Equal(t, int64(1), resp.Pagination.Total)
@@ -101,6 +102,7 @@ func Test_proofQuery(t *testing.T) {
 		require.Equal(t, 1, len(resp.IDs))
 		found = partial_resp.IDs[0]
 		require.Equal(t, persona, found.Persona)
+		require.Equal(t, persona, found.Avatar)
 		require.Equal(t, 2, len(found.Proofs))
 
 		empty_resp := ProofQueryResponse{}
@@ -117,6 +119,7 @@ func Test_proofQuery(t *testing.T) {
 		require.Equal(t, 1, len(resp.IDs))
 		found := resp.IDs[0]
 		require.Equal(t, persona, found.Persona)
+		require.Equal(t, persona, found.Avatar)
 		require.Equal(t, 2, len(found.Proofs))
 	})
 
