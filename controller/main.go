@@ -37,6 +37,7 @@ func Init() {
 	Engine.POST("/v1/proof", proofUpload)
 	Engine.GET("/v1/proof/exists", proofExists)
 	Engine.GET("/v1/proof", proofQuery)
+	Engine.GET("/v1/proofchain/changes", proofChainChanges)
 	Engine.GET("/v1/proofchain", proofChainQuery)
 }
 

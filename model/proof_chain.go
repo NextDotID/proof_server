@@ -13,6 +13,7 @@ import (
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
+	"github.com/samber/lo"
 	"golang.org/x/xerrors"
 	"gorm.io/datatypes"
 )
@@ -85,6 +86,21 @@ func (pc *ProofChain) Apply() (err error) {
 		return pc.deleteProof()
 	default:
 		return xerrors.Errorf("unknown action: %s", string(pc.Action))
+	}
+}
+
+func (pc *ProofChain) ToProofChainItem() ProofChainItem {
+	return ProofChainItem{
+		Action:           pc.Action,
+		Platform:         pc.Platform,
+		Identity:         pc.Identity,
+		ProofLocation:    pc.Location,
+		CreatedAt:        strconv.FormatInt(pc.CreatedAt.Unix(), 10),
+		Signature:        pc.Signature,
+		SignaturePayload: pc.SignaturePayload,
+		Uuid:             pc.Uuid,
+		Extra:            pc.Extra,
+		ArweaveID:        pc.ArweaveID,
 	}
 }
 
@@ -273,19 +289,9 @@ func ProofChainFindByPersona(persona string, all_data bool, from int, limit int)
 		return total, rs, tx.Error
 	}
 
-	for _, item := range proofs {
-		rs = append(rs, ProofChainItem{
-			Action:           item.Action,
-			Platform:         item.Platform,
-			Identity:         item.Identity,
-			ProofLocation:    item.Location,
-			CreatedAt:        strconv.FormatInt(item.CreatedAt.Unix(), 10),
-			Signature:        item.Signature,
-			SignaturePayload: item.SignaturePayload,
-			Uuid:             item.Uuid,
-			Extra:            item.Extra,
-			ArweaveID:        item.ArweaveID,
-		})
-	}
+	rs = lo.Map(proofs, func(item ProofChain, index int) ProofChainItem {
+		return item.ToProofChainItem()
+	})
+
 	return total, rs, nil
 }
