@@ -83,7 +83,7 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 
 	result := make([]ProofQueryResponseSingle, 0, 0)
 	proofs := make([]model.Proof, 0, 0)
-	tx := model.DB.Model(&model.Proof{})
+	tx := model.DB.Model(&model.Proof{}).Order("id DESC")
 
 	switch req.Platform {
 	case string(types.Platforms.NextID):
