@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
+
+	"github.com/spf13/viper"
 
 	"github.com/sirupsen/logrus"
 )
@@ -11,6 +14,8 @@ import (
 type Config struct {
 	DB       DBConfig       `json:"db"`
 	Platform PlatformConfig `json:"platform"`
+	Arweave  ArweaveConfig  `json:"arweave"`
+	Sqs      SqsConfig      `json:"sqs"`
 }
 
 type DBConfig struct {
@@ -25,6 +30,16 @@ type DBConfig struct {
 type PlatformConfig struct {
 	Twitter  TwitterPlatformConfig  `json:"twitter"`
 	Ethereum EthereumPlatformConfig `json:"ethereum"`
+	Discord  DiscordPlatformConfig  `json:"discord"`
+}
+
+type ArweaveConfig struct {
+	Jwk       string `json:"jwk"`
+	ClientUrl string `json:"client_url"`
+}
+
+type SqsConfig struct {
+	QueueName string `json:"queue_name"`
 }
 
 type TwitterPlatformConfig struct {
@@ -38,8 +53,20 @@ type EthereumPlatformConfig struct {
 	RPCServer string `json:"rpc_server"`
 }
 
+type CliConfig struct {
+	ServerURL  string `json:"server_url"`
+	UploadPath string `json:"upload_url"`
+	QueryPath  string `json:"query_url"`
+}
+
+type DiscordPlatformConfig struct {
+	BotToken             string `json:"bot_token"`
+	ProofServerChannelID string `json:"proof_server_channel_id"`
+}
+
 var (
-	C *Config = new(Config)
+	C     *Config = new(Config)
+	Viper *viper.Viper
 )
 
 func Init(configPath string) {
@@ -54,6 +81,22 @@ func Init(configPath string) {
 	err = json.Unmarshal(configContent, C)
 	if err != nil {
 		logrus.Fatalf("Error duriong unmarshaling config file: %v", err)
+	}
+}
+
+func InitCliConfig() {
+	Viper = viper.New()
+
+	Viper.SetConfigName("cli") // config file name without extension
+	Viper.SetConfigType("toml")
+	//viper.AddConfigPath(".")
+	Viper.AddConfigPath("./config/") // config file path
+	//viper.AutomaticEnv()             // read value ENV variable
+
+	err := Viper.ReadInConfig()
+	if err != nil {
+		fmt.Printf("fatal error config file: cli err:%v \n", err)
+		os.Exit(1)
 	}
 }
 

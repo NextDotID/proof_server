@@ -2,7 +2,6 @@ package github
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -56,7 +55,7 @@ func (gh *Github) GeneratePostPayload() (post map[string]string) {
 		Persona:        "0x" + crypto.CompressedPubkeyHex(gh.Pubkey),
 		GithubUsername: gh.Identity,
 		SignPayload:    gh.GenerateSignPayload(),
-		Signature:      "%%SIG_BASE64%%",
+		Signature:      "%SIG_BASE64%",
 		CreatedAt:      util.TimeToTimestampString(gh.CreatedAt),
 		Uuid:           gh.Uuid.String(),
 	}
@@ -124,7 +123,7 @@ func (gh *Github) Validate() (err error) {
 	if err != nil {
 		return xerrors.Errorf("error when recovering pubkey: %w", err)
 	}
-	signature, err := base64.StdEncoding.DecodeString(payload.Signature)
+	signature, err := util.DecodeString(payload.Signature)
 	if err != nil {
 		return xerrors.Errorf("error when decoding signature: %w", err)
 	}

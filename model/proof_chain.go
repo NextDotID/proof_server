@@ -13,6 +13,7 @@ import (
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util/crypto"
 	"github.com/nextdotid/proof-server/validator"
+	"github.com/samber/lo"
 	"golang.org/x/xerrors"
 	"gorm.io/datatypes"
 )
@@ -30,6 +31,7 @@ type ProofChain struct {
 	SignaturePayload string         `gorm:"column:signature_payload"`
 	Extra            datatypes.JSON `gorm:"default:'{}'"`
 	Uuid             string         `gorm:"index;column:uuid"`
+	ArweaveID        string         `gorm:"column:arweave_id;not null;default:''"`
 	PreviousID       sql.NullInt64  `gorm:"index"`
 	Previous         *ProofChain
 }
@@ -45,6 +47,22 @@ type ProofChainItem struct {
 	SignaturePayload string         `json:"signature_payload"`
 	Uuid             string         `json:"uuid"`
 	Extra            datatypes.JSON `json:"extra"`
+	ArweaveID        string         `json:"arweave_id"`
+}
+
+// Arweave data ID
+type ProofChainArweaveDocument struct {
+	Action            types.Action   `json:"action"`
+	Platform          types.Platform `json:"platform"`
+	Identity          string         `json:"identity"`
+	ProofLocation     string         `json:"proof_location"`
+	CreatedAt         string         `json:"created_at"`
+	Signature         string         `json:"signature"`
+	SignaturePayload  string         `json:"signature_payload"`
+	Uuid              string         `json:"uuid"`
+	Extra             datatypes.JSON `json:"extra"`
+	PreviousUuid      string         `json:"previous_uuid"`
+	PreviousArweaveID string         `json:"previous_arweave_id"`
 }
 
 func (ProofChain) TableName() string {
@@ -68,6 +86,21 @@ func (pc *ProofChain) Apply() (err error) {
 		return pc.deleteProof()
 	default:
 		return xerrors.Errorf("unknown action: %s", string(pc.Action))
+	}
+}
+
+func (pc *ProofChain) ToProofChainItem() ProofChainItem {
+	return ProofChainItem{
+		Action:           pc.Action,
+		Platform:         pc.Platform,
+		Identity:         pc.Identity,
+		ProofLocation:    pc.Location,
+		CreatedAt:        strconv.FormatInt(pc.CreatedAt.Unix(), 10),
+		Signature:        pc.Signature,
+		SignaturePayload: pc.SignaturePayload,
+		Uuid:             pc.Uuid,
+		Extra:            pc.Extra,
+		ArweaveID:        pc.ArweaveID,
 	}
 }
 
@@ -200,7 +233,7 @@ func ProofChainCreateFromValidator(validator *validator.Base) (pc *ProofChain, e
 	pc = &ProofChain{
 		Action:           validator.Action,
 		Persona:          MarshalPersona(validator.Pubkey),
-		Identity:         strings.ToLower(validator.Identity), // TODO: exception may occur
+		Identity:         validator.Identity, // TODO: exception may occur
 		Platform:         validator.Platform,
 		Location:         validator.ProofLocation,
 		Signature:        MarshalSignature(validator.Signature),
@@ -208,6 +241,7 @@ func ProofChainCreateFromValidator(validator *validator.Base) (pc *ProofChain, e
 		CreatedAt:        validator.CreatedAt,
 		Uuid:             validator.Uuid.String(),
 		Previous:         nil,
+		ArweaveID:        "",
 	}
 
 	if validator.Previous != "" {
@@ -255,18 +289,9 @@ func ProofChainFindByPersona(persona string, all_data bool, from int, limit int)
 		return total, rs, tx.Error
 	}
 
-	for _, item := range proofs {
-		rs = append(rs, ProofChainItem{
-			Action:           item.Action,
-			Platform:         item.Platform,
-			Identity:         item.Identity,
-			ProofLocation:    item.Location,
-			CreatedAt:        strconv.FormatInt(item.CreatedAt.Unix(), 10),
-			Signature:        item.Signature,
-			SignaturePayload: item.SignaturePayload,
-			Uuid:             item.Uuid,
-			Extra:            item.Extra,
-		})
-	}
+	rs = lo.Map(proofs, func(item ProofChain, index int) ProofChainItem {
+		return item.ToProofChainItem()
+	})
+
 	return total, rs, nil
 }

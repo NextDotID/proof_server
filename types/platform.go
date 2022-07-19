@@ -9,10 +9,16 @@ var Platforms = struct {
 	Twitter  Platform
 	Keybase  Platform
 	Ethereum Platform
+	Discord  Platform
+	Das      Platform
+	Solana   Platform
 }{
 	Github:   "github",
 	NextID:   "nextid",
 	Twitter:  "twitter",
 	Keybase:  "keybase",
 	Ethereum: "ethereum",
+	Discord:  "discord",
+	Das:      "dotbit",
+	Solana:   "solana",
 }

@@ -35,8 +35,10 @@ type ProofQueryPaginationResponse struct {
 }
 
 type ProofQueryResponseSingle struct {
-	Persona string                          `json:"persona"`
-	Proofs  []ProofQueryResponseSingleProof `json:"proofs"`
+	Persona       string                          `json:"persona"`
+	Avatar        string                          `json:"avatar"`
+	LastArweaveID string                          `json:"last_arweave_id"`
+	Proofs        []ProofQueryResponseSingleProof `json:"proofs"`
 }
 
 type ProofQueryResponseSingleProof struct {
@@ -81,7 +83,7 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 
 	result := make([]ProofQueryResponseSingle, 0, 0)
 	proofs := make([]model.Proof, 0, 0)
-	tx := model.DB.Model(&model.Proof{})
+	tx := model.DB.Model(&model.Proof{}).Order("id DESC")
 
 	switch req.Platform {
 	case string(types.Platforms.NextID):
@@ -134,6 +136,7 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 		}
 		single := ProofQueryResponseSingle{
 			Persona: persona,
+			Avatar:  persona,
 			Proofs: lo.Map(proofs, func(proof model.Proof, _index int) ProofQueryResponseSingleProof {
 				return ProofQueryResponseSingleProof{
 					Platform:      proof.Platform,
@@ -145,6 +148,15 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 				}
 			}),
 		}
+
+		// TODO: optimize performance here?
+		lastPc := model.ProofChain{}
+		tx = model.DB.Where("persona = ?", persona).Last(&lastPc)
+		if tx.Error != nil {
+			return result, pagination
+		}
+
+		single.LastArweaveID = lastPc.ArweaveID
 
 		result = append(result, single)
 	}

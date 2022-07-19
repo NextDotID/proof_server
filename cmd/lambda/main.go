@@ -15,7 +15,11 @@ import (
 	"github.com/nextdotid/proof-server/validator/ethereum"
 	"github.com/nextdotid/proof-server/validator/github"
 	"github.com/nextdotid/proof-server/validator/keybase"
+	"github.com/nextdotid/proof-server/validator/solana"
 	"github.com/nextdotid/proof-server/validator/twitter"
+	"github.com/nextdotid/proof-server/validator/das"
+	"github.com/nextdotid/proof-server/validator/discord"
+	"github.com/nextdotid/proof-server/util/sqs"
 	"github.com/sirupsen/logrus"
 )
 
@@ -27,11 +31,18 @@ func init_db(cfg aws.Config) {
 	model.Init()
 }
 
+func init_sqs(cfg aws.Config) {
+	sqs.Init(cfg)
+}
+
 func init_validators() {
 	twitter.Init()
 	ethereum.Init()
 	keybase.Init()
 	github.Init()
+	discord.Init()
+	das.Init()
+	solana.Init()
 }
 
 func init() {
@@ -47,6 +58,7 @@ func init() {
 	logrus.SetLevel(logrus.WarnLevel)
 
 	init_db(cfg)
+	init_sqs(cfg)
 	init_validators()
 	controller.Init()
 }

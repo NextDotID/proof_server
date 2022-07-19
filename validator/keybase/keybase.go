@@ -1,7 +1,6 @@
 package keybase
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -59,7 +58,7 @@ func (kb *Keybase) GeneratePostPayload() (post map[string]string) {
 		Persona:         "0x" + mycrypto.CompressedPubkeyHex(kb.Pubkey),
 		KeybaseUsername: kb.Identity,
 		SignPayload:     kb.GenerateSignPayload(),
-		Signature:       "%%SIG_BASE64%%",
+		Signature:       "%SIG_BASE64%",
 		CreatedAt:       util.TimeToTimestampString(kb.CreatedAt),
 		Uuid:            kb.Uuid.String(),
 	}
@@ -121,7 +120,7 @@ func (kb *Keybase) validateBody(payload *KeybasePayload) error {
 		return xerrors.Errorf("Persona mismatch")
 	}
 
-	sig_bytes, err := base64.StdEncoding.DecodeString(payload.Signature)
+	sig_bytes, err := util.DecodeString(payload.Signature)
 	if err != nil {
 		return xerrors.Errorf("error when decoding sig: %w", err)
 	}

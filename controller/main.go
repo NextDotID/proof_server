@@ -7,10 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nextdotid/proof-server/common"
 	"github.com/nextdotid/proof-server/validator"
+	"github.com/sirupsen/logrus"
 )
 
 var (
 	Engine *gin.Engine
+	l      = logrus.WithFields(logrus.Fields{"module": "controller"})
 )
 
 type ErrorResponse struct {
@@ -35,6 +37,7 @@ func Init() {
 	Engine.POST("/v1/proof", proofUpload)
 	Engine.GET("/v1/proof/exists", proofExists)
 	Engine.GET("/v1/proof", proofQuery)
+	Engine.GET("/v1/proofchain/changes", proofChainChanges)
 	Engine.GET("/v1/proofchain", proofChainQuery)
 }
 

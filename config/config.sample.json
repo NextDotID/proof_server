@@ -16,6 +16,10 @@
     },
     "ethereum": {
       "rpc_server": "https://polygon-rpc.com/"
+    },
+    "discord": {
+      "bot_token": "",
+      "proof_server_channel_id": ""
     }
   }
 }

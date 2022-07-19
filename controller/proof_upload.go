@@ -11,6 +11,7 @@ import (
 	"github.com/nextdotid/proof-server/types"
 	"github.com/nextdotid/proof-server/util"
 	mycrypto "github.com/nextdotid/proof-server/util/crypto"
+	"github.com/nextdotid/proof-server/util/sqs"
 	"github.com/nextdotid/proof-server/validator"
 	"golang.org/x/xerrors"
 )
@@ -56,9 +57,14 @@ func proofUpload(c *gin.Context) {
 		return
 	}
 
-	if err := applyUpload(&validator); err != nil {
+	if err = applyUpload(&validator); err != nil {
 		errorResp(c, 400, xerrors.Errorf("%w", err))
 		return
+	}
+
+	if err = triggerArweave(model.MarshalPersona(pubkey)); err != nil {
+		// Do not errorResp here, since it is a tolerable error.
+		l.Warnf("error sending arweave upload message: %v", err)
 	}
 
 	c.JSON(http.StatusCreated, gin.H{})
@@ -118,6 +124,19 @@ func applyUpload(validator *validator.Base) error {
 	err = pc.Apply()
 	if err != nil {
 		return xerrors.Errorf("%w", err)
+	}
+
+	return nil
+}
+
+func triggerArweave(persona string) error {
+	msg := types.QueueMessage{
+		Action:  types.QueueActions.ArweaveUpload,
+		Persona: persona,
+	}
+
+	if err := sqs.Send(msg); err != nil {
+		return xerrors.Errorf("error sending message to queue: %w", err)
 	}
 
 	return nil
