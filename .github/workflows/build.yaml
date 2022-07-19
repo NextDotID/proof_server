@@ -96,7 +96,12 @@ jobs:
         name: lambda_production
 
     - name: Package lambda binary into zip
-      run: mv lambda_production lambda && chmod a+x lambda && zip lambda.zip lambda
+      run: |
+        mv lambda_production lambda
+        mv lambda_worker_production worker
+        chmod a+x lambda worker
+        zip lambda.zip lambda
+        zip worker.zip worker
     - uses: actions/setup-python@v3
       with:
         python-version: '3.x'
@@ -104,6 +109,14 @@ jobs:
       run: |
         pip3 install awscli
         aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_NAME_PRODUCTION }} --zip-file 'fileb://./lambda.zip' > /dev/null
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+    - name: Deploy to AWS Lambda (worker)
+      run: |
+        pip3 install awscli
+        aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_WORKER_NAME_PRODUCTION }} --zip-file 'fileb://./worker.zip' > /dev/null
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
