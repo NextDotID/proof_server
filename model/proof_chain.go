@@ -18,7 +18,7 @@ import (
 	"gorm.io/datatypes"
 )
 
-//  ProofChain is a chain of a persona's proof modification log.
+// ProofChain is a chain of a persona's proof modification log.
 type ProofChain struct {
 	ID               int64          `gorm:"primarykey"`
 	CreatedAt        time.Time      `gorm:"column:created_at"`
@@ -52,6 +52,7 @@ type ProofChainItem struct {
 
 // Arweave data ID
 type ProofChainArweaveDocument struct {
+	Avatar            string         `json:"avatar"`
 	Action            types.Action   `json:"action"`
 	Platform          types.Platform `json:"platform"`
 	Identity          string         `json:"identity"`

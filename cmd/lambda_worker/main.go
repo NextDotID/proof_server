@@ -161,6 +161,7 @@ func arweave_bundle_single(pc *model.ProofChain, previous *model.ProofChain) (*a
 	}
 
 	doc := model.ProofChainArweaveDocument{
+		Avatar:            pc.Persona,
 		Action:            pc.Action,
 		Platform:          pc.Platform,
 		Identity:          pc.Identity,
