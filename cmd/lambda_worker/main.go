@@ -1,4 +1,4 @@
-/// Lambda worker for revalidating proof records
+// / Lambda worker for revalidating proof records
 package main
 
 import (
@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/everFinance/goar"
 	artypes "github.com/everFinance/goar/types"
+	"github.com/everFinance/goar/utils"
 	myconfig "github.com/nextdotid/proof-server/config"
 	"github.com/nextdotid/proof-server/model"
 	"github.com/nextdotid/proof-server/types"
@@ -41,6 +42,7 @@ func main() {
 }
 
 func handler(ctx context.Context, sqs_event events.SQSEvent) error {
+	arweaveMsgs := []*types.QueueMessage{}
 	for _, raw_message := range sqs_event.Records {
 		fmt.Printf(
 			"[%s] Received from [%s]: %s \n",
@@ -57,9 +59,7 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) error {
 
 		switch message.Action {
 		case types.QueueActions.ArweaveUpload:
-			if err := arweave_upload_many(&message); err != nil {
-				return err
-			}
+			arweaveMsgs = append(arweaveMsgs, &message)
 		case types.QueueActions.Revalidate:
 			if err := revalidate_single(ctx, &message); err != nil {
 				return err
@@ -69,54 +69,71 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) error {
 		}
 	}
 
+	if len(arweaveMsgs) > 0 {
+		if err := arweave_upload_many(arweaveMsgs); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-func arweave_upload_many(message *types.QueueMessage) error {
+func arweave_upload_many(messages []*types.QueueMessage) error {
 	if wallet == nil {
 		return xerrors.New("wallet is not initialized")
 	}
 
 	tx := model.DB.Begin()
+	items := []artypes.BundleItem{}
 
-	chains := []*model.ProofChain{}
-	findTx := tx.
-		Clauses(clause.Locking{Strength: "UPDATE"}).
-		Where("persona = ?", message.Persona).
-		Order("ID asc").
-		Find(&chains)
-	if findTx.Error != nil {
-		tx.Rollback()
-		return xerrors.Errorf("error when find and lock proof chains: %w", findTx.Error)
-	}
-
-	if len(chains) == 0 {
-		logrus.Warnf("no chains to upload: %s", message.Persona)
-		return nil
-	}
-
-	for _, pc := range chains {
-		if pc.ArweaveID != "" {
-			continue
-		}
-
-		previous, ok := lo.Find(chains, func(item *model.ProofChain) bool {
-			return pc.PreviousID.Valid && pc.PreviousID.Int64 == item.ID
-		})
-		if ok && previous.ArweaveID == "" {
-			logrus.Warnf("previous chain is not uploaded yet: %d", previous.ID)
-			break
-		}
-
-		if err := arweave_upload_single(pc, previous); err != nil {
-			logrus.Errorf("error uploading proof chain %s: %w", pc.Uuid, err)
-			break
-		}
-
-		if saveTx := tx.Save(pc); saveTx.Error != nil {
+	for _, message := range messages {
+		chains := []*model.ProofChain{}
+		findTx := tx.
+			Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("persona = ?", message.Persona).
+			Order("ID asc").
+			Find(&chains)
+		if findTx.Error != nil {
 			tx.Rollback()
-			return xerrors.Errorf("error when save proof chain: %w", saveTx.Error)
+			return xerrors.Errorf("error when find and lock proof chains: %w", findTx.Error)
 		}
+
+		if len(chains) == 0 {
+			logrus.Warnf("no chains to upload: %s", message.Persona)
+			return nil
+		}
+
+		for _, pc := range chains {
+			if pc.ArweaveID != "" {
+				continue
+			}
+
+			previous, ok := lo.Find(chains, func(item *model.ProofChain) bool {
+				return pc.PreviousID.Valid && pc.PreviousID.Int64 == item.ID
+			})
+			if ok && previous.ArweaveID == "" {
+				logrus.Warnf("previous chain is not uploaded yet: %d", previous.ID)
+				break
+			}
+
+			item, err := arweave_bundle_single(pc, previous)
+			if err != nil {
+				logrus.Errorf("error marshalling proof chain %s: %w", pc.Uuid, err)
+				break
+			}
+
+			items = append(items, *item)
+		}
+	}
+
+	bundle, err := utils.NewBundle(items...)
+	if err != nil {
+		return xerrors.Errorf("error creating bundle: %w", err)
+	}
+
+	arTx, err := wallet.SendBundleTx(bundle.BundleBinary, []artypes.Tag{})
+	if err != nil {
+		return xerrors.Errorf("error sending bundle: %s, %w", arTx.ID, err)
 	}
 
 	if commitTx := tx.Commit(); commitTx.Error != nil {
@@ -126,7 +143,7 @@ func arweave_upload_many(message *types.QueueMessage) error {
 	return nil
 }
 
-func arweave_upload_single(pc *model.ProofChain, previous *model.ProofChain) error {
+func arweave_bundle_single(pc *model.ProofChain, previous *model.ProofChain) (*artypes.BundleItem, error) {
 	previousUuid := ""
 	previousArweaveID := ""
 	if previous != nil {
@@ -150,10 +167,10 @@ func arweave_upload_single(pc *model.ProofChain, previous *model.ProofChain) err
 
 	json, err := json.MarshalIndent(doc, "", "\t")
 	if err != nil {
-		return xerrors.Errorf("error marshalling document: %w", err)
+		return nil, xerrors.Errorf("error marshalling document: %w", err)
 	}
 
-	artx, err := wallet.SendData(json, []artypes.Tag{
+	item, err := wallet.CreateAndSignBundleItem(json, 1, "", "", []artypes.Tag{
 		{
 			Name:  "ProofService-UUID",
 			Value: doc.Uuid,
@@ -171,14 +188,12 @@ func arweave_upload_single(pc *model.ProofChain, previous *model.ProofChain) err
 			Value: "application/json",
 		},
 	})
-
 	if err != nil {
-		return xerrors.Errorf("error sending data to arweave: %s, %w", artx.ID, err)
+		return nil, xerrors.Errorf("error creating bundle item: %s, %w", item.Id, err)
 	}
 
-	pc.ArweaveID = artx.ID
-
-	return nil
+	pc.ArweaveID = item.Id
+	return &item, nil
 }
 
 func revalidate_single(ctx context.Context, message *types.QueueMessage) error {
