@@ -126,6 +126,11 @@ func arweave_upload_many(messages []*types.QueueMessage) error {
 				break
 			}
 
+			if saveTx := tx.Save(pc); saveTx.Error != nil {
+				tx.Rollback()
+				return xerrors.Errorf("error when save proof chain: %w", saveTx.Error)
+			}
+
 			items = append(items, *item)
 		}
 	}
