@@ -83,6 +83,10 @@ func arweave_upload_many(messages []*types.QueueMessage) error {
 		return xerrors.New("wallet is not initialized")
 	}
 
+	messages = lo.UniqBy(messages, func(msg *types.QueueMessage) string {
+		return msg.Persona
+	})
+
 	tx := model.DB.Begin()
 	items := []artypes.BundleItem{}
 
