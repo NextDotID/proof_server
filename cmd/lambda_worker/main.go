@@ -37,6 +37,11 @@ var (
 	wallet      *goar.Wallet
 )
 
+const (
+	// Min number of messages to process at once
+	MIN_PERSONAS = 5
+)
+
 func main() {
 	lambda.Start(handler)
 }
@@ -69,7 +74,15 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) error {
 		}
 	}
 
+	arweaveMsgs = lo.UniqBy(arweaveMsgs, func(msg *types.QueueMessage) string {
+		return msg.Persona
+	})
 	if len(arweaveMsgs) > 0 {
+		// At least we need 5 persona in a batch to be cost-effective
+		if len(arweaveMsgs) < MIN_PERSONAS {
+			return xerrors.Errorf("received less than minimum: %d", len(arweaveMsgs))
+		}
+
 		if err := arweave_upload_many(arweaveMsgs); err != nil {
 			return err
 		}
@@ -82,10 +95,6 @@ func arweave_upload_many(messages []*types.QueueMessage) error {
 	if wallet == nil {
 		return xerrors.New("wallet is not initialized")
 	}
-
-	messages = lo.UniqBy(messages, func(msg *types.QueueMessage) string {
-		return msg.Persona
-	})
 
 	tx := model.DB.Begin()
 	items := []artypes.BundleItem{}
