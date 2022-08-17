@@ -11,3 +11,4 @@ config/*.toml
 !config/cli.sample.toml
 
 .idea
+.vscode/
