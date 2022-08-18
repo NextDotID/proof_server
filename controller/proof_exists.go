@@ -56,6 +56,7 @@ func proofExists(c *gin.Context) {
 		errorResp(c, http.StatusNotFound, xerrors.Errorf("Record not found for %s: %s", req.Platform, req.Identity))
 		return
 	}
+	go triggerRevalidate(found.ID)
 
 	c.JSON(http.StatusOK, ProofExistsResponse{
 		CreatedAt:     strconv.FormatInt(found.CreatedAt.Unix(), 10),
