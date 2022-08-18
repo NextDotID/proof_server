@@ -67,7 +67,7 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) error {
 			arweaveMsgs = append(arweaveMsgs, &message)
 		case types.QueueActions.Revalidate:
 			if err := revalidate_single(ctx, &message); err != nil {
-				return err
+				fmt.Printf("error revalidating proof record %d: %s\n", message.ProofID, err)
 			}
 		default:
 			logrus.Warnf("unsupported queue action: %s", message.Action)
