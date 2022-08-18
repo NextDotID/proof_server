@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nextdotid/proof-server/model"
 	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof-server/util/sqs"
 	"github.com/samber/lo"
 	"golang.org/x/xerrors"
 )
@@ -123,6 +124,12 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 	if tx.Error != nil || tx.RowsAffected == int64(0) || len(proofs) == 0 {
 		return result, pagination
 	}
+	// Trigger revalidate procedure
+	lo.ForEach(proofs, func(proof model.Proof, i int) {
+		if proof.IsOutdated() {
+			go triggerRevalidate(proof.ID)
+		}
+	})
 
 	personas := lo.Map(proofs, func(p model.Proof, _index int) string {
 		return p.Persona
@@ -165,4 +172,17 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 		pagination.Next = pagination.Current + 1
 	}
 	return result, pagination
+}
+
+func triggerRevalidate(proofID int64) error {
+	msg := types.QueueMessage{
+		Action:  types.QueueActions.Revalidate,
+		ProofID: proofID,
+	}
+
+	if err := sqs.Send(msg); err != nil {
+		return xerrors.Errorf("Failed to send message to queue: %w", err)
+	}
+
+	return nil
 }

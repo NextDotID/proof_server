@@ -8,6 +8,9 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// EXPIRED_IN is the time after which a proof is considered expired and should perform revalidate.
+const EXPIRED_IN = time.Hour * 24 * 3
+
 // Proof is final proof state of a user (persona).
 type Proof struct {
 	ID            int64 `gorm:"primarykey"`
@@ -37,6 +40,11 @@ func FindAllProofByPersona(persona any) (proofs []Proof, err error) {
 		return nil, xerrors.Errorf("error when finding proofs: %w", err)
 	}
 	return proofs, nil
+}
+
+// IsOutdated returns true if proof is outdated and should do a revalidate.
+func (proof *Proof) IsOutdated() bool {
+	return proof.LastCheckedAt.Add(EXPIRED_IN).Before(time.Now())
 }
 
 // Revalidate validates current proof, will update `IsValid` and
