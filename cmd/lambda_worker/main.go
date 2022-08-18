@@ -217,7 +217,7 @@ func arweave_bundle_single(pc *model.ProofChain, previous *model.ProofChain) (*a
 
 func revalidate_single(ctx context.Context, message *types.QueueMessage) error {
 	proof := model.Proof{}
-	tx := model.DB.Preload("ProofChain").Preload("ProofChain.Previous").First(&proof, message.ProofID)
+	tx := model.DB.Preload("ProofChain").Preload("ProofChain.Previous").Where("id = ?", message.ProofID).First(&proof)
 	if tx.Error != nil {
 		return xerrors.Errorf("%w", tx.Error)
 	}
