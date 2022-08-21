@@ -67,7 +67,7 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) error {
 			arweaveMsgs = append(arweaveMsgs, &message)
 		case types.QueueActions.Revalidate:
 			if err := revalidate_single(ctx, &message); err != nil {
-				return err
+				fmt.Printf("error revalidating proof record %d: %s\n", message.ProofID, err)
 			}
 		default:
 			logrus.Warnf("unsupported queue action: %s", message.Action)
@@ -217,7 +217,7 @@ func arweave_bundle_single(pc *model.ProofChain, previous *model.ProofChain) (*a
 
 func revalidate_single(ctx context.Context, message *types.QueueMessage) error {
 	proof := model.Proof{}
-	tx := model.DB.Preload("ProofChain.Previous").First(&proof, message.ProofID)
+	tx := model.DB.Preload("ProofChain").Preload("ProofChain.Previous").Where("id = ?", message.ProofID).First(&proof)
 	if tx.Error != nil {
 		return xerrors.Errorf("%w", tx.Error)
 	}
