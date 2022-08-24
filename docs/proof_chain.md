@@ -46,7 +46,7 @@ interface Link {
 // Main struct
 interface Chain {
     version: VERSION;
-    persona: {
+    avatar: {
         public_key: PublicKey,
         curve: "secp256k1",
     };
@@ -60,7 +60,7 @@ interface Chain {
 ```javascript
 {
     "version": "1",
-    "persona": {
+    "avatar": {
         "public_key": "0x0485554db28de6fefb7fe532164b67372a5e9d78dfd7f77e09a8b274f777c3e64f2e20353df005a83dbe4c5ca663638621ce4d1dd0c9586ab3fc71286b74741ed8",
         "curve": "secp256k1"
     },
@@ -103,10 +103,10 @@ function sign_link(link: Link): Signature {
     // Sign this using web3 personal_sign method
     // Specifically:
     let personal_signature_payload = keccak256("\x19Ethereum Signed Message:\n" + signature_payload.length + signature_payload)
-    let signature_bin: Buffer = persona_private_key.sign(personal_signature_payload)
+    let signature_bin: Buffer = avatar_private_key.sign(personal_signature_payload)
     let signature = "0x" + Base16.encode(signature_bin, {case: 'lower'})
 
-    // const signature = web3.eth.personal.sign(signature_payload, persona_private_key);
+    // const signature = web3.eth.personal.sign(signature_payload, avatar_private_key);
 
     // Final artifact should be a format like below:
     assert(signature.match(/^0x[0-9a-f]{130}$/))
