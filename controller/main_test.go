@@ -3,19 +3,20 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/nextdotid/proof-server/validator/discord"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
+	"github.com/nextdotid/proof_server/validator/discord"
+
 	"github.com/gin-gonic/gin"
-	"github.com/nextdotid/proof-server/config"
-	"github.com/nextdotid/proof-server/model"
-	"github.com/nextdotid/proof-server/validator/ethereum"
-	"github.com/nextdotid/proof-server/validator/github"
-	"github.com/nextdotid/proof-server/validator/keybase"
-	"github.com/nextdotid/proof-server/validator/twitter"
+	"github.com/nextdotid/proof_server/config"
+	"github.com/nextdotid/proof_server/model"
+	"github.com/nextdotid/proof_server/validator/ethereum"
+	"github.com/nextdotid/proof_server/validator/github"
+	"github.com/nextdotid/proof_server/validator/keybase"
+	"github.com/nextdotid/proof_server/validator/twitter"
 )
 
 func before_each(t *testing.T) {

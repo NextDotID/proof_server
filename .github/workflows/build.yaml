@@ -31,7 +31,7 @@ jobs:
         CGO_ENABLED: '0'
         GOARCH: amd64
         GOOS: linux
-      run: go build -ldflags "-X 'github.com/nextdotid/proof-server/common.Environment=${{ matrix.appenv }}' -X 'github.com/nextdotid/proof-server/common.Revision=${{ github.sha }}' -X 'github.com/nextdotid/proof-server/common.BuildTime=$(date +%s)'" -o ./build/${{ matrix.appcmd }}_${{ matrix.appenv }} ./cmd/${{ matrix.appcmd }}
+      run: go build -ldflags "-X 'github.com/nextdotid/proof_server/common.Environment=${{ matrix.appenv }}' -X 'github.com/nextdotid/proof_server/common.Revision=${{ github.sha }}' -X 'github.com/nextdotid/proof_server/common.BuildTime=$(date +%s)'" -o ./build/${{ matrix.appcmd }}_${{ matrix.appenv }} ./cmd/${{ matrix.appcmd }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
@@ -44,7 +44,7 @@ jobs:
   deploy-staging:
     needs: build
     name: Deploy to AWS Lambda (staging)
-    if: github.ref_name == 'develop' && github.repository == 'nextdotid/proof-server'
+    if: github.ref_name == 'develop' && github.repository == 'nextdotid/proof_server'
     runs-on: ubuntu-latest
     steps:
     - name: Download lambda binary
@@ -87,7 +87,7 @@ jobs:
   deploy-production:
     needs: build
     name: Deploy to AWS Lambda (production)
-    if: github.ref_name == 'master' && github.repository == 'nextdotid/proof-server'
+    if: github.ref_name == 'master' && github.repository == 'nextdotid/proof_server'
     runs-on: ubuntu-latest
     steps:
     - name: Download lambda binary

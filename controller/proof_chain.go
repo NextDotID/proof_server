@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/nextdotid/proof-server/model"
-	"golang.org/x/xerrors"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/nextdotid/proof_server/model"
+	"golang.org/x/xerrors"
 )
 
 type ProofChainRequest struct {

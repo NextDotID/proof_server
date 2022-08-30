@@ -3,9 +3,9 @@ package controller
 import (
 	"testing"
 
-	"github.com/nextdotid/proof-server/model"
-	"github.com/nextdotid/proof-server/types"
-	"github.com/nextdotid/proof-server/util"
+	"github.com/nextdotid/proof_server/model"
+	"github.com/nextdotid/proof_server/types"
+	"github.com/nextdotid/proof_server/util"
 	"github.com/stretchr/testify/assert"
 )
 

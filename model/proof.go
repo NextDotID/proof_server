@@ -3,8 +3,8 @@ package model
 import (
 	"time"
 
-	"github.com/nextdotid/proof-server/types"
-	"github.com/nextdotid/proof-server/validator"
+	"github.com/nextdotid/proof_server/types"
+	"github.com/nextdotid/proof_server/validator"
 	"golang.org/x/xerrors"
 )
 

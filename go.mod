@@ -1,4 +1,4 @@
-module github.com/nextdotid/proof-server
+module github.com/nextdotid/proof_server
 
 go 1.18
 

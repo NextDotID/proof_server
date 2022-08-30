@@ -5,7 +5,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/nextdotid/proof-server/config"
+	"github.com/nextdotid/proof_server/config"
 )
 
 var (

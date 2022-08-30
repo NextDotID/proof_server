@@ -2,9 +2,10 @@ package util
 
 import (
 	"encoding/base64"
-	"github.com/nextdotid/proof-server/util/base1024"
 	"strconv"
 	"time"
+
+	"github.com/nextdotid/proof_server/util/base1024"
 
 	"golang.org/x/xerrors"
 )

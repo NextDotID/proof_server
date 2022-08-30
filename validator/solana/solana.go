@@ -5,10 +5,10 @@ import (
 
 	"github.com/gagliardetto/solana-go"
 	"github.com/mr-tron/base58"
-	"github.com/nextdotid/proof-server/types"
-	"github.com/nextdotid/proof-server/util"
-	mycrypto "github.com/nextdotid/proof-server/util/crypto"
-	"github.com/nextdotid/proof-server/validator"
+	"github.com/nextdotid/proof_server/types"
+	"github.com/nextdotid/proof_server/util"
+	mycrypto "github.com/nextdotid/proof_server/util/crypto"
+	"github.com/nextdotid/proof_server/validator"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )

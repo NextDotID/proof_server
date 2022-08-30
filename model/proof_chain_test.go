@@ -3,13 +3,14 @@ package model
 import (
 	"database/sql"
 	"encoding/base64"
-	"github.com/nextdotid/proof-server/types"
-	"github.com/nextdotid/proof-server/util"
-	"github.com/nextdotid/proof-server/util/crypto"
-	"github.com/nextdotid/proof-server/validator"
-	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
+
+	"github.com/nextdotid/proof_server/types"
+	"github.com/nextdotid/proof_server/util"
+	"github.com/nextdotid/proof_server/util/crypto"
+	"github.com/nextdotid/proof_server/validator"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_ProofChainFindLatest(t *testing.T) {

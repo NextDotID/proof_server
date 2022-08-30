@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/nextdotid/proof-server/model"
-	"github.com/nextdotid/proof-server/types"
-	"github.com/nextdotid/proof-server/util/sqs"
+	"github.com/nextdotid/proof_server/model"
+	"github.com/nextdotid/proof_server/types"
+	"github.com/nextdotid/proof_server/util/sqs"
 	"github.com/samber/lo"
 	"golang.org/x/xerrors"
 )
