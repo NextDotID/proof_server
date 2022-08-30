@@ -94,6 +94,10 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: lambda_production
+    - name: Download lambda worker binary
+      uses: actions/download-artifact@v3
+      with:
+        name: lambda_worker_production
 
     - name: Package lambda binary into zip
       run: |
