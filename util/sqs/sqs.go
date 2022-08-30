@@ -6,7 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
-	myconfig "github.com/nextdotid/proof-server/config"
+	myconfig "github.com/nextdotid/proof_server/config"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )

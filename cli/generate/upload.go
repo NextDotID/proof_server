@@ -4,13 +4,14 @@ import (
 	"bufio"
 	"encoding/base64"
 	"fmt"
-	"github.com/go-resty/resty/v2"
-	"github.com/nextdotid/proof-server/config"
-	"github.com/nextdotid/proof-server/controller"
-	"github.com/nextdotid/proof-server/types"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/nextdotid/proof_server/config"
+	"github.com/nextdotid/proof_server/controller"
+	"github.com/nextdotid/proof_server/types"
 )
 
 func UploadToProof(gp GenerateParams, personaPublicKey string, createAt string, uuid string, signature []byte, walletSignature []byte) {

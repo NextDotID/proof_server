@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/nextdotid/proof-server/common"
-	"github.com/nextdotid/proof-server/validator"
+	"github.com/nextdotid/proof_server/common"
+	"github.com/nextdotid/proof_server/validator"
 	"github.com/sirupsen/logrus"
 )
 

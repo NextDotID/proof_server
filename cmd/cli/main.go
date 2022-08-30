@@ -3,10 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/nextdotid/proof-server/cli/generate"
-	"github.com/nextdotid/proof-server/cli/query"
 	"os"
 	"strconv"
+
+	"github.com/nextdotid/proof_server/cli/generate"
+	"github.com/nextdotid/proof_server/cli/query"
 )
 
 const (

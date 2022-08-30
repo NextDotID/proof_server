@@ -5,10 +5,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty/v2"
-	"github.com/nextdotid/proof-server/config"
 	"os"
 	"strconv"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/nextdotid/proof_server/config"
 )
 
 type QueryParams struct {

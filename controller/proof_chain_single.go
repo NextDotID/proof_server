@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/nextdotid/proof-server/model"
+	"github.com/nextdotid/proof_server/model"
 	"github.com/samber/lo"
 )
 

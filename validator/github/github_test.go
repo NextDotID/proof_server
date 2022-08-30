@@ -4,10 +4,10 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/nextdotid/proof-server/types"
-	"github.com/nextdotid/proof-server/util"
-	"github.com/nextdotid/proof-server/util/crypto"
-	"github.com/nextdotid/proof-server/validator"
+	"github.com/nextdotid/proof_server/types"
+	"github.com/nextdotid/proof_server/util"
+	"github.com/nextdotid/proof_server/util/crypto"
+	"github.com/nextdotid/proof_server/validator"
 	"github.com/stretchr/testify/assert"
 )
 

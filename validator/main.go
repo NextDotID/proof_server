@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/nextdotid/proof-server/types"
+	"github.com/nextdotid/proof_server/types"
 )
 
 var (

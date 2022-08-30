@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/stretchr/testify/assert"
 
-	myconfig "github.com/nextdotid/proof-server/config"
+	myconfig "github.com/nextdotid/proof_server/config"
 )
 
 type SQSSendMessageImpl struct{}

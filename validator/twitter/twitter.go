@@ -10,14 +10,14 @@ import (
 
 	t "github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-	"github.com/nextdotid/proof-server/config"
-	"github.com/nextdotid/proof-server/types"
-	"github.com/nextdotid/proof-server/util"
-	mycrypto "github.com/nextdotid/proof-server/util/crypto"
+	"github.com/nextdotid/proof_server/config"
+	"github.com/nextdotid/proof_server/types"
+	"github.com/nextdotid/proof_server/util"
+	mycrypto "github.com/nextdotid/proof_server/util/crypto"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 
-	"github.com/nextdotid/proof-server/validator"
+	"github.com/nextdotid/proof_server/validator"
 )
 
 type Twitter struct {

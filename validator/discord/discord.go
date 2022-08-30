@@ -10,13 +10,13 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/nextdotid/proof-server/config"
-	"github.com/nextdotid/proof-server/util"
+	"github.com/nextdotid/proof_server/config"
+	"github.com/nextdotid/proof_server/util"
 	"golang.org/x/xerrors"
 
-	"github.com/nextdotid/proof-server/types"
-	"github.com/nextdotid/proof-server/util/crypto"
-	"github.com/nextdotid/proof-server/validator"
+	"github.com/nextdotid/proof_server/types"
+	"github.com/nextdotid/proof_server/util/crypto"
+	"github.com/nextdotid/proof_server/validator"
 )
 
 type Discord struct {

@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/nextdotid/proof-server/config"
+	"github.com/nextdotid/proof_server/config"
 )
 
 func before_each(t *testing.T) {

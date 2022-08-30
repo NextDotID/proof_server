@@ -6,17 +6,18 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	ethcrypto "github.com/ethereum/go-ethereum/crypto"
-	"github.com/go-resty/resty/v2"
-	"github.com/nextdotid/proof-server/config"
-	"github.com/nextdotid/proof-server/controller"
-	"github.com/nextdotid/proof-server/types"
-	"github.com/nextdotid/proof-server/util/base1024"
-	"github.com/nextdotid/proof-server/util/crypto"
 	"net/http"
 	"os"
 	"regexp"
 	"strconv"
+
+	ethcrypto "github.com/ethereum/go-ethereum/crypto"
+	"github.com/go-resty/resty/v2"
+	"github.com/nextdotid/proof_server/config"
+	"github.com/nextdotid/proof_server/controller"
+	"github.com/nextdotid/proof_server/types"
+	"github.com/nextdotid/proof_server/util/base1024"
+	"github.com/nextdotid/proof_server/util/crypto"
 )
 
 var post_regex = regexp.MustCompile("%SIG_BASE64%")

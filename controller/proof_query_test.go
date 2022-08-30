@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
-	"github.com/nextdotid/proof-server/model"
-	"github.com/nextdotid/proof-server/types"
-	"github.com/nextdotid/proof-server/util/crypto"
-	"github.com/nextdotid/proof-server/validator"
+	"github.com/nextdotid/proof_server/model"
+	"github.com/nextdotid/proof_server/types"
+	"github.com/nextdotid/proof_server/util/crypto"
+	"github.com/nextdotid/proof_server/validator"
 	"github.com/stretchr/testify/require"
 )
 
@@ -51,7 +51,7 @@ func insert_proof(t *testing.T) {
 	}
 }
 
-/// Insert Random Persona <-> Given ETH public key binding.
+// / Insert Random Persona <-> Given ETH public key binding.
 func insert_eth_proof(t *testing.T, eth_pub_key *ecdsa.PublicKey) {
 	personaPk, _ := crypto.GenerateKeypair()
 	validator := validator.Base{
