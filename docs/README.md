@@ -19,6 +19,7 @@ you on any supported platform.
 | Discord  | `discord`        | `UserName#0000`              | message link (`https://discord.com/channels/DIGITS/DIGITS/DIGITS`)             |                                                         |
 | DotBit   | `dotbit`         | `address.bit`                | Custom type Record (`nextid_proof_0xPUBKEY_COMRESSED_HEX`)                     | Formerly known as DAS (Decentralized Account System)    |
 | Solana   | `solana`         | Wallet address `AbCdEfG9...` | N/A (Two-way signatures created from persona sk and wallet sk)                 |                                                         |
+| Minds    | `minds`          | `minds_username`             | Proof post ID (`LONG_DIGITS` in `https://www.minds.com/newsfeed/LONG_DIGITS`)  |                                                         |
 
 ### Planning
 
