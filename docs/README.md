@@ -20,6 +20,7 @@ you on any supported platform.
 | DotBit   | `dotbit`         | `address.bit`                | Custom type Record (`nextid_proof_0xPUBKEY_COMRESSED_HEX`)                     | Formerly known as DAS (Decentralized Account System)    |
 | Solana   | `solana`         | Wallet address `AbCdEfG9...` | N/A (Two-way signatures created from persona sk and wallet sk)                 |                                                         |
 | Minds    | `minds`          | `minds_username`             | Proof post ID (`LONG_DIGITS` in `https://www.minds.com/newsfeed/LONG_DIGITS`)  |                                                         |
+| DNS      | `dns`            | `example.com`                | N/A (use `dig example.com TXT`)                                                |                                                         |
 
 ### Planning
 
@@ -27,7 +28,6 @@ you on any supported platform.
 |--------------------------------------|------------------|-------------------------------------------------------------------|--------------------------------------------------------|-------|
 | [Facebook](https://www.facebook.com) | `facebook`       | Username in link (i.e. `Meta` in `https://www.facebook.com/Meta`) | Post ID (`460695145492083`)                            |       |
 | [Telegram](https://telegram.org)     | `telegram`       | `telegram`                                                        | `https://t.me/some_public_group/CHAT_ID_DIGITS`        |       |
-| DNS (TXT field)                      | `dns`            | `example.com`                                                     | N/A (use `dig example.com TXT`)                        |       |
 | ENS                                  | `ens`            | `myens.eth`                                                       | N/A (use `id.next.proof` record in ENS to store proof) |       |
 | Email                                | `email`          | `mail_address@example.com`                                        | A public mailing list `mbox` download URL (?)          |       |
 
