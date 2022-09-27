@@ -57,7 +57,6 @@ func generateBase1024Encode() Twitter {
 func Test_GeneratePostPayload(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
-
 		tweet := generate()
 		result := tweet.GeneratePostPayload()
 		assert.Contains(t, result["default"], "Verifying my Twitter ID")

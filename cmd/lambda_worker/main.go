@@ -24,6 +24,7 @@ import (
 	"github.com/nextdotid/proof_server/validator/ethereum"
 	"github.com/nextdotid/proof_server/validator/github"
 	"github.com/nextdotid/proof_server/validator/keybase"
+	"github.com/nextdotid/proof_server/validator/minds"
 	"github.com/nextdotid/proof_server/validator/solana"
 	"github.com/nextdotid/proof_server/validator/twitter"
 	"github.com/samber/lo"
@@ -244,6 +245,7 @@ func init_validators() {
 	discord.Init()
 	das.Init()
 	solana.Init()
+	minds.Init()
 }
 
 func init() {
