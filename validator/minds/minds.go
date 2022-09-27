@@ -26,7 +26,7 @@ var (
 	l           = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "minds"})
 	re          = regexp.MustCompile(MATCH_TEMPLATE)
 	POST_STRUCT = map[string]string{
-		"default": "🎭 Verifying my Minds ID @%s for NextID.\n\nSig: %%SIG_BASE64%%\nCreatedAt: %d\nUUID: %s\n\nPowered by Next.ID - Connect All Digital Identities.\n",
+		"default": "🎭 Verifying my Minds ID @%s for NextID.\n\nSig: %%SIG_BASE64%%\nCreatedAt: %d\nUUID: %s%s\n\nPowered by Next.ID - Connect All Digital Identities.\n",
 	}
 )
 
@@ -75,8 +75,12 @@ func Init() {
 
 func (minds *Minds) GeneratePostPayload() (post map[string]string) {
 	post = make(map[string]string, 0)
+	previous := ""
+	if minds.Previous != "" {
+		previous = "\nPrevious: " + minds.Previous
+	}
 	for lang_code, template := range POST_STRUCT {
-		post[lang_code] = fmt.Sprintf(template, minds.Identity, minds.CreatedAt.Unix(), minds.Uuid.String())
+		post[lang_code] = fmt.Sprintf(template, minds.Identity, minds.CreatedAt.Unix(), minds.Uuid.String(), previous)
 	}
 	return post
 }
