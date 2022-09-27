@@ -13,6 +13,7 @@ var Platforms = struct {
 	Das      Platform
 	Solana   Platform
 	Minds    Platform
+	DNS      Platform
 }{
 	Github:   "github",
 	NextID:   "nextid",
@@ -23,4 +24,5 @@ var Platforms = struct {
 	Das:      "dotbit",
 	Solana:   "solana",
 	Minds:    "minds",
+	DNS:      "dns",
 }
