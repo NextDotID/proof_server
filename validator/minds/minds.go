@@ -68,8 +68,8 @@ func Init() {
 		validator.PlatformFactories = make(map[types.Platform]func(*validator.Base) validator.IValidator)
 	}
 	validator.PlatformFactories[types.Platforms.Minds] = func(base *validator.Base) validator.IValidator {
-		kb := Minds{base}
-		return &kb
+		minds := Minds{base}
+		return &minds
 	}
 }
 
