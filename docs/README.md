@@ -26,7 +26,6 @@ you on any supported platform.
 | Platform                             | `platform` value | `identity` value                                                  | `proof_location` value                                 | Misc. |
 |--------------------------------------|------------------|-------------------------------------------------------------------|--------------------------------------------------------|-------|
 | [Facebook](https://www.facebook.com) | `facebook`       | Username in link (i.e. `Meta` in `https://www.facebook.com/Meta`) | Post ID (`460695145492083`)                            |       |
-| [Minds](https://www.minds.com)       | `minds`          | `minds`                                                           | Newsfeed ID (`1309718521097228301`)                    |       |
 | [Telegram](https://telegram.org)     | `telegram`       | `telegram`                                                        | `https://t.me/some_public_group/CHAT_ID_DIGITS`        |       |
 | DNS (TXT field)                      | `dns`            | `example.com`                                                     | N/A (use `dig example.com TXT`)                        |       |
 | ENS                                  | `ens`            | `myens.eth`                                                       | N/A (use `id.next.proof` record in ENS to store proof) |       |
