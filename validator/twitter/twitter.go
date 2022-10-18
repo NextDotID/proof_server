@@ -108,6 +108,7 @@ func (twitter *Twitter) Validate() (err error) {
 	}
 
 	twitter.Text = tweet.FullText
+	twitter.AltName = strconv.FormatInt(tweet.User.ID, 10)
 	return twitter.validateText()
 }
 

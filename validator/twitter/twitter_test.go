@@ -10,7 +10,7 @@ import (
 	mycrypto "github.com/nextdotid/proof_server/util/crypto"
 	"github.com/nextdotid/proof_server/validator"
 	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func before_each(t *testing.T) {
@@ -59,9 +59,9 @@ func Test_GeneratePostPayload(t *testing.T) {
 		before_each(t)
 		tweet := generate()
 		result := tweet.GeneratePostPayload()
-		assert.Contains(t, result["default"], "Verifying my Twitter ID")
-		assert.Contains(t, result["default"], tweet.Identity)
-		assert.Contains(t, result["default"], "%SIG_BASE64%")
+		require.Contains(t, result["default"], "Verifying my Twitter ID")
+		require.Contains(t, result["default"], tweet.Identity)
+		require.Contains(t, result["default"], "%SIG_BASE64%")
 	})
 }
 
@@ -70,19 +70,20 @@ func Test_Validate(t *testing.T) {
 		before_each(t)
 
 		tweet := generate()
-		assert.Nil(t, tweet.Validate())
-		assert.Greater(t, len(tweet.Text), 10)
-		assert.NotEmpty(t, tweet.Text)
-		assert.Equal(t, "yeiwb", tweet.Identity)
+		require.Nil(t, tweet.Validate())
+		require.Greater(t, len(tweet.Text), 10)
+		require.NotEmpty(t, tweet.Text)
+		require.Equal(t, "yeiwb", tweet.Identity)
+		require.Equal(t, "1468853291941773312", tweet.AltName)
 	})
 
 	t.Run("success on encode base1024", func(t *testing.T) {
 		before_each(t)
 		tweet := generateBase1024Encode()
-		assert.Nil(t, tweet.Validate())
-		assert.Greater(t, len(tweet.Text), 10)
-		assert.NotEmpty(t, tweet.Text)
-		assert.Equal(t, "sannieinmeta", tweet.Identity)
+		require.Nil(t, tweet.Validate())
+		require.Greater(t, len(tweet.Text), 10)
+		require.NotEmpty(t, tweet.Text)
+		require.Equal(t, "sannieinmeta", tweet.Identity)
 	})
 
 	t.Run("should return identity error", func(t *testing.T) {
@@ -90,13 +91,13 @@ func Test_Validate(t *testing.T) {
 
 		tweet := generate()
 		tweet.Identity = "foobar"
-		assert.NotNil(t, tweet.Validate())
+		require.NotNil(t, tweet.Validate())
 	})
 
 	t.Run("should return proof location not found", func(t *testing.T) {
 		before_each(t)
 		tweet := generate()
 		tweet.ProofLocation = "123456"
-		assert.NotNil(t, tweet.Validate())
+		require.NotNil(t, tweet.Validate())
 	})
 }
