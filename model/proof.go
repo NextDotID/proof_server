@@ -25,6 +25,7 @@ type Proof struct {
 	Persona  string         `gorm:"index;not null"`
 	Platform types.Platform `gorm:"index;not null"`
 	Identity string         `gorm:"index;not null"`
+	AltName  string         `gorm:"index"`
 	Location string         `gorm:"not null"`
 }
 

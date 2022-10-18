@@ -45,6 +45,7 @@ type ProofQueryResponseSingle struct {
 type ProofQueryResponseSingleProof struct {
 	Platform      types.Platform `json:"platform"`
 	Identity      string         `json:"identity"`
+	AltName       string         `json:"alt_name"`
 	CreatedAt     string         `json:"created_at"`
 	LastCheckedAt string         `json:"last_checked_at"`
 	IsValid       bool           `json:"is_valid"`
@@ -94,12 +95,12 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 		}
 	case "":
 		{ // All platform
-			tx = tx.Where("identity LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%")
+			tx = tx.Where("identity LIKE ? OR alt_name LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%", "%"+strings.ToLower(req.Identity[0])+"%")
 			for i, id := range req.Identity {
 				if i == 0 {
 					continue
 				}
-				tx = tx.Or("identity LIKE ?", "%"+strings.ToLower(id)+"%")
+				tx = tx.Or("identity LIKE ? OR alt_name LIKE ?", "%"+strings.ToLower(id)+"%", "%"+strings.ToLower(id)+"%")
 			}
 			countTx := tx // Value-copy another query for total amount calculation
 			countTx.Count(&pagination.Total)
@@ -108,13 +109,13 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 	default:
 		{
 			tx = tx.Where("platform", req.Platform).
-				Where("identity LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%")
+				Where("identity LIKE ? OR alt_name LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%", "%"+strings.ToLower(req.Identity[0])+"%")
 
 			for i, id := range req.Identity {
 				if i == 0 {
 					continue
 				}
-				tx = tx.Or("identity LIKE ?", "%"+strings.ToLower(id)+"%")
+				tx = tx.Or("identity LIKE ? OR alt_name LIKE ?", "%"+strings.ToLower(id)+"%", "%"+strings.ToLower(id)+"%")
 			}
 			countTx := tx
 			countTx.Count(&pagination.Total)
@@ -148,6 +149,7 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 				return ProofQueryResponseSingleProof{
 					Platform:      proof.Platform,
 					Identity:      proof.Identity,
+					AltName:       proof.AltName,
 					CreatedAt:     strconv.FormatInt(proof.CreatedAt.Unix(), 10),
 					LastCheckedAt: strconv.FormatInt(proof.LastCheckedAt.Unix(), 10),
 					IsValid:       proof.IsValid,

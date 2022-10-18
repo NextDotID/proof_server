@@ -25,6 +25,7 @@ type ProofChain struct {
 	Action           types.Action   `gorm:"index;not null"`
 	Persona          string         `gorm:"index;not null"`
 	Identity         string         `gorm:"index;not null"`
+	AltName          string         `gorm:"index"`
 	Platform         types.Platform `gorm:"index;not null"`
 	Location         string         `gorm:"not null"`
 	Signature        string         `gorm:"not null"`
@@ -117,6 +118,7 @@ func (pc *ProofChain) createProof() (err error) {
 		Persona:       pc.Persona,
 		Platform:      pc.Platform,
 		Identity:      pc.Identity,
+		AltName:       pc.AltName,
 		Location:      pc.Location,
 		LastCheckedAt: time.Now(),
 		IsValid:       true,
@@ -175,6 +177,7 @@ func (pc *ProofChain) RestoreValidator() (v *validator.Base, err error) {
 		Action:        pc.Action,
 		Pubkey:        pc.Pubkey(),
 		Identity:      pc.Identity,
+		AltName:       pc.AltName,
 		ProofLocation: pc.Location,
 		Signature:     pc.SignatureBytes(),
 		Extra:         extra,
@@ -235,6 +238,7 @@ func ProofChainCreateFromValidator(validator *validator.Base) (pc *ProofChain, e
 		Action:           validator.Action,
 		Persona:          MarshalPersona(validator.Pubkey),
 		Identity:         validator.Identity, // TODO: exception may occur
+		AltName:          validator.AltName,
 		Platform:         validator.Platform,
 		Location:         validator.ProofLocation,
 		Signature:        MarshalSignature(validator.Signature),

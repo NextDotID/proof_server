@@ -30,6 +30,7 @@ type Base struct {
 	Pubkey   *ecdsa.PublicKey
 	// Identity on target platform.
 	Identity         string
+	AltName          string
 	ProofLocation    string
 	Signature        []byte
 	SignaturePayload string
