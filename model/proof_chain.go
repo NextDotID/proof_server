@@ -25,7 +25,7 @@ type ProofChain struct {
 	Action           types.Action   `gorm:"index;not null"`
 	Persona          string         `gorm:"index;not null"`
 	Identity         string         `gorm:"index;not null"`
-	AltID            string         `gorm:"index"`
+	AltID            string         `gorm:"column:alt_id;index"`
 	Platform         types.Platform `gorm:"index;not null"`
 	Location         string         `gorm:"not null"`
 	Signature        string         `gorm:"not null"`
@@ -42,6 +42,7 @@ type ProofChainItem struct {
 	Action           types.Action   `json:"action"`
 	Platform         types.Platform `json:"platform"`
 	Identity         string         `json:"identity"`
+	AltID            string         `json:"alt_id"`
 	ProofLocation    string         `json:"proof_location"`
 	CreatedAt        string         `json:"created_at"`
 	Signature        string         `json:"signature"`
@@ -57,6 +58,7 @@ type ProofChainArweaveDocument struct {
 	Action            types.Action   `json:"action"`
 	Platform          types.Platform `json:"platform"`
 	Identity          string         `json:"identity"`
+	AltID             string         `json:"alt_id"`
 	ProofLocation     string         `json:"proof_location"`
 	CreatedAt         string         `json:"created_at"`
 	Signature         string         `json:"signature"`
@@ -96,6 +98,7 @@ func (pc *ProofChain) ToProofChainItem() ProofChainItem {
 		Action:           pc.Action,
 		Platform:         pc.Platform,
 		Identity:         pc.Identity,
+		AltID:            pc.AltID,
 		ProofLocation:    pc.Location,
 		CreatedAt:        strconv.FormatInt(pc.CreatedAt.Unix(), 10),
 		Signature:        pc.Signature,

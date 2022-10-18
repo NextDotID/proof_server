@@ -42,7 +42,7 @@ func proofExists(c *gin.Context) {
 	}
 	found := model.Proof{}
 	tx := model.DB.Where(
-		"persona = ? AND platform = ? AND (identity = ? OR alt_name = ?)",
+		"persona = ? AND platform = ? AND (identity = ? OR alt_id = ?)",
 		model.MarshalPersona(personaPubkey),
 		req.Platform,
 		strings.ToLower(req.Identity),

@@ -176,6 +176,7 @@ func arweave_bundle_single(pc *model.ProofChain, previous *model.ProofChain) (*a
 		Action:            pc.Action,
 		Platform:          pc.Platform,
 		Identity:          pc.Identity,
+		AltID:             pc.AltID,
 		ProofLocation:     pc.Location,
 		CreatedAt:         strconv.FormatInt(pc.CreatedAt.Unix(), 10),
 		Signature:         pc.Signature,
