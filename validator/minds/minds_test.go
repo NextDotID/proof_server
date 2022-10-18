@@ -71,5 +71,6 @@ func Test_Validate(t *testing.T) {
 
 		minds := generate()
 		require.NoError(t, minds.Validate())
+		require.Equal(t, "1302892485034381316", minds.AltName)
 	})
 }
