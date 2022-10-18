@@ -91,6 +91,7 @@ func Test_Validate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		dns := build()
 		require.NoError(t, dns.Validate())
+		require.Equal(t, dns.Identity, dns.AltName)
 	})
 
 	t.Run("invalid", func(t *testing.T) {
