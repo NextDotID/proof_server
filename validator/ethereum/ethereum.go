@@ -69,6 +69,7 @@ func (et *Ethereum) GenerateSignPayload() (payload string) {
 func (et *Ethereum) Validate() (err error) {
 	et.SignaturePayload = et.GenerateSignPayload()
 	et.Identity = strings.ToLower(et.Identity)
+	et.AltName = et.Identity
 
 	switch et.Action {
 	case types.Actions.Create:
