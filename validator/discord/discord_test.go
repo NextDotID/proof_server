@@ -41,6 +41,7 @@ func TestDiscord_Validate(t *testing.T) {
 		discord := generate()
 		err := discord.Validate()
 		assert.Nil(t, err)
+		t.Logf("AltName: %s", discord.AltName)
 	})
 	t.Run("different user", func(t *testing.T) {
 		before_each()

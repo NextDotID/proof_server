@@ -103,6 +103,7 @@ func (dc *Discord) Validate() (err error) {
 		return xerrors.Errorf("User name mismatch: expect %s - actual %s", dc.Identity, msgResp.Author)
 	}
 
+	dc.AltName = msgResp.Author.ID
 	dc.Text = msgResp.Content
 	return dc.validateText()
 }
