@@ -55,7 +55,7 @@ func Test_Validate(t *testing.T) {
 		github := generate()
 		err := github.Validate()
 		require.Nil(t, err)
-		require.Equal(t, "1191636", github.AltName)
+		require.Equal(t, "1191636", github.AltID)
 	})
 
 	t.Run("error if owner mismatch", func(t *testing.T) {

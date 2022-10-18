@@ -53,7 +53,7 @@ func Test_Validate(t *testing.T) {
 		require.Nil(t, das.Validate())
 		require.Greater(t, len(das.Signature), 10)
 		require.Equal(t, "mitchatmask.bit", das.Identity)
-		require.Equal(t, das.Identity, das.AltName)
+		require.Equal(t, das.Identity, das.AltID)
 	})
 
 	// Do not test validation by ProofLocation, since it is unnecessary.

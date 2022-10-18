@@ -128,7 +128,7 @@ func (dns *DNS) GenerateSignPayload() (payload string) {
 func (dns *DNS) Validate() (err error) {
 	// domain name is case-insensitive
 	dns.Identity = strings.ToLower(dns.Identity)
-	dns.AltName = dns.Identity
+	dns.AltID = dns.Identity
 	dns.SignaturePayload = dns.GenerateSignPayload()
 	query_resp, err := query(dns.Identity)
 	if err != nil {

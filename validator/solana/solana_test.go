@@ -128,7 +128,7 @@ func Test_Validate_Delete(t *testing.T) {
 		sol.Signature, _ = mycrypto.SignPersonal([]byte(sol.GenerateSignPayload()), personaPriv)
 
 		require.NoError(t, sol.Validate())
-		require.Equal(t, sol.Identity, sol.AltName)
+		require.Equal(t, sol.Identity, sol.AltID)
 	})
 
 	t.Run("signed by wallet", func(t *testing.T) {

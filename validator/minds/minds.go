@@ -148,7 +148,7 @@ func (minds *Minds) validatePayload(payload *MindsPayload) error {
 	if minds.Identity != strings.ToLower(entity.Owner.UserName) {
 		return xerrors.Errorf("Username mismatch: expect @%s, got @%s", minds.Identity, entity.Owner.UserName)
 	}
-	minds.AltName = entity.Owner.Guid
+	minds.AltID = entity.Owner.Guid
 
 	scanner := bufio.NewScanner(strings.NewReader(minds.Text))
 	for scanner.Scan() {

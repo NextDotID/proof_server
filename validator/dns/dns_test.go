@@ -17,13 +17,13 @@ func build() DNS {
 	createdAt, _ := util.TimestampStringToTime("1664267795")
 	return DNS{
 		Base: &validator.Base{
-			Platform:         types.Platforms.DNS,
-			Previous:         "",
-			Action:           types.Actions.Create,
-			Pubkey:           pk,
-			Identity:         "testcase.nextnext.id",
-			CreatedAt:        createdAt,
-			Uuid:             uuid.MustParse("80c98711-f4f6-43c7-b05c-8d86372f6131"),
+			Platform:  types.Platforms.DNS,
+			Previous:  "",
+			Action:    types.Actions.Create,
+			Pubkey:    pk,
+			Identity:  "testcase.nextnext.id",
+			CreatedAt: createdAt,
+			Uuid:      uuid.MustParse("80c98711-f4f6-43c7-b05c-8d86372f6131"),
 		},
 	}
 }
@@ -91,7 +91,7 @@ func Test_Validate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		dns := build()
 		require.NoError(t, dns.Validate())
-		require.Equal(t, dns.Identity, dns.AltName)
+		require.Equal(t, dns.Identity, dns.AltID)
 	})
 
 	t.Run("invalid", func(t *testing.T) {

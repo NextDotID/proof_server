@@ -149,7 +149,7 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 				return ProofQueryResponseSingleProof{
 					Platform:      proof.Platform,
 					Identity:      proof.Identity,
-					AltName:       proof.AltName,
+					AltName:       proof.AltID,
 					CreatedAt:     strconv.FormatInt(proof.CreatedAt.Unix(), 10),
 					LastCheckedAt: strconv.FormatInt(proof.LastCheckedAt.Unix(), 10),
 					IsValid:       proof.IsValid,

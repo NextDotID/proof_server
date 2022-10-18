@@ -74,7 +74,7 @@ func Test_Validate(t *testing.T) {
 		require.Greater(t, len(tweet.Text), 10)
 		require.NotEmpty(t, tweet.Text)
 		require.Equal(t, "yeiwb", tweet.Identity)
-		require.Equal(t, "1468853291941773312", tweet.AltName)
+		require.Equal(t, "1468853291941773312", tweet.AltID)
 	})
 
 	t.Run("success on encode base1024", func(t *testing.T) {

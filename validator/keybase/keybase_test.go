@@ -56,6 +56,6 @@ func Test_Validate(t *testing.T) {
 		require.Nil(t, kb.Validate())
 		require.Greater(t, len(kb.Signature), 10)
 		require.Equal(t, "nykma", kb.Identity)
-		require.Equal(t, kb.Identity, kb.AltName)
+		require.Equal(t, kb.Identity, kb.AltID)
 	})
 }

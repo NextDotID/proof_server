@@ -83,7 +83,7 @@ func Test_Validate(t *testing.T) {
 
 		eth := generate()
 		require.Nil(t, eth.Validate())
-		require.Equal(t, eth.AltName, eth.Identity)
+		require.Equal(t, eth.AltID, eth.Identity)
 	})
 }
 
