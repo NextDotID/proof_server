@@ -60,6 +60,7 @@ func (sol *Solana) Validate() (err error) {
 	// Wallet Sig encoded by Base58
 	// Persona Sig encoded by Base64
 	sol.SignaturePayload = sol.GenerateSignPayload()
+	sol.AltName = sol.Identity
 
 	switch sol.Action {
 	case types.Actions.Create:
