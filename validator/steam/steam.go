@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/nextdotid/proof_server/types"
 	"github.com/nextdotid/proof_server/util"
@@ -16,13 +17,17 @@ import (
 
 const (
 	// Profile info by digit-based SteamID (e.g. "76561197968575517")
-	PROFILE_PAGE_UID = "https://steamcommunity.com/profiles/%s/?xml=1"
+	PROFILE_PAGE_STEAMID = "https://steamcommunity.com/profiles/%s/?xml=1"
 	// Profile info by user-defined custom URL (e.g. "ChetFaliszek")
 	PROFILE_PAGE_CUSTOM_URL = "https://steamcommunity.com/id/%s/?xml=1"
 )
 
 var (
 	l = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "steam"})
+	// Base64|CreatedAtTimestamp|UUID|Previous
+	POST_STRUCT = map[string]string{
+		"default": "NextID signature: %%SIG_BASE64%%|%d|%s|%s",
+	}
 )
 
 type Steam struct {
@@ -68,10 +73,23 @@ func Init() {
 }
 
 func (steam *Steam) GeneratePostPayload() (post map[string]string) {
-	return // TODO
+	post = make(map[string]string)
+	previous := "null"
+	if steam.Previous != "" {
+		previous = steam.Previous
+	}
+	for langCode, template := range POST_STRUCT {
+		post[langCode] = fmt.Sprintf(template, steam.CreatedAt.Unix(), steam.Uuid.String(), previous)
+	}
+	return post
 }
 
 func (steam *Steam) GenerateSignPayload() (payload string) {
+	if err := steam.GetUserInfo(); err != nil {
+		l.Errorf("Get user info failed: %s", err.Error())
+		return ""
+	}
+
 	payloadStruct := validator.H{
 		"action":     string(steam.Action),
 		"identity":   steam.Identity,
@@ -97,28 +115,65 @@ func (steam *Steam) Validate() (err error) {
 	return xerrors.Errorf("TODO: Not implemented")
 }
 
-// GetUserInfo returns user info from steam profile page XML.
-func (steam *Steam) GetUserInfo(isCustomUrl bool) (uid string, username string, description string, err error) {
+// See also: https://developer.valvesoftware.com/wiki/SteamID
+func ExtractSteamID(idInDecimal string) (universe uint, userID uint, y uint, err error) {
+	id, err := strconv.ParseUint(idInDecimal, 10, 64)
+	if err != nil {
+		return 0, 0, 0, xerrors.Errorf("parsing string SteamID: %w", err)
+	}
+
+	// Account type (4bit) <> Account instance (20bit)
+	accountTypeAndInstance := (id >> 32) & 0x00FFFFFF
+	// Account type 1 (indivisual)
+	// Account instance 0x00001 (usually set to 1 for user accounts).
+	if accountTypeAndInstance != uint64(0x00100001) {
+		return 0, 0, 0, xerrors.Errorf("parsing SteamID: account type mismatch")
+	}
+
+	universe = uint((id >> 56) & 0xFF)    // First 8 bit
+	userID = uint((id & 0xFFFFFFFE) >> 1) // [33, 63] bit
+	y = uint(id & 0x1)                    // last 1 bit
+
+	if universe != uint(1) { // Public
+		return universe, userID, y, xerrors.Errorf("parsing SteamID: invalid universe identifier")
+	}
+
+	return
+}
+
+// GetUserInfo returns user info from steam profile page XML, will also refresh `self`'s `Identity`, `AltID` and `Text`.
+func (steam *Steam) GetUserInfo() (err error) {
 	var url string
-	if isCustomUrl {
+	_, _, _, steamIDErr := ExtractSteamID(steam.Identity)
+	if steamIDErr != nil {
+		l.Infof("Error when parsing identity %s to steamID: %s", steam.Identity, steamIDErr.Error())
 		url = fmt.Sprintf(PROFILE_PAGE_CUSTOM_URL, steam.Identity)
 	} else {
-		url = fmt.Sprintf(PROFILE_PAGE_UID, steam.Identity)
+		url = fmt.Sprintf(PROFILE_PAGE_STEAMID, steam.Identity)
 	}
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return "", "", "", xerrors.Errorf("Error when getting steam profile page: %w", err)
+		return xerrors.Errorf("Error when getting steam profile page: %w", err)
 	}
 	if resp.StatusCode != 200 {
-		return "", "", "", xerrors.Errorf("Error when getting steam profile page: status code %d", resp.StatusCode)
+		return xerrors.Errorf("Error when getting steam profile page: status code %d", resp.StatusCode)
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", "", "", xerrors.Errorf("Error when reading steam profile page body: %w", err)
+		return xerrors.Errorf("Error when reading steam profile page body: %w", err)
 	}
 
-	return parseSteamXML(body)
+	uid, username, description, err := parseSteamXML(body)
+	if err != nil {
+		return err
+	}
+
+	steam.Identity = uid
+	steam.AltID = username
+	steam.Text = description
+	return nil
+
 }
 
 func parseSteamXML(xmlBody []byte) (uid string, username string, descripton string, err error) {
