@@ -1,21 +1,22 @@
 package steam
 
 import (
-	"crypto/ecdsa"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"testing"
-	"time"
 
+	"github.com/google/uuid"
 	"github.com/nextdotid/proof_server/types"
+	"github.com/nextdotid/proof_server/util"
+	"github.com/nextdotid/proof_server/util/crypto"
 	"github.com/nextdotid/proof_server/validator"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 )
 
 const (
-	FILENAME_NO_PAYLOAD = "./test_76561197968575517.xml"
+	FILENAME_NO_PAYLOAD = "./test_76561198092541763.xml"
 )
 
 func getFileContent(t *testing.T, filename string) []byte {
@@ -28,21 +29,18 @@ func getFileContent(t *testing.T, filename string) []byte {
 }
 
 func generate() Steam {
+	pk, _ := crypto.StringToPubkey("0x0392e26f86fd483265bc7ab39d20a0bd0a40d0079c4aba7dfbab11f591ff22bc3e")
+	createdAt, _ := util.TimestampStringToTime("1666257424")
 	return Steam{
-		&validator.Base{
+		Base: &validator.Base{
 			Platform:         types.Platforms.Steam,
 			Previous:         "",
 			Action:           types.Actions.Create,
-			Pubkey:           &ecdsa.PublicKey{},
-			Identity:         "BeFoRE-CS",
+			Pubkey:           pk,
+			Identity:         "menyk",
 			AltID:            "",
-			ProofLocation:    "",
-			Signature:        []byte{},
-			SignaturePayload: "",
-			Text:             "",
-			Extra:            map[string]string{},
-			CreatedAt:        time.Now(), // TODO
-			Uuid:             [16]byte{},
+			CreatedAt:       createdAt,
+			Uuid:             uuid.MustParse("d035591e-f25f-4b06-8045-b96c1d9af454"),
 		},
 	}
 }
@@ -59,9 +57,9 @@ func Test_parseSteamXML(t *testing.T) {
 		response := getFileContent(t, FILENAME_NO_PAYLOAD)
 		uid, username, description, err := parseSteamXML(response)
 		require.NoError(t, err)
-		require.Equal(t, "76561197968575517", uid)
-		require.Equal(t, "ChetFaliszek", username)
-		require.Contains(t, description, "<span")
+		require.Equal(t, "76561198092541763", uid)
+		require.Equal(t, "BeFoRE-CS", username)
+		require.Contains(t, description, "i like ash")
 	})
 }
 
@@ -128,5 +126,32 @@ func Test_GeneratePostPayload(t *testing.T) {
 		lo.ForEach([]string{"NextID", steam.Uuid.String(), strconv.FormatInt(steam.CreatedAt.Unix(), 10)}, func(contains string, i int) {
 			require.Contains(t, defaultPayload, contains)
 		})
+	})
+}
+
+func Test_Validate(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		steam := generate()
+		require.NoError(t, steam.Validate())
+	})
+
+	t.Run("error if pubkey mismatch", func(t *testing.T) {
+		steam := generate()
+		pk, _ := crypto.GenerateKeypair()
+		steam.Pubkey = pk
+
+		err := steam.Validate()
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "bad signature")
+	})
+
+	t.Run("error if proof post not found", func(t *testing.T) {
+		steam := generate()
+		steam.Identity = "BeFoRE-CS"
+
+		err := steam.Validate()
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "proof not found in user summary")
+
 	})
 }

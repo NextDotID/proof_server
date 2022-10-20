@@ -6,11 +6,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/nextdotid/proof_server/types"
 	"github.com/nextdotid/proof_server/util"
+	"github.com/nextdotid/proof_server/util/crypto"
 	"github.com/nextdotid/proof_server/validator"
+	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
@@ -20,14 +23,17 @@ const (
 	PROFILE_PAGE_STEAMID = "https://steamcommunity.com/profiles/%s/?xml=1"
 	// Profile info by user-defined custom URL (e.g. "ChetFaliszek")
 	PROFILE_PAGE_CUSTOM_URL = "https://steamcommunity.com/id/%s/?xml=1"
+	// Ignore other part of the proof post, only take signature part.
+	MATCH_TEMPLATE = "NextID proof: (.+?):"
 )
 
 var (
 	l = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "steam"})
 	// Base64|CreatedAtTimestamp|UUID|Previous
 	POST_STRUCT = map[string]string{
-		"default": "NextID signature: %%SIG_BASE64%%|%d|%s|%s",
+		"default": "NextID proof: %%SIG_BASE64%%:%d:%s:%s",
 	}
+	re = regexp.MustCompile(MATCH_TEMPLATE)
 )
 
 type Steam struct {
@@ -112,7 +118,43 @@ func (steam *Steam) GenerateSignPayload() (payload string) {
 }
 
 func (steam *Steam) Validate() (err error) {
-	return xerrors.Errorf("TODO: Not implemented")
+	// steam.Text fetch included
+	payload := steam.GenerateSignPayload()
+	l.Debugf("Summary for user %s: %s", steam.Identity, steam.Text)
+	if payload == "" {
+		return xerrors.Errorf("error when generating sign payload")
+	}
+	found := re.FindAllStringSubmatch(steam.Text, 10) // Find up to 10 results
+	if len(found) == 0 {
+		return xerrors.Errorf("proof not found in user summary")
+	}
+
+	foundValid := false
+	lo.ForEach(found, func(matched []string, index int) {
+		if len(matched) != 2 {
+			err = xerrors.Errorf("Invalid result on proof record No.%d", index + 1)
+			return
+		}
+		sigBytes, matchedErr := util.DecodeString(matched[1])
+		if matchedErr != nil {
+			err = matchedErr
+			return
+		}
+
+		validateErr := crypto.ValidatePersonalSignature(payload, sigBytes, steam.Pubkey)
+		if validateErr != nil {
+			err = validateErr
+			return
+		}
+
+		foundValid = true
+	})
+	if foundValid {
+		// At least 1 valid result is found. Ignore other errors.
+		return nil
+	}
+
+	return
 }
 
 // See also: https://developer.valvesoftware.com/wiki/SteamID
@@ -124,7 +166,7 @@ func ExtractSteamID(idInDecimal string) (universe uint, userID uint, y uint, err
 
 	// Account type (4bit) <> Account instance (20bit)
 	accountTypeAndInstance := (id >> 32) & 0x00FFFFFF
-	// Account type 1 (indivisual)
+	// Account type 1 (individual)
 	// Account instance 0x00001 (usually set to 1 for user accounts).
 	if accountTypeAndInstance != uint64(0x00100001) {
 		return 0, 0, 0, xerrors.Errorf("parsing SteamID: account type mismatch")
@@ -143,10 +185,15 @@ func ExtractSteamID(idInDecimal string) (universe uint, userID uint, y uint, err
 
 // GetUserInfo returns user info from steam profile page XML, will also refresh `self`'s `Identity`, `AltID` and `Text`.
 func (steam *Steam) GetUserInfo() (err error) {
+	if steam.Text != "" {
+		// No duplicated fetching
+		return nil
+	}
+
 	var url string
 	_, _, _, steamIDErr := ExtractSteamID(steam.Identity)
 	if steamIDErr != nil {
-		l.Infof("Error when parsing identity %s to steamID: %s", steam.Identity, steamIDErr.Error())
+		l.Warnf("Error when parsing identity %s to steamID: %s", steam.Identity, steamIDErr.Error())
 		url = fmt.Sprintf(PROFILE_PAGE_CUSTOM_URL, steam.Identity)
 	} else {
 		url = fmt.Sprintf(PROFILE_PAGE_STEAMID, steam.Identity)
@@ -154,14 +201,14 @@ func (steam *Steam) GetUserInfo() (err error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return xerrors.Errorf("Error when getting steam profile page: %w", err)
+		return xerrors.Errorf("getting steam profile page: %w", err)
 	}
 	if resp.StatusCode != 200 {
-		return xerrors.Errorf("Error when getting steam profile page: status code %d", resp.StatusCode)
+		return xerrors.Errorf("getting steam profile page: status code %d", resp.StatusCode)
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return xerrors.Errorf("Error when reading steam profile page body: %w", err)
+		return xerrors.Errorf("reading steam profile page body: %w", err)
 	}
 
 	uid, username, description, err := parseSteamXML(body)
