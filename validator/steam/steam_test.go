@@ -29,9 +29,12 @@ func Test_parseSteamXML(t *testing.T) {
 		require.Contains(t, err.Error(), "The specified profile could not be found")
 	})
 
-	t.Run("correct response, but has no payload", func(t *testing.T) {
+	t.Run("correct response", func(t *testing.T) {
 		response := getFileContent(t, FILENAME_NO_PAYLOAD)
-		_, _, _, err := parseSteamXML(response)
+		uid, username, description, err := parseSteamXML(response)
 		require.NoError(t, err)
+		require.Equal(t, "76561197968575517", uid)
+		require.Equal(t, "ChetFaliszek", username)
+		require.Contains(t, description, "<span")
 	})
 }

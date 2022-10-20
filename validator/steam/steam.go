@@ -16,9 +16,9 @@ import (
 
 const (
 	// Profile info by digit-based SteamID (e.g. "76561197968575517")
-	PROFILE_PAGE_UID = "https://steamcommunity.com/profiles/%s?xml=1"
+	PROFILE_PAGE_UID = "https://steamcommunity.com/profiles/%s/?xml=1"
 	// Profile info by user-defined custom URL (e.g. "ChetFaliszek")
-	PROFILE_PAGE_CUSTOM_URL = "https://steamcommunity.com/id/%s?xml=1"
+	PROFILE_PAGE_CUSTOM_URL = "https://steamcommunity.com/id/%s/?xml=1"
 )
 
 var (
@@ -31,7 +31,30 @@ type Steam struct {
 
 type SteamErrorResponse struct {
 	XMLName xml.Name `xml:"response"`
-	Error string `xml:"error"`
+	Error   string   `xml:"error"`
+}
+
+type SteamResponse struct {
+	XMLName          xml.Name `xml:"profile"`
+	SteamID64        string   `xml:"steamID64"`
+	SteamID          string   `xml:"steamID"`
+	StateMessage     string   `xml:"stateMessage"`
+	PrivacyState     string   `xml:"privacyState"`
+	VisibilityState  string   `xml:"visibilityState"`
+	AvatarIcon       string   `xml:"avatarIcon"`
+	AvatarMedium     string   `xml:"avatarMedium"`
+	AvatarFull       string   `xml:"avatarFull"`
+	VacBanned        string   `xml:"vacBanned"`
+	TradeBanState    string   `xml:"tradeBanState"`
+	IsLimitedAccount string   `xml:"isLimitedAccount"`
+	CustomURL        string   `xml:"customURL"`
+	MemberSince      string   `xml:"memberSince"`
+	SteamRating      string   `xml:"steamRating"`
+	HoursPlayed2Wk   string   `xml:"hoursPlayed2Wk"`
+	Headline         string   `xml:"headline"`
+	Location         string   `xml:"location"`
+	Realname         string   `xml:"realname"`
+	Summary          string   `xml:"summary"`
 }
 
 func Init() {
@@ -101,10 +124,15 @@ func (steam *Steam) GetUserInfo(isCustomUrl bool) (uid string, username string, 
 func parseSteamXML(xmlBody []byte) (uid string, username string, descripton string, err error) {
 	errorResponse := new(SteamErrorResponse)
 	err = xml.Unmarshal(xmlBody, errorResponse)
-	if err == nil {
-		fmt.Printf("%+v", errorResponse) // DEBUG
+	if err == nil { // Error response
 		return "", "", "", xerrors.Errorf("Error when fetching steam profile page: %s", errorResponse.Error)
 	}
 
-	return // TODO
+	response := new(SteamResponse)
+	err = xml.Unmarshal(xmlBody, response)
+	if err != nil {
+		return "", "", "", xerrors.Errorf("Error when parsing steam profile page: %w", err)
+	}
+
+	return response.SteamID64, response.CustomURL, response.Summary, nil
 }
