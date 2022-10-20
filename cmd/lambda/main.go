@@ -21,6 +21,7 @@ import (
 	"github.com/nextdotid/proof_server/validator/keybase"
 	"github.com/nextdotid/proof_server/validator/minds"
 	"github.com/nextdotid/proof_server/validator/solana"
+	"github.com/nextdotid/proof_server/validator/steam"
 	"github.com/nextdotid/proof_server/validator/twitter"
 	"github.com/sirupsen/logrus"
 )
@@ -47,6 +48,7 @@ func init_validators() {
 	solana.Init()
 	minds.Init()
 	dns.Init()
+	steam.Init()
 }
 
 func init() {
