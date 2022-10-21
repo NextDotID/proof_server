@@ -39,9 +39,7 @@ func Test_Proof_Revalidate(t *testing.T) {
 		DB.Where("location = ?", pc.Location).Preload("ProofChain").Find(proof)
 		require.NotEqual(t, proof.ID, 0)
 
-		result, err := proof.Revalidate()
-		require.True(t, result)
-		require.Nil(t, err)
+		require.NoError(t, proof.Revalidate())
 	})
 
 	t.Run("failure", func(t *testing.T) {
@@ -68,9 +66,7 @@ func Test_Proof_Revalidate(t *testing.T) {
 		DB.Where("location = ?", pc.Location).Preload("ProofChain").Find(proof)
 		require.NotEqual(t, proof.ID, 0)
 
-		result, err := proof.Revalidate()
-		require.False(t, result)
-		t.Logf("%s", err.Error())
+		require.Error(t, proof.Revalidate())
 	})
 }
 
