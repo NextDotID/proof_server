@@ -9,6 +9,7 @@ import (
 	"github.com/nextdotid/proof_server/types"
 	"github.com/nextdotid/proof_server/util/crypto"
 	"github.com/nextdotid/proof_server/validator"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 )
 
@@ -96,6 +97,8 @@ func Test_proofQuery(t *testing.T) {
 		require.Equal(t, int64(1), resp.Pagination.Total)
 		require.Equal(t, 1, resp.Pagination.Current)
 		require.Equal(t, PER_PAGE, resp.Pagination.Per)
+		require.NotEqual(t, "0", found.ActivatedAt)
+		require.NotEqual(t, "", found.ActivatedAt)
 
 		partial_resp := ProofQueryResponse{}
 		APITestCall(Engine, "GET", "/v1/proof?platform=twitter&identity=eiw", "", &partial_resp)
@@ -146,9 +149,10 @@ func Test_proofQuery(t *testing.T) {
 	t.Run("patination", func(t *testing.T) {
 		before_each(t)
 		eth_pubkey, _ := crypto.GenerateKeypair()
-		for i := 0; i < 45; i++ { // Create 45 records
+		lo.Times(45, func(i int) int {
 			insert_eth_proof(t, eth_pubkey)
-		}
+			return 0
+		})
 		url := "/v1/proof?identity=" + ethcrypto.PubkeyToAddress(*eth_pubkey).String() + "&platform=ethereum"
 
 		resp_page1 := ProofQueryResponse{} // Page not given

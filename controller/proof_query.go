@@ -39,6 +39,7 @@ type ProofQueryResponseSingle struct {
 	Persona       string                          `json:"persona"`
 	Avatar        string                          `json:"avatar"`
 	LastArweaveID string                          `json:"last_arweave_id"`
+	ActivatedAt   string                          `json:"activated_at"`
 	Proofs        []ProofQueryResponseSingleProof `json:"proofs"`
 }
 
@@ -142,9 +143,18 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 		if err != nil {
 			return result, pagination
 		}
+
+		// Find last activation time of persona
+		activatedAt := "0"
+		latest_pc, _ := model.ProofChainFindLatest(persona)
+		if latest_pc != nil {
+			activatedAt = strconv.FormatInt(latest_pc.CreatedAt.Unix(), 10)
+		}
+
 		single := ProofQueryResponseSingle{
-			Persona: persona,
-			Avatar:  persona,
+			Persona:     persona,
+			Avatar:      persona,
+			ActivatedAt: activatedAt,
 			Proofs: lo.Map(proofs, func(proof model.Proof, _index int) ProofQueryResponseSingleProof {
 				return ProofQueryResponseSingleProof{
 					Platform:      proof.Platform,

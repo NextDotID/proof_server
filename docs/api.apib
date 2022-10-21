@@ -1,6 +1,7 @@
 FORMAT: 1A
 
 # Changelog
+  - <2022-10-21 Fri> :: GET /v1/proof: `activated_at` for all avatar
   - <2022-07-13 Wed> :: GET /v1/proofchain/changes
   - <2022-06-15 Wed> ::
     - GET /v1/proof -> `last_arweave_id`
@@ -183,6 +184,7 @@ Request failed.
     + ids (array[object], required) - All IDs found. Will be empty array if not found.
       + avatar (string, required) - Avatar public key
       + last_arweave_id (string, required) - Arweave transaction ID of last proof this avatar signed
+      + activated_at (string, required) - Last activation time of this avatar. (timestamp, unit: second)
       + proofs (array[object], required) - All proofs under this Avatar
         + platform (string, required) - Platform
         + identity (string, required) - Identity on that platform
@@ -202,6 +204,8 @@ Request failed.
           },
           "ids": [{
             "avatar": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575",
+            "last_arweave_id": "xxxxxxx",
+            "activated_at": "1643099438",
             "proofs": [{
               "platform": "twitter",
               "identity": "my_twitter_screen_name",
@@ -219,6 +223,8 @@ Request failed.
             }]
           }, {
             "avatar": "0xANOTHER",
+            "last_arweave_id": "yyyyyyyy",
+            "activated_at": "1643099438",
             "proofs": [{
               "platform": "ethereum",
               "identity": "0x114514......",
