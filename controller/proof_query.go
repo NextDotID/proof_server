@@ -21,7 +21,7 @@ type ProofQueryRequest struct {
 	Platform   string   `form:"platform"`
 	Identity   []string `form:"identity"`
 	Page       int      `form:"page"`
-	ExactMatch bool     `form:"exact_match"`
+	ExactMatch bool     `form:"exact"`
 }
 
 type ProofQueryResponse struct {
