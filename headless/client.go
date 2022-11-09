@@ -21,8 +21,8 @@ func NewHeadlessClient(url string) *HeadlessClient {
 	return &HeadlessClient{url, http.DefaultClient}
 }
 
-// Validate validates whether the given payload is valid
-func (h *HeadlessClient) Validate(ctx context.Context, payload *ValidateRequest) (bool, error) {
+// Find find whether the target matching payload exists
+func (h *HeadlessClient) Find(ctx context.Context, payload *FindRequest) (bool, error) {
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return false, xerrors.Errorf("%w", err)
@@ -55,10 +55,10 @@ func (h *HeadlessClient) Validate(ctx context.Context, payload *ValidateRequest)
 		return false, xerrors.Errorf("%w", err)
 	}
 
-	var resBody ValidateRespond
+	var resBody FindRespond
 	if err := json.Unmarshal(contents, &resBody); err != nil {
 		return false, xerrors.Errorf("%w", err)
 	}
 
-	return resBody.IsValid, nil
+	return resBody.Found, nil
 }

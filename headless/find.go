@@ -51,25 +51,25 @@ type Match struct {
 	MatchJS     *MatchJS     `json:"js"`
 }
 
-type ValidateRequest struct {
+type FindRequest struct {
 	Location string `json:"location"`
 	Timeout  string `json:"timeout"`
 	Match    Match  `json:"match"`
 }
 
-type ValidateRespond struct {
-	IsValid bool   `json:"is_valid"`
+type FindRespond struct {
+	Found   bool   `json:"found"`
 	Message string `json:"message,omitempty"`
 }
 
 func errorResp(c *gin.Context, error_code int, err error) {
-	c.JSON(error_code, ValidateRespond{
+	c.JSON(error_code, FindRespond{
 		Message: err.Error(),
 	})
 }
 
 func validate(c *gin.Context) {
-	var req ValidateRequest
+	var req FindRequest
 	if err := c.Bind(&req); err != nil {
 		errorResp(c, http.StatusBadRequest, xerrors.Errorf("Param error"))
 		return
@@ -149,30 +149,30 @@ func validate(c *gin.Context) {
 		}
 
 		if _, err := page.ElementR(selector, req.Match.MatchRegExp.Value); err != nil {
-			c.JSON(http.StatusOK, ValidateRespond{IsValid: false, Message: err.Error()})
+			c.JSON(http.StatusOK, FindRespond{Found: false, Message: err.Error()})
 
 			return
 		}
 	case matchTypeXPath:
 		selector := req.Match.MatchXPath.Selector
 		if _, err := page.ElementX(selector); err != nil {
-			c.JSON(http.StatusOK, ValidateRespond{IsValid: false, Message: err.Error()})
+			c.JSON(http.StatusOK, FindRespond{Found: false, Message: err.Error()})
 
 			return
 		}
 	case matchTypeJS:
 		js := req.Match.MatchJS.Value
 		if _, err := page.ElementByJS(rod.Eval(js)); err != nil {
-			c.JSON(http.StatusOK, ValidateRespond{IsValid: false, Message: err.Error()})
+			c.JSON(http.StatusOK, FindRespond{Found: false, Message: err.Error()})
 
 			return
 		}
 	}
 
-	c.JSON(http.StatusOK, ValidateRespond{IsValid: true})
+	c.JSON(http.StatusOK, FindRespond{Found: true})
 }
 
-func checkValidateRequest(req *ValidateRequest) error {
+func checkValidateRequest(req *FindRequest) error {
 	if req.Location == "" {
 		return xerrors.Errorf("'location' is missing")
 	}

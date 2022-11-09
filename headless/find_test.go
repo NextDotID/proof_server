@@ -10,10 +10,10 @@ import (
 	"github.com/nextdotid/proof_server/headless"
 )
 
-func newValidRequest(location string, matchType string) headless.ValidateRequest {
+func newValidRequest(location string, matchType string) headless.FindRequest {
 	switch matchType {
 	case "regexp":
-		return headless.ValidateRequest{
+		return headless.FindRequest{
 			Location: location,
 			Timeout:  "2s",
 			Match: headless.Match{
@@ -25,7 +25,7 @@ func newValidRequest(location string, matchType string) headless.ValidateRequest
 			},
 		}
 	case "xpath":
-		return headless.ValidateRequest{
+		return headless.FindRequest{
 			Location: location,
 			Timeout:  "2s",
 			Match: headless.Match{
@@ -36,7 +36,7 @@ func newValidRequest(location string, matchType string) headless.ValidateRequest
 			},
 		}
 	case "js":
-		return headless.ValidateRequest{
+		return headless.FindRequest{
 			Location: location,
 			Timeout:  "2s",
 			Match: headless.Match{
@@ -48,7 +48,7 @@ func newValidRequest(location string, matchType string) headless.ValidateRequest
 		}
 	}
 
-	return headless.ValidateRequest{}
+	return headless.FindRequest{}
 }
 
 func Test_Validate(t *testing.T) {
@@ -72,36 +72,36 @@ func Test_Validate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// using regexp
 		req := newValidRequest(ts.URL, "regexp")
-		res := headless.ValidateRespond{}
+		res := headless.FindRespond{}
 
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
-		assert.Equal(t, true, res.IsValid)
+		assert.Equal(t, true, res.Found)
 		assert.Equal(t, "", res.Message)
 
 		// using xpath
 		req = newValidRequest(ts.URL, "xpath")
-		res = headless.ValidateRespond{}
+		res = headless.FindRespond{}
 
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
-		assert.Equal(t, true, res.IsValid)
+		assert.Equal(t, true, res.Found)
 		assert.Equal(t, "", res.Message)
 
 		// using js
 		req = newValidRequest(ts.URL, "js")
-		res = headless.ValidateRespond{}
+		res = headless.FindRespond{}
 
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
-		assert.Equal(t, true, res.IsValid)
+		assert.Equal(t, true, res.Found)
 		assert.Equal(t, "", res.Message)
 	})
 
 	t.Run("error ", func(t *testing.T) {
 		// invalid location
 		req := newValidRequest(ts.URL, "regexp")
-		res := headless.ValidateRespond{}
+		res := headless.FindRespond{}
 		req.Location = ""
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
@@ -109,7 +109,7 @@ func Test_Validate(t *testing.T) {
 
 		// invalid timeout
 		req = newValidRequest(ts.URL, "regexp")
-		res = headless.ValidateRespond{}
+		res = headless.FindRespond{}
 		req.Timeout = "invalid"
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
@@ -117,7 +117,7 @@ func Test_Validate(t *testing.T) {
 
 		// invalid match type
 		req = newValidRequest(ts.URL, "regexp")
-		res = headless.ValidateRespond{}
+		res = headless.FindRespond{}
 		req.Match.Type = "invalid"
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
@@ -125,7 +125,7 @@ func Test_Validate(t *testing.T) {
 
 		// missing regexp value
 		req = newValidRequest(ts.URL, "regexp")
-		res = headless.ValidateRespond{}
+		res = headless.FindRespond{}
 		req.Match.MatchRegExp.Value = ""
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
@@ -133,7 +133,7 @@ func Test_Validate(t *testing.T) {
 
 		// missing xpath selector
 		req = newValidRequest(ts.URL, "xpath")
-		res = headless.ValidateRespond{}
+		res = headless.FindRespond{}
 		req.Match.MatchXPath.Selector = ""
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
@@ -141,7 +141,7 @@ func Test_Validate(t *testing.T) {
 
 		// missing js value
 		req = newValidRequest(ts.URL, "js")
-		res = headless.ValidateRespond{}
+		res = headless.FindRespond{}
 		req.Match.MatchJS.Value = ""
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
@@ -149,10 +149,10 @@ func Test_Validate(t *testing.T) {
 
 		// target text is not found
 		req = newValidRequest(ts.URL, "regexp")
-		success := headless.ValidateRespond{}
+		success := headless.FindRespond{}
 		req.Match.MatchRegExp.Value = "unknown-text"
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &success)
 
-		assert.Equal(t, success.IsValid, false)
+		assert.Equal(t, success.Found, false)
 	})
 }

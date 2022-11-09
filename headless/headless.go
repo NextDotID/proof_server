@@ -30,7 +30,7 @@ func Init(launcherPath string) {
 	Engine.Use(middlewareCors())
 
 	Engine.GET("/healthz", healthz)
-	Engine.POST("/v1/validate", validate)
+	Engine.POST("/v1/find", validate)
 }
 
 func healthz(c *gin.Context) {
