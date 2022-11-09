@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/url"
+	"path"
 
 	"golang.org/x/xerrors"
 )
@@ -23,12 +25,18 @@ func NewHeadlessClient(url string) *HeadlessClient {
 
 // Find find whether the target matching payload exists
 func (h *HeadlessClient) Find(ctx context.Context, payload *FindRequest) (bool, error) {
+	u, err := url.Parse(h.url)
+	if err != nil {
+		return false, xerrors.Errorf("%w", err)
+	}
+
+	u.Path = path.Join(u.Path, "/v1/find")
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return false, xerrors.Errorf("%w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, h.url, bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), bytes.NewReader(body))
 	if err != nil {
 		return false, xerrors.Errorf("%w", err)
 	}
