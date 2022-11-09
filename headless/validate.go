@@ -57,17 +57,13 @@ type ValidateRequest struct {
 	Match    Match  `json:"match"`
 }
 
-type ErrorResponse struct {
-	Message string `json:"message"`
-}
-
-type SuccessResponse struct {
+type ValidateRespond struct {
 	IsValid bool   `json:"is_valid"`
-	Detail  string `json:"detail,omitempty"`
+	Message string `json:"message,omitempty"`
 }
 
 func errorResp(c *gin.Context, error_code int, err error) {
-	c.JSON(error_code, ErrorResponse{
+	c.JSON(error_code, ValidateRespond{
 		Message: err.Error(),
 	})
 }
@@ -153,27 +149,27 @@ func validate(c *gin.Context) {
 		}
 
 		if _, err := page.ElementR(selector, req.Match.MatchRegExp.Value); err != nil {
-			c.JSON(http.StatusOK, SuccessResponse{IsValid: false, Detail: err.Error()})
+			c.JSON(http.StatusOK, ValidateRespond{IsValid: false, Message: err.Error()})
 
 			return
 		}
 	case matchTypeXPath:
 		selector := req.Match.MatchXPath.Selector
 		if _, err := page.ElementX(selector); err != nil {
-			c.JSON(http.StatusOK, SuccessResponse{IsValid: false, Detail: err.Error()})
+			c.JSON(http.StatusOK, ValidateRespond{IsValid: false, Message: err.Error()})
 
 			return
 		}
 	case matchTypeJS:
 		js := req.Match.MatchJS.Value
 		if _, err := page.ElementByJS(rod.Eval(js)); err != nil {
-			c.JSON(http.StatusOK, SuccessResponse{IsValid: false, Detail: err.Error()})
+			c.JSON(http.StatusOK, ValidateRespond{IsValid: false, Message: err.Error()})
 
 			return
 		}
 	}
 
-	c.JSON(http.StatusOK, SuccessResponse{IsValid: true})
+	c.JSON(http.StatusOK, ValidateRespond{IsValid: true})
 }
 
 func checkValidateRequest(req *ValidateRequest) error {

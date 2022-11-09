@@ -72,36 +72,36 @@ func Test_Validate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// using regexp
 		req := newValidRequest(ts.URL, "regexp")
-		res := headless.SuccessResponse{}
+		res := headless.ValidateRespond{}
 
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
 		assert.Equal(t, true, res.IsValid)
-		assert.Equal(t, "", res.Detail)
+		assert.Equal(t, "", res.Message)
 
 		// using xpath
 		req = newValidRequest(ts.URL, "xpath")
-		res = headless.SuccessResponse{}
+		res = headless.ValidateRespond{}
 
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
 		assert.Equal(t, true, res.IsValid)
-		assert.Equal(t, "", res.Detail)
+		assert.Equal(t, "", res.Message)
 
 		// using js
 		req = newValidRequest(ts.URL, "js")
-		res = headless.SuccessResponse{}
+		res = headless.ValidateRespond{}
 
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
 		assert.Equal(t, true, res.IsValid)
-		assert.Equal(t, "", res.Detail)
+		assert.Equal(t, "", res.Message)
 	})
 
 	t.Run("error ", func(t *testing.T) {
 		// invalid location
 		req := newValidRequest(ts.URL, "regexp")
-		res := headless.ErrorResponse{}
+		res := headless.ValidateRespond{}
 		req.Location = ""
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
@@ -109,7 +109,7 @@ func Test_Validate(t *testing.T) {
 
 		// invalid timeout
 		req = newValidRequest(ts.URL, "regexp")
-		res = headless.ErrorResponse{}
+		res = headless.ValidateRespond{}
 		req.Timeout = "invalid"
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
@@ -117,7 +117,7 @@ func Test_Validate(t *testing.T) {
 
 		// invalid match type
 		req = newValidRequest(ts.URL, "regexp")
-		res = headless.ErrorResponse{}
+		res = headless.ValidateRespond{}
 		req.Match.Type = "invalid"
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
@@ -125,7 +125,7 @@ func Test_Validate(t *testing.T) {
 
 		// missing regexp value
 		req = newValidRequest(ts.URL, "regexp")
-		res = headless.ErrorResponse{}
+		res = headless.ValidateRespond{}
 		req.Match.MatchRegExp.Value = ""
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
@@ -133,7 +133,7 @@ func Test_Validate(t *testing.T) {
 
 		// missing xpath selector
 		req = newValidRequest(ts.URL, "xpath")
-		res = headless.ErrorResponse{}
+		res = headless.ValidateRespond{}
 		req.Match.MatchXPath.Selector = ""
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
@@ -141,7 +141,7 @@ func Test_Validate(t *testing.T) {
 
 		// missing js value
 		req = newValidRequest(ts.URL, "js")
-		res = headless.ErrorResponse{}
+		res = headless.ValidateRespond{}
 		req.Match.MatchJS.Value = ""
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
 
@@ -149,7 +149,7 @@ func Test_Validate(t *testing.T) {
 
 		// target text is not found
 		req = newValidRequest(ts.URL, "regexp")
-		success := headless.SuccessResponse{}
+		success := headless.ValidateRespond{}
 		req.Match.MatchRegExp.Value = "unknown-text"
 		APITestCall(headless.Engine, "POST", "/v1/validate", req, &success)
 
