@@ -11,19 +11,17 @@ import (
 )
 
 var (
-	Engine *gin.Engine
-	l      = logrus.WithFields(logrus.Fields{"module": "headless"})
+	Engine       *gin.Engine
+	LauncherPath string
+	l            = logrus.WithFields(logrus.Fields{"module": "headless"})
 )
-
-type ErrorResponse struct {
-	Message string `json:"message"`
-}
 
 func middlewareCors() gin.HandlerFunc {
 	return cors.Default()
 }
 
-func Init() {
+func Init(launcherPath string) {
+	LauncherPath = launcherPath
 	if Engine != nil {
 		return
 	}
@@ -33,12 +31,6 @@ func Init() {
 
 	Engine.GET("/healthz", healthz)
 	Engine.POST("/v1/validate", validate)
-}
-
-func errorResp(c *gin.Context, error_code int, err error) {
-	c.JSON(error_code, ErrorResponse{
-		Message: err.Error(),
-	})
 }
 
 func healthz(c *gin.Context) {

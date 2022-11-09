@@ -56,9 +56,19 @@ type ValidateRequest struct {
 	Match    Match  `json:"match"`
 }
 
-type ValidateResponse struct {
+type ErrorResponse struct {
+	Message string `json:"message"`
+}
+
+type SuccessResponse struct {
 	IsValid bool   `json:"is_valid"`
 	Detail  string `json:"detail,omitempty"`
+}
+
+func errorResp(c *gin.Context, error_code int, err error) {
+	c.JSON(error_code, ErrorResponse{
+		Message: err.Error(),
+	})
 }
 
 func validate(c *gin.Context) {
@@ -73,7 +83,17 @@ func validate(c *gin.Context) {
 		return
 	}
 
-	browser := rod.New()
+	launcher := newLauncher(LauncherPath)
+	defer launcher.Cleanup()
+	defer launcher.Kill()
+
+	u, err := launcher.Launch()
+	if err != nil {
+		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
+		return
+	}
+
+	browser := rod.New().ControlURL(u)
 	if err := browser.Connect(); err != nil {
 		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
 		return
@@ -104,6 +124,11 @@ func validate(c *gin.Context) {
 		return
 	}
 
+	if err := page.WaitRepaint(); err != nil {
+		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
+		return
+	}
+
 	switch req.Match.Type {
 	case matchTypeRegex:
 		selector := req.Match.MatchRegExp.Selector
@@ -112,27 +137,27 @@ func validate(c *gin.Context) {
 		}
 
 		if _, err := page.ElementR(selector, req.Match.MatchRegExp.Value); err != nil {
-			c.JSON(http.StatusOK, ValidateResponse{IsValid: false, Detail: err.Error()})
+			c.JSON(http.StatusOK, SuccessResponse{IsValid: false, Detail: err.Error()})
 
 			return
 		}
 	case matchTypeXPath:
 		selector := req.Match.MatchXPath.Selector
 		if _, err := page.ElementX(selector); err != nil {
-			c.JSON(http.StatusOK, ValidateResponse{IsValid: false, Detail: err.Error()})
+			c.JSON(http.StatusOK, SuccessResponse{IsValid: false, Detail: err.Error()})
 
 			return
 		}
 	case matchTypeJS:
 		js := req.Match.MatchJS.Value
 		if _, err := page.ElementByJS(rod.Eval(js)); err != nil {
-			c.JSON(http.StatusOK, ValidateResponse{IsValid: false, Detail: err.Error()})
+			c.JSON(http.StatusOK, SuccessResponse{IsValid: false, Detail: err.Error()})
 
 			return
 		}
 	}
 
-	c.JSON(http.StatusOK, ValidateResponse{IsValid: true})
+	c.JSON(http.StatusOK, SuccessResponse{IsValid: true})
 }
 
 func checkValidateRequest(req *ValidateRequest) error {
