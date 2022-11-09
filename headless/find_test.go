@@ -51,20 +51,22 @@ func newValidRequest(location string, matchType string) headless.FindRequest {
 	return headless.FindRequest{}
 }
 
-func Test_Validate(t *testing.T) {
+func Test_Find(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(`
-    <html>
-      <head>
-        <scipt>
-          document.body.innerHTML = '<h1>match-this-text</h1>';       
-        </script>
-      </head>
-      <body>
-      </body>
-    </html>
-    `))
+		w.Write([]byte(
+			`
+      <html>
+        <head>
+          <scipt>
+            document.body.innerHTML = '<h1>match-this-text</h1>';       
+          </script>
+        </head>
+        <body>
+        </body>
+      </html>
+      `,
+		))
 	}))
 
 	defer ts.Close()
@@ -74,7 +76,7 @@ func Test_Validate(t *testing.T) {
 		req := newValidRequest(ts.URL, "regexp")
 		res := headless.FindRespond{}
 
-		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
+		APITestCall(headless.Engine, "POST", "/v1/find", req, &res)
 
 		assert.Equal(t, true, res.Found)
 		assert.Equal(t, "", res.Message)
@@ -83,7 +85,7 @@ func Test_Validate(t *testing.T) {
 		req = newValidRequest(ts.URL, "xpath")
 		res = headless.FindRespond{}
 
-		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
+		APITestCall(headless.Engine, "POST", "/v1/find", req, &res)
 
 		assert.Equal(t, true, res.Found)
 		assert.Equal(t, "", res.Message)
@@ -92,7 +94,7 @@ func Test_Validate(t *testing.T) {
 		req = newValidRequest(ts.URL, "js")
 		res = headless.FindRespond{}
 
-		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
+		APITestCall(headless.Engine, "POST", "/v1/find", req, &res)
 
 		assert.Equal(t, true, res.Found)
 		assert.Equal(t, "", res.Message)
@@ -103,7 +105,7 @@ func Test_Validate(t *testing.T) {
 		req := newValidRequest(ts.URL, "regexp")
 		res := headless.FindRespond{}
 		req.Location = ""
-		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
+		APITestCall(headless.Engine, "POST", "/v1/find", req, &res)
 
 		assert.Contains(t, res.Message, "location")
 
@@ -111,7 +113,7 @@ func Test_Validate(t *testing.T) {
 		req = newValidRequest(ts.URL, "regexp")
 		res = headless.FindRespond{}
 		req.Timeout = "invalid"
-		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
+		APITestCall(headless.Engine, "POST", "/v1/find", req, &res)
 
 		assert.Contains(t, res.Message, "timeout")
 
@@ -119,7 +121,7 @@ func Test_Validate(t *testing.T) {
 		req = newValidRequest(ts.URL, "regexp")
 		res = headless.FindRespond{}
 		req.Match.Type = "invalid"
-		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
+		APITestCall(headless.Engine, "POST", "/v1/find", req, &res)
 
 		assert.Contains(t, res.Message, "match.type")
 
@@ -127,7 +129,7 @@ func Test_Validate(t *testing.T) {
 		req = newValidRequest(ts.URL, "regexp")
 		res = headless.FindRespond{}
 		req.Match.MatchRegExp.Value = ""
-		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
+		APITestCall(headless.Engine, "POST", "/v1/find", req, &res)
 
 		assert.Contains(t, res.Message, "match.regexp.value")
 
@@ -135,7 +137,7 @@ func Test_Validate(t *testing.T) {
 		req = newValidRequest(ts.URL, "xpath")
 		res = headless.FindRespond{}
 		req.Match.MatchXPath.Selector = ""
-		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
+		APITestCall(headless.Engine, "POST", "/v1/find", req, &res)
 
 		assert.Contains(t, res.Message, "match.xpath.selector")
 
@@ -143,7 +145,7 @@ func Test_Validate(t *testing.T) {
 		req = newValidRequest(ts.URL, "js")
 		res = headless.FindRespond{}
 		req.Match.MatchJS.Value = ""
-		APITestCall(headless.Engine, "POST", "/v1/validate", req, &res)
+		APITestCall(headless.Engine, "POST", "/v1/find", req, &res)
 
 		assert.Contains(t, res.Message, "match.js.value")
 
@@ -151,7 +153,7 @@ func Test_Validate(t *testing.T) {
 		req = newValidRequest(ts.URL, "regexp")
 		success := headless.FindRespond{}
 		req.Match.MatchRegExp.Value = "unknown-text"
-		APITestCall(headless.Engine, "POST", "/v1/validate", req, &success)
+		APITestCall(headless.Engine, "POST", "/v1/find", req, &success)
 
 		assert.Equal(t, success.Found, false)
 	})
