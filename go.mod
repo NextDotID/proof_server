@@ -89,6 +89,7 @@ require (
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/ssoroka/slice v0.0.0-20220402005549-78f0cea3df8b // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/teris-io/shortid v0.0.0-20201117134242-e59966efd125 // indirect
 	github.com/tidwall/gjson v1.9.3 // indirect

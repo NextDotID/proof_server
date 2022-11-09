@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
+	"github.com/ssoroka/slice"
 	"golang.org/x/xerrors"
 )
 
@@ -117,14 +118,29 @@ func validate(c *gin.Context) {
 		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
 		return
 	}
+	router := page.HijackRequests()
+
+	resources := []proto.NetworkResourceType{
+		proto.NetworkResourceTypeFont,
+		proto.NetworkResourceTypeImage,
+		proto.NetworkResourceTypeMedia,
+		proto.NetworkResourceTypeStylesheet,
+		proto.NetworkResourceTypeWebSocket, // we don't need websockets to fetch html
+	}
+
+	router.MustAdd("*", func(ctx *rod.Hijack) {
+		if slice.Contains(resources, ctx.Request.Type()) {
+			ctx.Response.Fail(proto.NetworkErrorReasonBlockedByClient)
+			return
+		}
+
+		ctx.ContinueRequest(&proto.FetchContinueRequest{})
+	})
+
+	go router.Run()
 
 	page = page.Timeout(timeoutDuration)
 	if err := page.WaitLoad(); err != nil {
-		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
-		return
-	}
-
-	if err := page.WaitRepaint(); err != nil {
 		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
 		return
 	}
