@@ -2,6 +2,7 @@ package controller
 
 import (
 	"crypto/ecdsa"
+	"strings"
 	"testing"
 
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
@@ -9,6 +10,7 @@ import (
 	"github.com/nextdotid/proof_server/types"
 	"github.com/nextdotid/proof_server/util/crypto"
 	"github.com/nextdotid/proof_server/validator"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 )
 
@@ -51,6 +53,51 @@ func insert_proof(t *testing.T) {
 	}
 }
 
+func insert_proof_exact(t *testing.T) {
+	pubkey, _ := crypto.StringToPubkey(persona)
+	personaPk, _ := crypto.GenerateKeypair()
+	validators := []validator.Base{
+		{
+			Platform:      types.Platforms.Twitter,
+			Previous:      "",
+			Action:        types.Actions.Create,
+			Pubkey:        pubkey,
+			Identity:      "yeiwb",
+			ProofLocation: "1469221200140574721",
+			Signature:     []byte{1},
+		},
+		{
+			Platform:      types.Platforms.Ethereum,
+			Previous:      "AQ==",
+			Action:        types.Actions.Create,
+			Pubkey:        pubkey,
+			Identity:      "0xd5f630652d4a8a5f95cda3738ce9f43fa26e764f",
+			ProofLocation: "",
+			Signature:     []byte{2},
+			Extra: map[string]string{
+				"ethereum_pubkey": "0x04ae5933a45605e7fff23cd010455911c1f0194479438859af5140d749937e53fd935d768efa9229ae8be3314631e945c56f915778ad4565b4efafcd13864e2fd7",
+			},
+		},
+		{
+			Platform:      types.Platforms.Twitter,
+			Previous:      "",
+			Action:        types.Actions.Create,
+			Pubkey:        personaPk,
+			Identity:      "yeiwb_fuzzy",
+			ProofLocation: "1469221200140574722",
+			Signature:     []byte{3},
+		},
+	}
+
+	for _, b := range validators {
+		pc, err := model.ProofChainCreateFromValidator(&b)
+		require.Nil(t, err)
+
+		err = pc.Apply()
+		require.Nil(t, err)
+	}
+}
+
 // / Insert Random Persona <-> Given ETH public key binding.
 func insert_eth_proof(t *testing.T, eth_pub_key *ecdsa.PublicKey) {
 	personaPk, _ := crypto.GenerateKeypair()
@@ -59,7 +106,7 @@ func insert_eth_proof(t *testing.T, eth_pub_key *ecdsa.PublicKey) {
 		Previous:         "",
 		Action:           types.Actions.Create,
 		Pubkey:           personaPk,
-		Identity:         ethcrypto.PubkeyToAddress(*eth_pub_key).String(),
+		Identity:         strings.ToLower(ethcrypto.PubkeyToAddress(*eth_pub_key).String()),
 		ProofLocation:    "",
 		Signature:        []byte{1},
 		SignaturePayload: "",
@@ -96,6 +143,8 @@ func Test_proofQuery(t *testing.T) {
 		require.Equal(t, int64(1), resp.Pagination.Total)
 		require.Equal(t, 1, resp.Pagination.Current)
 		require.Equal(t, PER_PAGE, resp.Pagination.Per)
+		require.NotEqual(t, "0", found.ActivatedAt)
+		require.NotEqual(t, "", found.ActivatedAt)
 
 		partial_resp := ProofQueryResponse{}
 		APITestCall(Engine, "GET", "/v1/proof?platform=twitter&identity=eiw", "", &partial_resp)
@@ -143,13 +192,15 @@ func Test_proofQuery(t *testing.T) {
 		require.Equal(t, 2, len(resp.IDs[0].Proofs))
 	})
 
-	t.Run("patination", func(t *testing.T) {
+	t.Run("pagination", func(t *testing.T) {
 		before_each(t)
 		eth_pubkey, _ := crypto.GenerateKeypair()
-		for i := 0; i < 45; i++ { // Create 45 records
+		lo.Times(45, func(i int) int {
 			insert_eth_proof(t, eth_pubkey)
-		}
-		url := "/v1/proof?identity=" + ethcrypto.PubkeyToAddress(*eth_pubkey).String() + "&platform=ethereum"
+			return 0
+		})
+		eth_address := ethcrypto.PubkeyToAddress(*eth_pubkey).String()
+		url := "/v1/proof?identity=" + eth_address + "&platform=ethereum"
 
 		resp_page1 := ProofQueryResponse{} // Page not given
 		APITestCall(Engine, "GET", url, nil, &resp_page1)
@@ -169,5 +220,17 @@ func Test_proofQuery(t *testing.T) {
 		require.Equal(t, 4, resp_page4.Pagination.Current)
 		require.Equal(t, 0, resp_page4.Pagination.Next)
 		require.Equal(t, 0, len(resp_page4.IDs))
+	})
+
+	t.Run("exact_match", func(t *testing.T) {
+		before_each(t)
+		insert_proof_exact(t)
+
+		resp := ProofQueryResponse{}
+		APITestCall(Engine, "GET", "/v1/proof?platform=twitter&identity=yeiwb", "", &resp)
+		require.Equal(t, 2, len(resp.IDs))
+
+		APITestCall(Engine, "GET", "/v1/proof?platform=twitter&identity=yeiwb&exact=true", "", &resp)
+		require.Equal(t, 1, len(resp.IDs))
 	})
 }

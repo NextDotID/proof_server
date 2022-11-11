@@ -72,17 +72,31 @@ func GeneratePayload() {
 			fmt.Printf("Wallet base64 sig: vvvvvvvvvv\n%s\n^^^^^^^^^^^^^^^\n\n", base64.StdEncoding.EncodeToString(walletSignature))
 		} else {
 			for lang_code, payload := range respPayload.PostContent {
-				fmt.Printf(
-					"Post base64 encode payload [%s]: vvvvvvv\n%s\n^^^^^^^^^^\n\n",
-					lang_code,
-					string(post_regex.ReplaceAll([]byte(payload), []byte(base64.StdEncoding.EncodeToString(signature)))),
-				)
+				// dotbit "%COMPRESSED_PERSONA_PUBKEY_HEX%:%SIG_BASE64%"
+				if types.Platform(params.Platform) == types.Platforms.Das {
+					fmt.Printf(
+						"Post base64 encode payload [%s]: vvvvvvv\n%s\n^^^^^^^^^^\n\n",
+						lang_code,
+						personaPublicKeyParams+":"+base64.StdEncoding.EncodeToString(signature),
+					)
+					fmt.Printf(
+						"Post base1024 encode payload [%s]: vvvvvvv\n%s\n^^^^^^^^^^\n\n",
+						lang_code,
+						personaPublicKeyParams+":"+base1024.EncodeToString(signature),
+					)
+				} else {
+					fmt.Printf(
+						"Post base64 encode payload [%s]: vvvvvvv\n%s\n^^^^^^^^^^\n\n",
+						lang_code,
+						string(post_regex.ReplaceAll([]byte(payload), []byte(base64.StdEncoding.EncodeToString(signature)))),
+					)
+					fmt.Printf(
+						"Post base1024 encode payload [%s]: vvvvvvv\n%s\n^^^^^^^^^^\n\n",
+						lang_code,
+						string(post_regex.ReplaceAll([]byte(payload), []byte(base1024.EncodeToString(signature)))),
+					)
+				}
 
-				fmt.Printf(
-					"Post base1024 encode payload [%s]: vvvvvvv\n%s\n^^^^^^^^^^\n\n",
-					lang_code,
-					string(post_regex.ReplaceAll([]byte(payload), []byte(base1024.EncodeToString(signature)))),
-				)
 			}
 		}
 	}

@@ -101,6 +101,7 @@ func (das *Das) GenerateSignPayload() (payload string) {
 
 func (das *Das) Validate() (err error) {
 	das.Identity = strings.ToLower(das.Identity)
+	das.AltID = das.Identity
 	das.SignaturePayload = das.GenerateSignPayload()
 
 	// Find the record through API response instead of saving its 'location'.

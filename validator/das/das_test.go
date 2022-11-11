@@ -9,7 +9,7 @@ import (
 	mycrypto "github.com/nextdotid/proof_server/util/crypto"
 	"github.com/nextdotid/proof_server/validator"
 	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func before_each(t *testing.T) {
@@ -40,7 +40,7 @@ func Test_GeneratePostPayload(t *testing.T) {
 
 		das := generate()
 		result := das.GeneratePostPayload()
-		assert.Contains(t, result["default"], "%SIG_BASE64%")
+		require.Contains(t, result["default"], "%SIG_BASE64%")
 	})
 }
 
@@ -50,9 +50,10 @@ func Test_Validate(t *testing.T) {
 
 		das := generate()
 		das.Identity = "mItCHaTmASk.BiT"
-		assert.Nil(t, das.Validate())
-		assert.Greater(t, len(das.Signature), 10)
-		assert.Equal(t, "mitchatmask.bit", das.Identity)
+		require.Nil(t, das.Validate())
+		require.Greater(t, len(das.Signature), 10)
+		require.Equal(t, "mitchatmask.bit", das.Identity)
+		require.Equal(t, das.Identity, das.AltID)
 	})
 
 	// Do not test validation by ProofLocation, since it is unnecessary.

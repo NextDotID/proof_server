@@ -25,6 +25,7 @@ type Proof struct {
 	Persona  string         `gorm:"index;not null"`
 	Platform types.Platform `gorm:"index;not null"`
 	Identity string         `gorm:"index;not null"`
+	AltID    string         `gorm:"column:alt_id;index"`
 	Location string         `gorm:"not null"`
 }
 
@@ -49,30 +50,31 @@ func (proof *Proof) IsOutdated() bool {
 
 // Revalidate validates current proof, will update `IsValid` and
 // `LastCheckedAt`. Must be used after `DB.Preload("ProofChain")`.
-func (proof *Proof) Revalidate() (result bool, err error) {
+func (proof *Proof) Revalidate() (err error) {
 	v, err := proof.ProofChain.RestoreValidator()
-	if err != nil {
-		return false, xerrors.Errorf("error when restoring validator: %w", err)
+	if err != nil || v == nil {
+		return xerrors.Errorf("restoring validator: %w", err)
 	}
 
 	iv := validator.BaseToInterface(v)
 	if iv == nil {
-		return false, xerrors.Errorf("unknown platform: %s", string(proof.Platform))
+		return xerrors.Errorf("unknown platform: %s", string(proof.Platform))
 	}
 
 	err = iv.Validate()
 	if err != nil {
-		proof.touchValid(false, err.Error())
-		return false, xerrors.Errorf("validate failed: %w", err)
+		proof.touchValid(err.Error())
+		return xerrors.Errorf("validate failed: %w", err)
 	}
 
-	proof.touchValid(true, "")
-	return true, nil
+	proof.touchValid("")
+	// TODO: need to update `identity` and `alt_id` here.
+	return nil
 }
 
-func (proof *Proof) touchValid(result bool, reason string) {
+func (proof *Proof) touchValid(reason string) {
 	proof.LastCheckedAt = time.Now()
-	proof.IsValid = result
+	proof.IsValid = (reason == "")
 	proof.InvalidReason = reason
 	DB.Save(proof)
 }

@@ -21,10 +21,13 @@ import (
 	"github.com/nextdotid/proof_server/types"
 	"github.com/nextdotid/proof_server/validator/das"
 	"github.com/nextdotid/proof_server/validator/discord"
+	"github.com/nextdotid/proof_server/validator/dns"
 	"github.com/nextdotid/proof_server/validator/ethereum"
 	"github.com/nextdotid/proof_server/validator/github"
 	"github.com/nextdotid/proof_server/validator/keybase"
+	"github.com/nextdotid/proof_server/validator/minds"
 	"github.com/nextdotid/proof_server/validator/solana"
+	"github.com/nextdotid/proof_server/validator/steam"
 	"github.com/nextdotid/proof_server/validator/twitter"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
@@ -174,6 +177,7 @@ func arweave_bundle_single(pc *model.ProofChain, previous *model.ProofChain) (*a
 		Action:            pc.Action,
 		Platform:          pc.Platform,
 		Identity:          pc.Identity,
+		AltID:             pc.AltID,
 		ProofLocation:     pc.Location,
 		CreatedAt:         strconv.FormatInt(pc.CreatedAt.Unix(), 10),
 		Signature:         pc.Signature,
@@ -221,11 +225,7 @@ func revalidate_single(ctx context.Context, message *types.QueueMessage) error {
 	if tx.Error != nil {
 		return xerrors.Errorf("%w", tx.Error)
 	}
-	_, err := proof.Revalidate()
-	if err != nil {
-		return xerrors.Errorf("%w", err)
-	}
-	return nil
+	return proof.Revalidate()
 }
 
 func init_db(cfg aws.Config) {
@@ -244,6 +244,9 @@ func init_validators() {
 	discord.Init()
 	das.Init()
 	solana.Init()
+	minds.Init()
+	dns.Init()
+	steam.Init()
 }
 
 func init() {

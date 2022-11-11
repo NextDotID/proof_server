@@ -15,7 +15,7 @@ import (
 
 	mycrypto "github.com/nextdotid/proof_server/util/crypto"
 	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -61,7 +61,7 @@ func Test_GeneratePostPayload(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
 		eth := generate()
-		assert.Equal(t, "", eth.GeneratePostPayload()["default"])
+		require.Equal(t, "", eth.GeneratePostPayload()["default"])
 	})
 }
 
@@ -71,9 +71,9 @@ func Test_GenerateSignPayload(t *testing.T) {
 
 		eth := generate()
 		result := eth.GenerateSignPayload()
-		assert.Contains(t, result, "\"identity\":\""+strings.ToLower(crypto.PubkeyToAddress(wallet_sk.PublicKey).Hex()))
-		assert.Contains(t, result, "\"persona\":\"0x"+mycrypto.CompressedPubkeyHex(eth.Pubkey))
-		assert.Contains(t, result, "\"platform\":\"ethereum\"")
+		require.Contains(t, result, "\"identity\":\""+strings.ToLower(crypto.PubkeyToAddress(wallet_sk.PublicKey).Hex()))
+		require.Contains(t, result, "\"persona\":\"0x"+mycrypto.CompressedPubkeyHex(eth.Pubkey))
+		require.Contains(t, result, "\"platform\":\"ethereum\"")
 	})
 }
 
@@ -82,7 +82,8 @@ func Test_Validate(t *testing.T) {
 		before_each(t)
 
 		eth := generate()
-		assert.Nil(t, eth.Validate())
+		require.Nil(t, eth.Validate())
+		require.Equal(t, eth.AltID, eth.Identity)
 	})
 }
 
@@ -97,7 +98,7 @@ func Test_Validate_Delete(t *testing.T) {
 		}
 		eth.Signature, _ = mycrypto.SignPersonal([]byte(eth.GenerateSignPayload()), persona_sk)
 
-		assert.Nil(t, eth.Validate())
+		require.Nil(t, eth.Validate())
 	})
 
 	t.Run("signed by wallet", func(t *testing.T) {
@@ -110,7 +111,7 @@ func Test_Validate_Delete(t *testing.T) {
 			"wallet_signature": base64.StdEncoding.EncodeToString(wallet_sig),
 		}
 
-		assert.Nil(t, eth.Validate())
+		require.Nil(t, eth.Validate())
 	})
 
 	t.Run("signed by persona, but put in wallet_signature", func(t *testing.T) {
@@ -124,7 +125,7 @@ func Test_Validate_Delete(t *testing.T) {
 			"wallet_signature": base64.StdEncoding.EncodeToString(eth.Signature),
 		}
 
-		assert.NotNil(t, eth.Validate())
+		require.NotNil(t, eth.Validate())
 	})
 
 	t.Run("signed by wallet, but put in eth.Signature", func(t *testing.T) {
@@ -137,6 +138,6 @@ func Test_Validate_Delete(t *testing.T) {
 		eth.Signature, _ = mycrypto.SignPersonal([]byte(eth.GenerateSignPayload()), wallet_sk)
 		eth.Extra = map[string]string{}
 
-		assert.NotNil(t, eth.Validate())
+		require.NotNil(t, eth.Validate())
 	})
 }

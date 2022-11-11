@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/nextdotid/proof_server/types"
@@ -99,6 +100,7 @@ func (gh *Github) Validate() (err error) {
 	if gh.Identity != gist.Owner.GetLogin() {
 		return xerrors.Errorf("gist owner mismatch: should be %s, but got %s", gh.Identity, gist.Owner.GetLogin())
 	}
+	gh.AltID = strconv.FormatInt(gist.Owner.GetID(), 10)
 
 	gist_filename := fmt.Sprintf("0x%s.json", crypto.CompressedPubkeyHex(gh.Pubkey))
 	files := gist.GetFiles()

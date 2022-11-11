@@ -18,9 +18,10 @@ const (
 )
 
 type ProofQueryRequest struct {
-	Platform string   `form:"platform"`
-	Identity []string `form:"identity"`
-	Page     int      `form:"page"`
+	Platform   string   `form:"platform"`
+	Identity   []string `form:"identity"`
+	Page       int      `form:"page"`
+	ExactMatch bool     `form:"exact"`
 }
 
 type ProofQueryResponse struct {
@@ -39,12 +40,14 @@ type ProofQueryResponseSingle struct {
 	Persona       string                          `json:"persona"`
 	Avatar        string                          `json:"avatar"`
 	LastArweaveID string                          `json:"last_arweave_id"`
+	ActivatedAt   string                          `json:"activated_at"`
 	Proofs        []ProofQueryResponseSingleProof `json:"proofs"`
 }
 
 type ProofQueryResponseSingleProof struct {
 	Platform      types.Platform `json:"platform"`
 	Identity      string         `json:"identity"`
+	AltID         string         `json:"alt_id"`
 	CreatedAt     string         `json:"created_at"`
 	LastCheckedAt string         `json:"last_checked_at"`
 	IsValid       bool           `json:"is_valid"`
@@ -94,12 +97,21 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 		}
 	case "":
 		{ // All platform
-			tx = tx.Where("identity LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%")
+			if req.ExactMatch {
+				tx = tx.Where("identity = ? OR alt_id = ?", strings.ToLower(req.Identity[0]), strings.ToLower(req.Identity[0]))
+			} else {
+				tx = tx.Where("identity LIKE ? OR alt_id LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%", "%"+strings.ToLower(req.Identity[0])+"%")
+			}
+
 			for i, id := range req.Identity {
 				if i == 0 {
 					continue
 				}
-				tx = tx.Or("identity LIKE ?", "%"+strings.ToLower(id)+"%")
+				if req.ExactMatch {
+					tx = tx.Or("identity = ? OR alt_id = ?", strings.ToLower(id), strings.ToLower(id))
+				} else {
+					tx = tx.Or("identity LIKE ? OR alt_id LIKE ?", "%"+strings.ToLower(id)+"%", "%"+strings.ToLower(id)+"%")
+				}
 			}
 			countTx := tx // Value-copy another query for total amount calculation
 			countTx.Count(&pagination.Total)
@@ -107,14 +119,23 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 		}
 	default:
 		{
-			tx = tx.Where("platform", req.Platform).
-				Where("identity LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%")
+			tx = tx.Where("platform", req.Platform)
+			if req.ExactMatch {
+				tx = tx.Where("identity = ? OR alt_id = ?", strings.ToLower(req.Identity[0]), strings.ToLower(req.Identity[0]))
+			} else {
+				tx = tx.Where("identity LIKE ? OR alt_id LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%", "%"+strings.ToLower(req.Identity[0])+"%")
+			}
 
 			for i, id := range req.Identity {
 				if i == 0 {
 					continue
 				}
-				tx = tx.Or("identity LIKE ?", "%"+strings.ToLower(id)+"%")
+
+				if req.ExactMatch {
+					tx = tx.Or("identity = ? OR alt_id = ?", strings.ToLower(id), strings.ToLower(id))
+				} else {
+					tx = tx.Or("identity LIKE ? OR alt_id LIKE ?", "%"+strings.ToLower(id)+"%", "%"+strings.ToLower(id)+"%")
+				}
 			}
 			countTx := tx
 			countTx.Count(&pagination.Total)
@@ -141,13 +162,23 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 		if err != nil {
 			return result, pagination
 		}
+
+		// Find last activation time of persona
+		activatedAt := "0"
+		latest_pc, _ := model.ProofChainFindLatest(persona)
+		if latest_pc != nil {
+			activatedAt = strconv.FormatInt(latest_pc.CreatedAt.Unix(), 10)
+		}
+
 		single := ProofQueryResponseSingle{
-			Persona: persona,
-			Avatar:  persona,
+			Persona:     persona,
+			Avatar:      persona,
+			ActivatedAt: activatedAt,
 			Proofs: lo.Map(proofs, func(proof model.Proof, _index int) ProofQueryResponseSingleProof {
 				return ProofQueryResponseSingleProof{
 					Platform:      proof.Platform,
 					Identity:      proof.Identity,
+					AltID:         proof.AltID,
 					CreatedAt:     strconv.FormatInt(proof.CreatedAt.Unix(), 10),
 					LastCheckedAt: strconv.FormatInt(proof.LastCheckedAt.Unix(), 10),
 					IsValid:       proof.IsValid,

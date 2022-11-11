@@ -92,6 +92,7 @@ func (kb *Keybase) GenerateSignPayload() (payload string) {
 func (kb *Keybase) Validate() (err error) {
 	kb.Identity = strings.ToLower(kb.Identity)
 	kb.SignaturePayload = kb.GenerateSignPayload()
+	kb.AltID = kb.Identity // TODO: maybe get Keybase UserID in another API call?
 
 	url := fmt.Sprintf(URL, kb.Identity, mycrypto.CompressedPubkeyHex(kb.Pubkey))
 	kb.ProofLocation = url

@@ -8,7 +8,7 @@ import (
 	"github.com/nextdotid/proof_server/util"
 	"github.com/nextdotid/proof_server/util/crypto"
 	"github.com/nextdotid/proof_server/validator"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -54,7 +54,8 @@ func Test_Validate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		github := generate()
 		err := github.Validate()
-		assert.Nil(t, err)
+		require.Nil(t, err)
+		require.Equal(t, "1191636", github.AltID)
 	})
 
 	t.Run("error if owner mismatch", func(t *testing.T) {
@@ -62,8 +63,8 @@ func Test_Validate(t *testing.T) {
 		github.Identity = "foobar"
 
 		err := github.Validate()
-		assert.NotNil(t, err)
-		assert.Contains(t, err.Error(), "gist owner mismatch")
+		require.NotNil(t, err)
+		require.Contains(t, err.Error(), "gist owner mismatch")
 	})
 
 	t.Run("error if gist is private", func(t *testing.T) {
@@ -71,7 +72,7 @@ func Test_Validate(t *testing.T) {
 		github.ProofLocation = "a8acd06e99ae6baa4939300fc170446c"
 
 		err := github.Validate()
-		assert.NotNil(t, err)
-		assert.Contains(t, err.Error(), "not found or empty")
+		require.NotNil(t, err)
+		require.Contains(t, err.Error(), "not found or empty")
 	})
 }

@@ -15,7 +15,7 @@ import (
 
 	mycrypto "github.com/nextdotid/proof_server/util/crypto"
 	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -65,7 +65,7 @@ func Test_GeneratePostPayload(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
 		sol := generate()
-		assert.Equal(t, "", sol.GeneratePostPayload()["default"])
+		require.Equal(t, "", sol.GeneratePostPayload()["default"])
 	})
 }
 
@@ -75,10 +75,10 @@ func Test_GenerateSignPayload(t *testing.T) {
 
 		sol := generate()
 		result := sol.GenerateSignPayload()
-		assert.Contains(t, result, "\"identity\":\""+walletPriv.PublicKey().String())
-		assert.NotContains(t, result, "\"identity\":\""+strings.ToLower(walletPriv.PublicKey().String()))
-		assert.Contains(t, result, "\"persona\":\"0x"+mycrypto.CompressedPubkeyHex(sol.Pubkey))
-		assert.Contains(t, result, "\"platform\":\"solana\"")
+		require.Contains(t, result, "\"identity\":\""+walletPriv.PublicKey().String())
+		require.NotContains(t, result, "\"identity\":\""+strings.ToLower(walletPriv.PublicKey().String()))
+		require.Contains(t, result, "\"persona\":\"0x"+mycrypto.CompressedPubkeyHex(sol.Pubkey))
+		require.Contains(t, result, "\"platform\":\"solana\"")
 	})
 }
 
@@ -87,7 +87,7 @@ func Test_Validate(t *testing.T) {
 		before_each(t)
 
 		sol := generate()
-		assert.NoError(t, sol.Validate())
+		require.NoError(t, sol.Validate())
 	})
 
 	t.Run("fail with wrong wallet signature", func(t *testing.T) {
@@ -99,7 +99,7 @@ func Test_Validate(t *testing.T) {
 		}
 		sol.Signature, _ = mycrypto.SignPersonal([]byte(sol.GenerateSignPayload()), personaPriv)
 
-		assert.Error(t, sol.Validate())
+		require.Error(t, sol.Validate())
 	})
 
 	t.Run("fail with wrong persona signature", func(t *testing.T) {
@@ -112,7 +112,7 @@ func Test_Validate(t *testing.T) {
 		}
 		sol.Signature = []byte(uuid.New().String())
 
-		assert.Error(t, sol.Validate())
+		require.Error(t, sol.Validate())
 	})
 }
 
@@ -127,7 +127,8 @@ func Test_Validate_Delete(t *testing.T) {
 		}
 		sol.Signature, _ = mycrypto.SignPersonal([]byte(sol.GenerateSignPayload()), personaPriv)
 
-		assert.NoError(t, sol.Validate())
+		require.NoError(t, sol.Validate())
+		require.Equal(t, sol.Identity, sol.AltID)
 	})
 
 	t.Run("signed by wallet", func(t *testing.T) {
@@ -140,7 +141,7 @@ func Test_Validate_Delete(t *testing.T) {
 			"wallet_signature": walletSig.String(),
 		}
 
-		assert.NoError(t, sol.Validate())
+		require.NoError(t, sol.Validate())
 	})
 
 	t.Run("signed by persona, but with wrong wallet_signature", func(t *testing.T) {
@@ -153,7 +154,7 @@ func Test_Validate_Delete(t *testing.T) {
 			"wallet_signature": base58.Encode([]byte(uuid.New().String())),
 		}
 
-		assert.Error(t, sol.Validate())
+		require.Error(t, sol.Validate())
 	})
 
 	t.Run("signed by wallet, but with wrong persona sig, which should be ok", func(t *testing.T) {
@@ -167,6 +168,6 @@ func Test_Validate_Delete(t *testing.T) {
 			"wallet_signature": walletSig.String(),
 		}
 
-		assert.NoError(t, sol.Validate())
+		require.NoError(t, sol.Validate())
 	})
 }

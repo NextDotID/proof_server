@@ -12,6 +12,9 @@ var Platforms = struct {
 	Discord  Platform
 	Das      Platform
 	Solana   Platform
+	Minds    Platform
+	DNS      Platform
+	Steam    Platform
 }{
 	Github:   "github",
 	NextID:   "nextid",
@@ -21,4 +24,7 @@ var Platforms = struct {
 	Discord:  "discord",
 	Das:      "dotbit",
 	Solana:   "solana",
+	Minds:    "minds",
+	DNS:      "dns",
+	Steam:    "steam",
 }

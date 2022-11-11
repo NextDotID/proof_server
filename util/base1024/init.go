@@ -20,7 +20,7 @@ func init() {
 	})
 
 	points := make([]int64, 1024)
-	for i, _ := range points {
+	for i := range points {
 		points[i] = 1
 	}
 
