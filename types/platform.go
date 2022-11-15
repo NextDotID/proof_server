@@ -14,6 +14,7 @@ var Platforms = struct {
 	Solana   Platform
 	Minds    Platform
 	DNS      Platform
+	ENS      Platform
 	Steam    Platform
 }{
 	Github:   "github",
@@ -26,5 +27,6 @@ var Platforms = struct {
 	Solana:   "solana",
 	Minds:    "minds",
 	DNS:      "dns",
+	ENS:      "ens",
 	Steam:    "steam",
 }
