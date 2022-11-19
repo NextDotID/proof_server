@@ -142,7 +142,7 @@ func validate(c *gin.Context) {
 		return
 	}
 
-  // Wait for XHR
+	// Wait for XHR
 	page.WaitNavigation(proto.PageLifecycleEventNameNetworkAlmostIdle)()
 
 	switch req.Match.Type {
