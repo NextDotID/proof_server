@@ -1,9 +1,11 @@
 package headless_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -52,20 +54,34 @@ func newValidRequest(location string, matchType string) headless.FindRequest {
 }
 
 func Test_Find(t *testing.T) {
+	apiTs := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// To simulate network latency
+		time.Sleep(time.Duration(300) * time.Millisecond)
+
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.Write([]byte(`{ "content": "match-this-text" }`))
+	}))
+
+	defer apiTs.Close()
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html; charset=utf-8")
 		w.Write([]byte(
-			`
+			fmt.Sprintf(`
       <html>
         <head>
-          <scipt>
-            document.body.innerHTML = '<h1>match-this-text</h1>';       
+          <script>
+            fetch('%s')
+              .then(response => response.json())
+              .then(({ content }) => {
+                  document.body.innerHTML = '<h1>' + content + '</h1>';
+              });
           </script>
         </head>
         <body>
         </body>
       </html>
-      `,
+      `, apiTs.URL),
 		))
 	}))
 

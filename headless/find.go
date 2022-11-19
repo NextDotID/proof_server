@@ -134,12 +134,16 @@ func validate(c *gin.Context) {
 	})
 
 	go router.Run()
+	defer router.Stop()
 
 	page = page.Timeout(timeoutDuration)
 	if err := page.WaitLoad(); err != nil {
 		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
 		return
 	}
+
+  // Wait for XHR
+	page.WaitNavigation(proto.PageLifecycleEventNameNetworkAlmostIdle)()
 
 	switch req.Match.Type {
 	case matchTypeRegex:
