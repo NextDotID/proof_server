@@ -65,24 +65,24 @@ func Test_Find(t *testing.T) {
 	defer apiTs.Close()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		html := fmt.Sprintf(`
+                <html>
+                  <head>
+                    <script>
+                      fetch('%s')
+                        .then(response => response.json())
+                        .then(({ content }) => {
+                            document.body.innerHTML = '<h1>' + content + '</h1>';
+                        });
+                    </script>
+                  </head>
+                  <body>
+                  </body>
+                </html>`,
+                apiTs.URL)
+
 		w.Header().Add("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(
-			fmt.Sprintf(`
-      <html>
-        <head>
-          <script>
-            fetch('%s')
-              .then(response => response.json())
-              .then(({ content }) => {
-                  document.body.innerHTML = '<h1>' + content + '</h1>';
-              });
-          </script>
-        </head>
-        <body>
-        </body>
-      </html>
-      `, apiTs.URL),
-		))
+		w.Write([]byte(html))
 	}))
 
 	defer ts.Close()
