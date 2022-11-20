@@ -63,6 +63,7 @@ func (telegram *Telegram) GeneratePostPayload() (post map[string]string) {
 
 func (telegram *Telegram) GenerateSignPayload() (payload string) {
 	initClient()
+	var userId string
 	if err := client.Run(context.Background(), func(ctx context.Context) error {
 		if _, err := client.Auth().Bot(ctx, config.C.Platform.Telegram.BotToken); err != nil {
 			return xerrors.Errorf("Error when authenticating the telegram bot: %v,", err)
@@ -81,7 +82,7 @@ func (telegram *Telegram) GenerateSignPayload() (payload string) {
 		if !ok {
 			return xerrors.New("The resulting telegram user is empty")
 		}
-		telegram.Identity = fmt.Sprintf("%d", user.ID)
+		userId = fmt.Sprintf("%d", user.ID)
 		return nil
 	}); err != nil {
 		l.Warnf("Error inside the telegram client context: %v", err)
@@ -90,7 +91,7 @@ func (telegram *Telegram) GenerateSignPayload() (payload string) {
 
 	payloadStruct := validator.H{
 		"action":     string(telegram.Action),
-		"identity":   telegram.Identity,
+		"identity":   userId,
 		"platform":   "telegram",
 		"prev":       nil,
 		"created_at": util.TimeToTimestampString(telegram.CreatedAt),
