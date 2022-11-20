@@ -62,7 +62,32 @@ func (telegram *Telegram) GeneratePostPayload() (post map[string]string) {
 }
 
 func (telegram *Telegram) GenerateSignPayload() (payload string) {
-	telegram.Identity = strings.ToLower(telegram.Identity)
+	initClient()
+	if err := client.Run(context.Background(), func(ctx context.Context) error {
+		if _, err := client.Auth().Bot(ctx, config.C.Platform.Telegram.BotToken); err != nil {
+			return xerrors.Errorf("Error when authenticating the telegram bot: %v,", err)
+		}
+
+		resolved, err := client.API().ContactsResolveUsername(ctx, telegram.Identity)
+		if err != nil {
+			return xerrors.Errorf("Error while resolving the telegram username: %v,", err)
+		}
+
+		if len(resolved.Users) != 1 {
+			return xerrors.New("The resulting telegram user is empty")
+		}
+
+		user, ok := resolved.Users[0].(*tg.User)
+		if !ok {
+			return xerrors.New("The resulting telegram user is empty")
+		}
+		telegram.Identity = fmt.Sprintf("%d", user.ID)
+		return nil
+	}); err != nil {
+		l.Warnf("Error inside the telegram client context: %v", err)
+		return ""
+	}
+
 	payloadStruct := validator.H{
 		"action":     string(telegram.Action),
 		"identity":   telegram.Identity,
@@ -125,7 +150,6 @@ func (telegram *Telegram) Validate() (err error) {
 		}
 		if user.Bot {
 			user, userOk = msgList.Users[1].(*tg.User)
-
 		}
 		msg, msgOk := msgList.Messages[0].(*tg.Message)
 		if !msgOk || !userOk {
@@ -135,8 +159,9 @@ func (telegram *Telegram) Validate() (err error) {
 		if strings.EqualFold(user.Username, telegram.Identity) {
 			return xerrors.Errorf("Screen name mismatch: expect %s - actual %s", telegram.Identity, user.Username)
 		}
+
 		telegram.Text = msg.Message
-		telegram.AltID = strconv.FormatInt(user.ID, 10)
+		telegram.AltID = user.Username
 		return telegram.validateText()
 	}); err != nil {
 		return xerrors.Errorf("Error inside the telegram client context: %v", err)
