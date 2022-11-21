@@ -45,7 +45,7 @@ func  NewFinder(Url string, MatchBy string, Matcher string, Secret string, Timeo
 
 
 func find(opt *FinderOptions) (string) {
-	out, bberr := exec.Command("bb", "src/headless/find.clj",
+	out, bberr := exec.Command("bb", "src/headless/find.cljc",
 		"--url", opt.Url,
 		"--match-by", opt.MatchBy,
 		"--matcher", opt.Matcher,
