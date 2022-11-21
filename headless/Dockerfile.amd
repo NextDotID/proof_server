@@ -1,0 +1,5 @@
+FROM scratch
+
+COPY dist/bin/amd64/output-serial-gc headless
+
+ENTRYPOINT ["./headless"]

@@ -1,0 +1,10 @@
+from dlbears/scratch-arm-dlls:latest as dlls
+from scratch
+USER root
+RUN apk add gcompat
+
+COPY --from=dlls /lib/ /lib
+COPY --from=dlls /lib64/ /lib64
+COPY dist/bin/arm64/output-noop-gc headless
+
+ENTRYPOINT ["./headless"]
