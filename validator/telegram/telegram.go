@@ -173,22 +173,22 @@ func (telegram *Telegram) Validate() (err error) {
 
 		msgList, ok := msgsClass.(*tg.MessagesChannelMessages)
 		if !ok || len(msgList.Messages) != 1 || len(msgList.Messages) != 2 {
-			return xerrors.New("Please try again sending an original message 1")
+			return xerrors.New("Please try again sending an original message")
 		}
 		user, userOk := msgList.Users[0].(*tg.User)
 		if !userOk {
-			return xerrors.New("Please try again sending an original message 2")
+			return xerrors.New("Please try again sending an original message")
 		}
 		if user.Bot {
 			user, userOk = msgList.Users[1].(*tg.User)
 		}
 		msg, msgOk := msgList.Messages[0].(*tg.Message)
 		if !msgOk || !userOk {
-			return xerrors.New("Please try again sending an original message 2")
+			return xerrors.New("Please try again sending an original message")
 		}
 
 		if strings.EqualFold(user.Username, telegram.Identity) {
-			return xerrors.Errorf("Screen name mismatch: expect %s - actual %s", telegram.Identity, user.Username)
+			return xerrors.Errorf("Telegram username mismatch: expect %s - actual %s", telegram.Identity, user.Username)
 		}
 
 		telegram.Text = msg.Message
