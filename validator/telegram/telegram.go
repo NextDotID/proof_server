@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -119,8 +120,19 @@ func (telegram *Telegram) Validate() (err error) {
 		return mycrypto.ValidatePersonalSignature(telegram.SignaturePayload, telegram.Signature, telegram.Pubkey)
 	}
 
-	// Id of the direct message has been sent to the bot.
-	messageId, err := strconv.ParseInt(telegram.ProofLocation, 10, 64)
+	// Message link of the public group message, e.g. https://t.me/some_public_group/CHAT_ID_DIGITS
+	u, err := url.Parse(telegram.ProofLocation)
+	if err != nil {
+		return xerrors.Errorf("Error when parsing telegram proof location: %v", err)
+
+	}
+	msgPath := strings.Trim(u.Path, "/")
+	parts := strings.Split(msgPath, "/")
+	if len(parts) != 2 {
+		return xerrors.Errorf("Error: malformatted telegram proof location: %v", telegram.ProofLocation)
+	}
+	channelName := parts[0]
+	messageId, err := strconv.ParseInt(parts[1], 10, 64)
 	if err != nil {
 		return xerrors.Errorf("Error when parsing telegram message ID %s: %s", telegram.ProofLocation, err.Error())
 	}
@@ -131,17 +143,35 @@ func (telegram *Telegram) Validate() (err error) {
 			return xerrors.Errorf("Error when authenticating the telegram bot: %v,", err)
 		}
 
-		msgsClass, err := client.API().MessagesGetMessages(ctx, []tg.InputMessageClass{
-			&tg.InputMessageID{
-				ID: int(messageId),
+		resolved, err := client.API().ContactsResolveUsername(ctx, channelName)
+		if err != nil {
+			return xerrors.Errorf("Error while resolving the public group name: %v,", err)
+		}
+
+		if len(resolved.Chats) != 1 {
+			return xerrors.New("The resulting telegram public group is empty")
+		}
+
+		channel, ok := resolved.Chats[0].(*tg.Channel)
+		if !ok {
+			return xerrors.New("The resulting telegram public group is empty")
+		}
+
+		msgsClass, err := client.API().ChannelsGetMessages(ctx, &tg.ChannelsGetMessagesRequest{
+			Channel: &tg.InputChannel{
+				ChannelID:  channel.ID,
+				AccessHash: channel.AccessHash,
+			},
+			ID: []tg.InputMessageClass{
+				&tg.InputMessageID{ID: int(messageId)},
 			},
 		})
 
 		if err != nil {
-			return xerrors.Errorf("Error while fetching the user direct message (should be sent to the bot directly): %v,", err)
+			return xerrors.Errorf("Error while fetching the public channel message: %v,", err)
 		}
 
-		msgList, ok := msgsClass.(*tg.MessagesMessages)
+		msgList, ok := msgsClass.(*tg.MessagesChannelMessages)
 		if !ok || len(msgList.Messages) != 1 || len(msgList.Messages) != 2 {
 			return xerrors.New("Please try again sending an original message 1")
 		}
@@ -196,4 +226,15 @@ func initClient() {
 	// https://core.telegram.org/api/obtaining_api_id
 	client = telegram.NewClient(config.C.Platform.Telegram.ApiID, config.C.Platform.Telegram.ApiHash, telegram.Options{})
 
+	// Exit if the we can't authenticate the telegram client
+	// using the provided configs.
+	if err := client.Run(context.Background(), func(ctx context.Context) error {
+		if _, err := client.Auth().Bot(ctx, config.C.Platform.Telegram.BotToken); err != nil {
+			return xerrors.Errorf("Error when authenticating the telegram bot: %v,", err)
+		}
+
+		return nil
+	}); err != nil {
+		panic(err)
+	}
 }
