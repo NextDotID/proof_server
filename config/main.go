@@ -51,7 +51,7 @@ type TwitterPlatformConfig struct {
 
 type InstagramPlatformConfig struct {
          AppSecret string `json:"app_secret"`
-         AccessToken       string `json:"graph_access_token"`
+         AccessToken string `json:"graph_access_token"`
 	 
 }
 
