@@ -49,6 +49,11 @@ type TwitterPlatformConfig struct {
 	ConsumerSecret    string `json:"consumer_secret"`
 }
 
+type InstagramPlatformConfig struct {
+         AccessToken       string `json:"access_token"`
+	 AccessTokenSecret string `json:"access_token_secret"`
+}
+
 type EthereumPlatformConfig struct {
 	RPCServer string `json:"rpc_server"`
 }
