@@ -50,8 +50,9 @@ type TwitterPlatformConfig struct {
 }
 
 type InstagramPlatformConfig struct {
-         AccessToken       string `json:"access_token"`
-	 AccessTokenSecret string `json:"access_token_secret"`
+         AppSecret string `json:"app_secret"`
+         AccessToken       string `json:"graph_access_token"`
+	 
 }
 
 type EthereumPlatformConfig struct {
