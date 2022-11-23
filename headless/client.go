@@ -24,21 +24,21 @@ func NewHeadlessClient(url string) *HeadlessClient {
 }
 
 // Find find whether the target matching payload exists
-func (h *HeadlessClient) Find(ctx context.Context, payload *FindRequest) (bool, error) {
+func (h *HeadlessClient) Find(ctx context.Context, payload *FindRequest) (string, error) {
 	u, err := url.Parse(h.url)
 	if err != nil {
-		return false, xerrors.Errorf("%w", err)
+		return "", xerrors.Errorf("%w", err)
 	}
 
 	u.Path = path.Join(u.Path, "/v1/find")
 	body, err := json.Marshal(payload)
 	if err != nil {
-		return false, xerrors.Errorf("%w", err)
+		return "", xerrors.Errorf("%w", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), bytes.NewReader(body))
 	if err != nil {
-		return false, xerrors.Errorf("%w", err)
+		return "", xerrors.Errorf("%w", err)
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -46,7 +46,7 @@ func (h *HeadlessClient) Find(ctx context.Context, payload *FindRequest) (bool, 
 	res, err := h.client.Do(req)
 	if res != nil && err != nil {
 		if _, err := io.Copy(io.Discard, res.Body); err != nil {
-			return false, xerrors.Errorf("%w", err)
+			return "", xerrors.Errorf("%w", err)
 		}
 	}
 
@@ -55,18 +55,18 @@ func (h *HeadlessClient) Find(ctx context.Context, payload *FindRequest) (bool, 
 	}
 
 	if err != nil {
-		return false, xerrors.Errorf("%w", err)
+		return "", xerrors.Errorf("%w", err)
 	}
 
 	contents, err := io.ReadAll(res.Body)
 	if err != nil {
-		return false, xerrors.Errorf("%w", err)
+		return "", xerrors.Errorf("%w", err)
 	}
 
 	var resBody FindRespond
 	if err := json.Unmarshal(contents, &resBody); err != nil {
-		return false, xerrors.Errorf("%w", err)
+		return "", xerrors.Errorf("%w", err)
 	}
 
-	return resBody.Found, nil
+	return resBody.Content, nil
 }

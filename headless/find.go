@@ -58,7 +58,7 @@ type FindRequest struct {
 }
 
 type FindRespond struct {
-	Found   bool   `json:"found"`
+	Content string `json:"content"`
 	Message string `json:"message,omitempty"`
 }
 
@@ -144,36 +144,48 @@ func validate(c *gin.Context) {
 
 	// Wait for XHR
 	page.WaitNavigation(proto.PageLifecycleEventNameNetworkAlmostIdle)()
+	content, err := find(req.Match, page)
+	if err != nil {
+		c.JSON(http.StatusOK, FindRespond{Content: "", Message: err.Error()})
 
-	switch req.Match.Type {
-	case matchTypeRegex:
-		selector := req.Match.MatchRegExp.Selector
-		if selector == "" {
-			selector = "*"
-		}
-
-		if _, err := page.ElementR(selector, req.Match.MatchRegExp.Value); err != nil {
-			c.JSON(http.StatusOK, FindRespond{Found: false, Message: err.Error()})
-
-			return
-		}
-	case matchTypeXPath:
-		selector := req.Match.MatchXPath.Selector
-		if _, err := page.ElementX(selector); err != nil {
-			c.JSON(http.StatusOK, FindRespond{Found: false, Message: err.Error()})
-
-			return
-		}
-	case matchTypeJS:
-		js := req.Match.MatchJS.Value
-		if _, err := page.ElementByJS(rod.Eval(js)); err != nil {
-			c.JSON(http.StatusOK, FindRespond{Found: false, Message: err.Error()})
-
-			return
-		}
+		return
 	}
 
-	c.JSON(http.StatusOK, FindRespond{Found: true})
+	c.JSON(http.StatusOK, FindRespond{Content: content})
+}
+
+func find(match Match, page *rod.Page) (content string, err error) {
+	var element *rod.Element
+	switch match.Type {
+	case matchTypeRegex:
+		if match.MatchRegExp.Selector == "" {
+			match.MatchRegExp.Selector = "*"
+		}
+
+		element, err = page.ElementR(match.MatchRegExp.Selector, match.MatchRegExp.Value)
+		if err != nil {
+			return "", xerrors.Errorf("%w", err)
+		}
+	case matchTypeXPath:
+		element, err = page.ElementX(match.MatchXPath.Selector)
+		if err != nil {
+			return "", xerrors.Errorf("%w", err)
+		}
+	case matchTypeJS:
+		element, err = page.ElementByJS(rod.Eval(match.MatchJS.Value))
+		if err != nil {
+			return "", xerrors.Errorf("%w", err)
+		}
+	default:
+		return "", xerrors.Errorf("%s", "invalid payload")
+	}
+
+	text, err := element.Text()
+	if err != nil {
+		return "", xerrors.Errorf("%w", err)
+	}
+
+	return text, nil
 }
 
 func checkValidateRequest(req *FindRequest) error {

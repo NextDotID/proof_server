@@ -22,7 +22,7 @@ func newValidRequest(location string, matchType string) headless.FindRequest {
 				Type: "regexp",
 				MatchRegExp: &headless.MatchRegExp{
 					Selector: "*",
-					Value:    "match-this-text",
+					Value:    "^Sig: .*$",
 				},
 			},
 		}
@@ -44,7 +44,7 @@ func newValidRequest(location string, matchType string) headless.FindRequest {
 			Match: headless.Match{
 				Type: "js",
 				MatchJS: &headless.MatchJS{
-					Value: "() => [].filter.call(document.querySelectorAll('*'), (el) => el.textContent === 'match-this-text')[0]",
+					Value: "() => [].filter.call(document.querySelectorAll('*'), (el) => el.textContent.includes('match-this-text'))[0]",
 				},
 			},
 		}
@@ -59,7 +59,7 @@ func Test_Find(t *testing.T) {
 		time.Sleep(time.Duration(300) * time.Millisecond)
 
 		w.Header().Add("Content-Type", "application/json; charset=utf-8")
-		w.Write([]byte(`{ "content": "match-this-text" }`))
+		w.Write([]byte(`{ "content": "Sig: match-this-text" }`))
 	}))
 
 	defer apiTs.Close()
@@ -79,7 +79,7 @@ func Test_Find(t *testing.T) {
                   <body>
                   </body>
                 </html>`,
-                apiTs.URL)
+			apiTs.URL)
 
 		w.Header().Add("Content-Type", "text/html; charset=utf-8")
 		w.Write([]byte(html))
@@ -94,7 +94,7 @@ func Test_Find(t *testing.T) {
 
 		APITestCall(headless.Engine, "POST", "/v1/find", req, &res)
 
-		assert.Equal(t, true, res.Found)
+		assert.Equal(t, "Sig: match-this-text", res.Content)
 		assert.Equal(t, "", res.Message)
 
 		// using xpath
@@ -103,7 +103,7 @@ func Test_Find(t *testing.T) {
 
 		APITestCall(headless.Engine, "POST", "/v1/find", req, &res)
 
-		assert.Equal(t, true, res.Found)
+		assert.Equal(t, "Sig: match-this-text", res.Content)
 		assert.Equal(t, "", res.Message)
 
 		// using js
@@ -112,7 +112,7 @@ func Test_Find(t *testing.T) {
 
 		APITestCall(headless.Engine, "POST", "/v1/find", req, &res)
 
-		assert.Equal(t, true, res.Found)
+		assert.Equal(t, "Sig: match-this-text", res.Content)
 		assert.Equal(t, "", res.Message)
 	})
 
@@ -171,6 +171,6 @@ func Test_Find(t *testing.T) {
 		req.Match.MatchRegExp.Value = "unknown-text"
 		APITestCall(headless.Engine, "POST", "/v1/find", req, &success)
 
-		assert.Equal(t, success.Found, false)
+		assert.Equal(t, success.Content, "")
 	})
 }
