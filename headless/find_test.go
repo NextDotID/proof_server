@@ -33,7 +33,7 @@ func newValidRequest(location string, matchType string) headless.FindRequest {
 			Match: headless.Match{
 				Type: "xpath",
 				MatchXPath: &headless.MatchXPath{
-					Selector: "//text()[contains(.,'match-this-text')]",
+					Selector: "//text()[contains(.,'Sig:')]",
 				},
 			},
 		}
@@ -44,7 +44,7 @@ func newValidRequest(location string, matchType string) headless.FindRequest {
 			Match: headless.Match{
 				Type: "js",
 				MatchJS: &headless.MatchJS{
-					Value: "() => [].filter.call(document.querySelectorAll('*'), (el) => el.textContent.includes('match-this-text'))[0]",
+					Value: "() => [].filter.call(document.querySelectorAll('*'), (el) => el.textContent.includes('Sig:'))[0]",
 				},
 			},
 		}
