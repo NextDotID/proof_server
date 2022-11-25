@@ -13,10 +13,12 @@ require (
 	github.com/gagliardetto/solana-go v1.4.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-resty/resty/v2 v2.7.0
+	github.com/go-rod/rod v0.112.0
 	github.com/gotd/td v0.71.0
 	github.com/mr-tron/base58 v1.2.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.11.0
+	github.com/ssoroka/slice v0.0.0-20220402005549-78f0cea3df8b
 	github.com/wealdtech/go-ens/v3 v3.5.5
 )
 
@@ -120,6 +122,9 @@ require (
 	github.com/tklauser/numcpus v0.2.2 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	github.com/wealdtech/go-multicodec v1.4.0 // indirect
+	github.com/ysmood/goob v0.4.0 // indirect
+	github.com/ysmood/gson v0.7.2 // indirect
+	github.com/ysmood/leakless v0.8.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.opentelemetry.io/otel v1.11.1 // indirect
 	go.opentelemetry.io/otel/trace v1.11.1 // indirect
