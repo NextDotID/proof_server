@@ -120,7 +120,7 @@ func (telegram *Telegram) Validate() (err error) {
 		return mycrypto.ValidatePersonalSignature(telegram.SignaturePayload, telegram.Signature, telegram.Pubkey)
 	}
 
-	// Message link of the public group message, e.g. https://t.me/some_public_group/CHAT_ID_DIGITS
+	// Message link of the public channel message, e.g. https://t.me/some_public_channel/CHAT_ID_DIGITS
 	u, err := url.Parse(telegram.ProofLocation)
 	if err != nil {
 		return xerrors.Errorf("Error when parsing telegram proof location: %v", err)
@@ -137,6 +137,11 @@ func (telegram *Telegram) Validate() (err error) {
 		return xerrors.Errorf("Error when parsing telegram message ID %s: %s", telegram.ProofLocation, err.Error())
 	}
 
+	// Optional, could be removed
+	if channelName != config.C.Platform.Telegram.PublicChannelName {
+		return xerrors.New("Unknown channel")
+	}
+
 	if err := client.Run(context.Background(), func(ctx context.Context) error {
 
 		if _, err := client.Auth().Bot(ctx, config.C.Platform.Telegram.BotToken); err != nil {
@@ -145,16 +150,16 @@ func (telegram *Telegram) Validate() (err error) {
 
 		resolved, err := client.API().ContactsResolveUsername(ctx, channelName)
 		if err != nil {
-			return xerrors.Errorf("Error while resolving the public group name: %v,", err)
+			return xerrors.Errorf("Error while resolving the public channel name: %v,", err)
 		}
 
 		if len(resolved.Chats) != 1 {
-			return xerrors.New("The resulting telegram public group is empty")
+			return xerrors.New("The resulting telegram public channel is empty")
 		}
 
 		channel, ok := resolved.Chats[0].(*tg.Channel)
 		if !ok {
-			return xerrors.New("The resulting telegram public group is empty")
+			return xerrors.New("The resulting telegram public channel is empty")
 		}
 
 		msgsClass, err := client.API().ChannelsGetMessages(ctx, &tg.ChannelsGetMessagesRequest{
@@ -186,13 +191,14 @@ func (telegram *Telegram) Validate() (err error) {
 		if !msgOk || !userOk {
 			return xerrors.New("Please try again sending an original message")
 		}
-
-		if strings.EqualFold(user.Username, telegram.Identity) {
+		userId := strconv.FormatInt(user.ID, 10)
+		if strings.EqualFold(userId, telegram.Identity) {
 			return xerrors.Errorf("Telegram username mismatch: expect %s - actual %s", telegram.Identity, user.Username)
 		}
 
 		telegram.Text = msg.Message
 		telegram.AltID = user.Username
+		telegram.Identity = userId
 		return telegram.validateText()
 	}); err != nil {
 		return xerrors.Errorf("Error inside the telegram client context: %v", err)
@@ -232,9 +238,9 @@ func initClient() {
 		if _, err := client.Auth().Bot(ctx, config.C.Platform.Telegram.BotToken); err != nil {
 			return xerrors.Errorf("Error when authenticating the telegram bot: %v,", err)
 		}
-
 		return nil
 	}); err != nil {
 		panic(err)
 	}
+
 }

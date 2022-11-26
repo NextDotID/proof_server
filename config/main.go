@@ -51,9 +51,10 @@ type TwitterPlatformConfig struct {
 }
 
 type TelegramPlatformConfig struct {
-	ApiID    int    `json:"api_id"`
-	ApiHash  string `json:"api_hash"`
-	BotToken string `json:"bot_token"`
+	ApiID             int    `json:"api_id"`
+	ApiHash           string `json:"api_hash"`
+	BotToken          string `json:"bot_token"`
+	PublicChannelName string `json:"public_channel_name"`
 }
 
 type EthereumPlatformConfig struct {
