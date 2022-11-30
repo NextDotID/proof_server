@@ -50,9 +50,8 @@ type TwitterPlatformConfig struct {
 }
 
 type InstagramPlatformConfig struct {
-        AppSecret string `json:"app_secret"`
         AccessToken string `json:"graph_access_token"`
-	 
+	PageID string  `json:"page_id"`
 }
 
 type EthereumPlatformConfig struct {
