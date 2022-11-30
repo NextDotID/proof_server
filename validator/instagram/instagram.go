@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	i "github.com/dghubble/go-instagram/instagram"
+	t "github.com/dghubble/go-instagram/instagram"
 	"github.com/dghubble/oauth1"
 	"github.com/nextdotid/proof_server/config"
 	"github.com/nextdotid/proof_server/types"
@@ -136,9 +136,9 @@ func initClient() {
 		return
 	}
 	oauthToken := oauth1.NewToken(
-		config.C.Platform.Instagram.GraphAccessToken,
-		config.C.Platform.Instagram.AppSecret,
+		config.C.Platform.Instagram.AccessToken,
+		config.C.Platform.Instagram.PageID,
 	)
 	httpClient := oauthConfig.Client(oauth1.NoContext, oauthToken)
-	client = i.NewClient(httpClient)
+	client = t.NewClient(httpClient)
 }
