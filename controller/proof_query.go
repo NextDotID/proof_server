@@ -22,6 +22,8 @@ type ProofQueryRequest struct {
 	Identity   []string `form:"identity"`
 	Page       int      `form:"page"`
 	ExactMatch bool     `form:"exact"`
+	SortBy     string   `form:"sort"`
+	Order      string   `form:"order"`
 }
 
 type ProofQueryResponse struct {
@@ -87,7 +89,20 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 
 	result := make([]ProofQueryResponseSingle, 0, 0)
 	proofs := make([]model.Proof, 0, 0)
-	tx := model.DB.Model(&model.Proof{}).Order("id DESC")
+	tx := model.DB.Model(&model.Proof{})
+
+	// support selected fields only.
+	orderBy := "id"
+	switch strings.ToLower(req.SortBy) {
+	case "id", "last_arweave_id", "created_at", "last_checked_at", "proof_chain_id", "platform", "identity", "alt_id":
+		orderBy = strings.ToLower(req.SortBy)
+	}
+	if strings.ToLower(req.Order) == "asc" {
+		orderBy = orderBy + " asc"
+	} else {
+		orderBy = orderBy + " desc"
+	}
+	tx = tx.Order(orderBy)
 
 	switch req.Platform {
 	case string(types.Platforms.NextID):
@@ -158,7 +173,7 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 	personas = lo.Uniq(personas)
 
 	for _, persona := range personas {
-		proofs, err := model.FindAllProofByPersona(persona)
+		proofs, err := model.FindAllProofByPersona(persona, orderBy)
 		if err != nil {
 			return result, pagination
 		}
