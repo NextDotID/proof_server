@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/spf13/viper"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,12 +18,13 @@ type Config struct {
 }
 
 type DBConfig struct {
-	Host     string `json:"host"`
-	Port     uint   `json:"port"`
-	User     string `json:"user"`
-	Password string `json:"password"`
-	DBName   string `json:"db_name"`
-	TZ       string `json:"tz"`
+	Host          string   `json:"host"`
+	ReadOnlyHosts []string `json:"read_only_hosts"`
+	Port          uint     `json:"port"`
+	User          string   `json:"user"`
+	Password      string   `json:"password"`
+	DBName        string   `json:"db_name"`
+	TZ            string   `json:"tz"`
 }
 
 type PlatformConfig struct {
@@ -100,10 +100,10 @@ func InitCliConfig() {
 	}
 }
 
-func GetDatabaseDSN() string {
+func GetDatabaseDSN(host string) string {
 	template := "host=%s port=%d user=%s password=%s dbname=%s TimeZone=%s sslmode=disable"
 	return fmt.Sprintf(template,
-		C.DB.Host,
+		host,
 		C.DB.Port,
 		C.DB.User,
 		C.DB.Password,

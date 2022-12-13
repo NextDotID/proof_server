@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -18,7 +19,7 @@ func Init() {
 	if DB != nil { // initialized
 		return
 	}
-	dsn := config.GetDatabaseDSN()
+	dsn := config.GetDatabaseDSN(config.C.DB.Host)
 	var err error
 
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -35,4 +36,15 @@ func Init() {
 	}
 
 	l.Info("database initialized")
+}
+
+func GetReadOnlyDB() *gorm.DB {
+	host := lo.Sample(config.C.DB.ReadOnlyHosts)
+	dsn := config.GetDatabaseDSN(host)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+
+	return db
 }
