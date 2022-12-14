@@ -1,6 +1,7 @@
 FORMAT: 1A
 
 # Changelog
+  - <2022-12-14 Wed> :: GET /v1/proof: `sort` and `order`
   - <2022-10-21 Fri> :: GET /v1/proof: `activated_at` for all avatar
   - <2022-07-13 Wed> :: GET /v1/proofchain/changes
   - <2022-06-15 Wed> ::
@@ -165,6 +166,9 @@ Request failed.
       + platform (string, optional) - Proof platform. If not given, all platforms will be searched.
       + identity (string, required) - Identity on target platform. Separate identities with comma (`,`) if you want to query mutipe identity at once.
       + page (number, optional) - Pagination. First page is number `1`.
+      + exact (bool, optional) - Exact match or not. Defaults to `false`.
+      + sort (string, optional) - Could be `activated_at`. Set this to `activated_at` to make avatar results sorted by last activation time.
+      + order (string, optional) - Could be `asc` or `desc` for sorting. Defaults to `desc`.
 
     + Example
 
