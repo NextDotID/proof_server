@@ -112,7 +112,7 @@ func Test_FindAllProofByPersona(t *testing.T) {
 		DB.Model(&Proof{}).Count(&count)
 		require.Equal(t, int64(2), count)
 
-		proofs, err := FindAllProofByPersona(pk)
+		proofs, err := FindAllProofByPersona(pk, "id desc")
 		require.Nil(t, err)
 		require.Equal(t, 2, len(proofs))
 		result_types := lo.Map(proofs, func(proof Proof, _index int) types.Platform {

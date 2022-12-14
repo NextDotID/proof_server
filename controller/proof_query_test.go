@@ -233,4 +233,17 @@ func Test_proofQuery(t *testing.T) {
 		APITestCall(Engine, "GET", "/v1/proof?platform=twitter&identity=yeiwb&exact=true", "", &resp)
 		require.Equal(t, 1, len(resp.IDs))
 	})
+
+	t.Run("sort", func(t *testing.T) {
+		before_each(t)
+		insert_proof(t)
+
+		ascResp := ProofQueryResponse{}
+		APITestCall(Engine, "GET", "/v1/proof?sort=platform&order=asc&identity="+persona+"&platform=nextid", "", &ascResp)
+		require.Equal(t, types.Platform("ethereum"), ascResp.IDs[0].Proofs[0].Platform)
+
+		descResp := ProofQueryResponse{}
+		APITestCall(Engine, "GET", "/v1/proof?sort=platform&order=desc&identity="+persona+"&platform=nextid", "", &descResp)
+		require.Equal(t, types.Platform("twitter"), descResp.IDs[0].Proofs[0].Platform)
+	})
 }
