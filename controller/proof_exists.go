@@ -41,7 +41,7 @@ func proofExists(c *gin.Context) {
 		return
 	}
 	found := model.Proof{}
-	tx := model.DB.Where(
+	tx := model.ReadOnlyDB.Where(
 		"persona = ? AND platform = ? AND (identity = ? OR alt_id = ?)",
 		model.MarshalPersona(personaPubkey),
 		req.Platform,

@@ -87,7 +87,7 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 
 	result := make([]ProofQueryResponseSingle, 0, 0)
 	proofs := make([]model.Proof, 0, 0)
-	tx := model.DB.Model(&model.Proof{}).Order("id DESC")
+	tx := model.ReadOnlyDB.Model(&model.Proof{}).Order("id DESC")
 
 	switch req.Platform {
 	case string(types.Platforms.NextID):
@@ -189,7 +189,7 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 
 		// TODO: optimize performance here?
 		lastPc := model.ProofChain{}
-		tx = model.DB.Where("persona = ?", persona).Last(&lastPc)
+		tx = model.ReadOnlyDB.Where("persona = ?", persona).Last(&lastPc)
 		if tx.Error != nil {
 			return result, pagination
 		}
