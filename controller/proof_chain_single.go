@@ -39,7 +39,7 @@ func proofChainChanges(c *gin.Context) {
 	}
 
 	pc_found := make([]model.ProofChain, 0, 0)
-	tx := model.DB.Where("id > ?", req.LastID).Limit(req.Count).Order("id ASC").Find(&pc_found)
+	tx := model.ReadOnlyDB.Where("id > ?", req.LastID).Limit(req.Count).Order("id ASC").Find(&pc_found)
 	if tx.Error != nil {
 		errorResp(c, http.StatusInternalServerError, tx.Error)
 		return

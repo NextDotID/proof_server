@@ -215,7 +215,7 @@ func MarshalSignature(signature []byte) string {
 
 func ProofChainFindLatest(persona string) (pc *ProofChain, err error) {
 	pc = new(ProofChain)
-	tx := DB.Where("persona = ?", MarshalPersona(persona)).Order("id DESC").Take(pc)
+	tx := ReadOnlyDB.Where("persona = ?", MarshalPersona(persona)).Order("id DESC").Take(pc)
 	if tx.Error != nil {
 		if strings.Contains(tx.Error.Error(), "record not found") {
 			return nil, nil
@@ -228,7 +228,7 @@ func ProofChainFindLatest(persona string) (pc *ProofChain, err error) {
 
 func ProofChainFindBySignature(signature string) (pc *ProofChain, err error) {
 	previous := &ProofChain{}
-	tx := DB.Where("signature = ?", signature).Take(previous)
+	tx := ReadOnlyDB.Where("signature = ?", signature).Take(previous)
 	if tx.Error != nil || previous.ID == int64(0) {
 		return nil, xerrors.Errorf("error finding previous proof chain: %w", tx.Error)
 	}
@@ -281,7 +281,7 @@ func ProofChainFindByPersona(persona string, all_data bool, from int, limit int)
 	rs = make([]ProofChainItem, 0, 0)
 	proofs := make([]ProofChain, 0, 0)
 
-	tx := DB.Model(&ProofChain{})
+	tx := ReadOnlyDB.Model(&ProofChain{})
 	tx = tx.Where("persona = ?", persona)
 
 	countTx := tx // Value-copy another query for total amount calculation

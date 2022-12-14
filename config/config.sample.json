@@ -1,6 +1,7 @@
 {
   "db": {
     "host": "localhost",
+    "read_only_hosts": ["localhost"],
     "port": 5433,
     "user": "proof_server",
     "password": "iehohp6iep5eez5fai3eechohdieQuee",

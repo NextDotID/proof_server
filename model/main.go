@@ -11,6 +11,10 @@ import (
 
 var (
 	DB *gorm.DB
+	// Since this service is mostly run as a lambda, we don't need
+	// to init an array here.  When lambda scaled to a very large
+	// number, servers in `read_only_hosts` will be used evenly.
+	ReadOnlyDB *gorm.DB
 	l  = logrus.WithFields(logrus.Fields{"module": "model"})
 )
 
@@ -35,16 +39,12 @@ func Init() {
 		panic(err)
 	}
 
-	l.Info("database initialized")
-}
-
-func GetReadOnlyDB() *gorm.DB {
-	host := lo.Sample(config.C.DB.ReadOnlyHosts)
-	dsn := config.GetDatabaseDSN(host)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	readOnlyHost := lo.Sample(config.C.DB.ReadOnlyHosts)
+	readOnlyDSN := config.GetDatabaseDSN(readOnlyHost)
+	ReadOnlyDB, err = gorm.Open(postgres.Open(readOnlyDSN), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
 
-	return db
+	l.Info("database initialized")
 }
