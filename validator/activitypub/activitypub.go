@@ -1,6 +1,8 @@
 package activitypub
 
 import (
+	"bufio"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -31,7 +33,7 @@ type ActivityPub struct {
 }
 
 const (
-	POST_TEMPLATE = "Validate my ActivityPub identity @%s for Avatar 0x%s:\n\nSignature: %%SIG_BASE64%%\nUUID:%s\nPrevious:%s\nCreatedAt:%d\n\nPowered by Next.ID - Connect All Digital Identities.\n"
+	POST_TEMPLATE = "Validate my ActivityPub identity @%s for Avatar 0x%s:\n\nSignature: %%SIG_BASE64%%\nUUID: %s\nPrevious: %s\nCreatedAt: %d\n\nPowered by Next.ID - Connect All Digital Identities.\n"
 	MATCH_TEMPLATE = "^Signature: (.*)$"
 )
 
@@ -121,13 +123,17 @@ func (ap *ActivityPub) DetectServerSoftware() (server ServerSoftware, err error)
 
 func (ap *ActivityPub) GeneratePostPayload() (_ map[string]string) {
 	id := ap.Identity
+	previous := ap.Previous
+	if previous == "" {
+		previous = "null"
+	}
 	return map[string]string{
 		"default": fmt.Sprintf(
 			POST_TEMPLATE,
 			id,
 			crypto.CompressedPubkeyHex(ap.Pubkey),
 			ap.Uuid.String(),
-			ap.Previous,
+			previous,
 			ap.CreatedAt.Unix(),
 		),
 	}
@@ -155,5 +161,44 @@ func (ap *ActivityPub) GenerateSignPayload() (payload string) {
 }
 
 func (ap *ActivityPub) Validate() (err error) {
-	return nil // TODO
+	// Get Text
+	server, err := ap.DetectServerSoftware()
+	if err != nil {
+		return err
+	}
+	switch server {
+	case Servers.Mastodon:
+	case Servers.Pleroma:
+		err = ap.GetMastodonText()
+	case Servers.Misskey:
+		err = ap.GetMisskeyText()
+	}
+	if err != nil {
+		return err
+	}
+	// Extract signature from text
+	if err = ap.ExtractSignature(); err != nil {
+		return err
+	}
+	// Verify signature
+	return crypto.ValidatePersonalSignature(ap.GenerateSignPayload(), ap.Signature, ap.Pubkey)
+}
+
+func (ap *ActivityPub) ExtractSignature() (err error) {
+	// Extract signature using regexp
+	scanner := bufio.NewScanner(strings.NewReader(ap.Text))
+	for scanner.Scan() {
+		matches := re.FindStringSubmatch(scanner.Text())
+		if len(matches) != 2 {
+			continue // Search for next line
+		}
+		sig, err := base64.StdEncoding.DecodeString(matches[1])
+		if err != nil {
+			return xerrors.Errorf("error when parsing signature: %w", err)
+		}
+		ap.Signature = sig
+		return nil
+	}
+
+	return xerrors.Errorf("no signature found")
 }

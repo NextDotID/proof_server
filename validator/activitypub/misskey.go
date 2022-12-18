@@ -16,18 +16,24 @@ type misskeyNotesShowRequest struct {
 // Only focus on `text` field for now.
 // TODO: show error message if it is not public.
 type misskeyNotesShowResponse struct {
-	Text string `json:"text"`
+	User misskeyNotesShowResponseUser `json:"user"`
+	Text string                       `json:"text"`
 }
 
-func (ap *ActivityPub)GetMisskeyText() (err error) {
+type misskeyNotesShowResponseUser struct {
+	Id       string `json:"id"`
+	Username string `json:"username"`
+}
+
+func (ap *ActivityPub) GetMisskeyText() (err error) {
 	_, server, err := ap.SplitID()
 	if err != nil {
 		return err
 	}
 
-	body := misskeyNotesShowRequest {
+	body := misskeyNotesShowRequest{
 		NoteID: ap.ProofLocation,
-		}
+	}
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
 		return err
@@ -41,7 +47,12 @@ func (ap *ActivityPub)GetMisskeyText() (err error) {
 	if err != nil {
 		return xerrors.Errorf("error when decoding Misskey note response: %w", err)
 	}
-	ap.Text = response.Text
+	postIdentity := fmt.Sprintf("%s@%s", response.User.Username, server)
+	if postIdentity != ap.Identity {
+		return xerrors.Errorf("Error when fetching Misskey note: This post is made by %s, not %s", postIdentity, ap.Identity)
+	}
 
-	return nil // TODO
+	ap.AltID = response.User.Id
+	ap.Text = response.Text
+	return nil
 }
