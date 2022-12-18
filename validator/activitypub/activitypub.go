@@ -51,6 +51,17 @@ var (
 	}
 )
 
+func Init() {
+	if validator.PlatformFactories == nil {
+		validator.PlatformFactories = make(map[types.Platform]func(*validator.Base) validator.IValidator)
+	}
+	validator.PlatformFactories[types.Platforms.Steam] = func(base *validator.Base) validator.IValidator {
+		ap := ActivityPub{base}
+		return &ap
+	}
+}
+
+
 func (ap *ActivityPub) SplitID() (username, server string, err error) {
 	// Trim initial @
 	ap.Identity = strings.Trim(ap.Identity, "@")
