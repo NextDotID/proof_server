@@ -29,6 +29,7 @@ type DBConfig struct {
 
 type PlatformConfig struct {
 	Twitter  TwitterPlatformConfig  `json:"twitter"`
+	Telegram TelegramPlatformConfig `json:"telegram"`
 	Ethereum EthereumPlatformConfig `json:"ethereum"`
 	Discord  DiscordPlatformConfig  `json:"discord"`
 }
@@ -47,6 +48,13 @@ type TwitterPlatformConfig struct {
 	AccessTokenSecret string `json:"access_token_secret"`
 	ConsumerKey       string `json:"consumer_key"`
 	ConsumerSecret    string `json:"consumer_secret"`
+}
+
+type TelegramPlatformConfig struct {
+	ApiID             int    `json:"api_id"`
+	ApiHash           string `json:"api_hash"`
+	BotToken          string `json:"bot_token"`
+	PublicChannelName string `json:"public_channel_name"`
 }
 
 type EthereumPlatformConfig struct {

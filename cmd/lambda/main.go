@@ -13,6 +13,7 @@ import (
 	"github.com/nextdotid/proof_server/controller"
 	"github.com/nextdotid/proof_server/model"
 	"github.com/nextdotid/proof_server/util/sqs"
+	"github.com/nextdotid/proof_server/validator/activitypub"
 	"github.com/nextdotid/proof_server/validator/das"
 	"github.com/nextdotid/proof_server/validator/discord"
 	"github.com/nextdotid/proof_server/validator/dns"
@@ -49,6 +50,7 @@ func init_validators() {
 	minds.Init()
 	dns.Init()
 	steam.Init()
+	activitypub.Init()
 }
 
 func init() {

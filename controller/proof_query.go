@@ -22,6 +22,8 @@ type ProofQueryRequest struct {
 	Identity   []string `form:"identity"`
 	Page       int      `form:"page"`
 	ExactMatch bool     `form:"exact"`
+	SortBy     string   `form:"sort"`
+	Order      string   `form:"order"`
 }
 
 type ProofQueryResponse struct {
@@ -87,20 +89,43 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 
 	result := make([]ProofQueryResponseSingle, 0, 0)
 	proofs := make([]model.Proof, 0, 0)
-	tx := model.ReadOnlyDB.Model(&model.Proof{}).Order("id DESC")
+	tx := model.ReadOnlyDB.Model(&model.Proof{})
+
+	// support selected fields only.
+	orderBy := "id"
+	order := "desc"
+	switch strings.ToLower(req.SortBy) {
+	case "id", "last_arweave_id", "created_at", "last_checked_at", "proof_chain_id", "platform", "identity", "alt_id":
+		orderBy = strings.ToLower(req.SortBy)
+	}
+	switch strings.ToLower(req.Order) {
+	case "asc", "desc":
+		order = strings.ToLower(req.Order)
+	}
+
+	if strings.ToLower(req.SortBy) == "activated_at" {
+		orderBy = "created_at"
+		tx = model.ReadOnlyDB.Table("proof").
+			Select("proof.*, proof_chains.*").
+			Joins("INNER JOIN proof_chains ON proof.persona = proof_chains.persona").
+			Order("proof_chains.created_at " + order).
+			Model(&model.Proof{})
+	} else {
+		tx = tx.Order(orderBy + " " + order)
+	}
 
 	switch req.Platform {
 	case string(types.Platforms.NextID):
 		{
-			tx = tx.Where("persona IN ?", req.Identity).Offset(offsetCount).Limit(pagination.Per).Find(&proofs)
+			tx = tx.Where("proof.persona IN ?", req.Identity).Offset(offsetCount).Limit(pagination.Per).Find(&proofs)
 			pagination.Total = tx.RowsAffected
 		}
 	case "":
 		{ // All platform
 			if req.ExactMatch {
-				tx = tx.Where("identity = ? OR alt_id = ?", strings.ToLower(req.Identity[0]), strings.ToLower(req.Identity[0]))
+				tx = tx.Where("proof.identity = ? OR proof.alt_id = ?", strings.ToLower(req.Identity[0]), strings.ToLower(req.Identity[0]))
 			} else {
-				tx = tx.Where("identity LIKE ? OR alt_id LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%", "%"+strings.ToLower(req.Identity[0])+"%")
+				tx = tx.Where("proof.identity LIKE ? OR proof.alt_id LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%", "%"+strings.ToLower(req.Identity[0])+"%")
 			}
 
 			for i, id := range req.Identity {
@@ -108,9 +133,9 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 					continue
 				}
 				if req.ExactMatch {
-					tx = tx.Or("identity = ? OR alt_id = ?", strings.ToLower(id), strings.ToLower(id))
+					tx = tx.Or("proof.identity = ? OR proof.alt_id = ?", strings.ToLower(id), strings.ToLower(id))
 				} else {
-					tx = tx.Or("identity LIKE ? OR alt_id LIKE ?", "%"+strings.ToLower(id)+"%", "%"+strings.ToLower(id)+"%")
+					tx = tx.Or("proof.identity LIKE ? OR proof.alt_id LIKE ?", "%"+strings.ToLower(id)+"%", "%"+strings.ToLower(id)+"%")
 				}
 			}
 			countTx := tx // Value-copy another query for total amount calculation
@@ -119,11 +144,11 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 		}
 	default:
 		{
-			tx = tx.Where("platform", req.Platform)
+			tx = tx.Where("proof.platform", req.Platform)
 			if req.ExactMatch {
-				tx = tx.Where("identity = ? OR alt_id = ?", strings.ToLower(req.Identity[0]), strings.ToLower(req.Identity[0]))
+				tx = tx.Where("proof.identity = ? OR proof.alt_id = ?", strings.ToLower(req.Identity[0]), strings.ToLower(req.Identity[0]))
 			} else {
-				tx = tx.Where("identity LIKE ? OR alt_id LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%", "%"+strings.ToLower(req.Identity[0])+"%")
+				tx = tx.Where("proof.identity LIKE ? OR proof.alt_id LIKE ?", "%"+strings.ToLower(req.Identity[0])+"%", "%"+strings.ToLower(req.Identity[0])+"%")
 			}
 
 			for i, id := range req.Identity {
@@ -132,9 +157,9 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 				}
 
 				if req.ExactMatch {
-					tx = tx.Or("identity = ? OR alt_id = ?", strings.ToLower(id), strings.ToLower(id))
+					tx = tx.Or("proof.identity = ? OR proof.alt_id = ?", strings.ToLower(id), strings.ToLower(id))
 				} else {
-					tx = tx.Or("identity LIKE ? OR alt_id LIKE ?", "%"+strings.ToLower(id)+"%", "%"+strings.ToLower(id)+"%")
+					tx = tx.Or("proof.identity LIKE ? OR proof.alt_id LIKE ?", "%"+strings.ToLower(id)+"%", "%"+strings.ToLower(id)+"%")
 				}
 			}
 			countTx := tx
@@ -158,7 +183,7 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 	personas = lo.Uniq(personas)
 
 	for _, persona := range personas {
-		proofs, err := model.FindAllProofByPersona(persona)
+		proofs, err := model.FindAllProofByPersona(persona, orderBy+" "+order)
 		if err != nil {
 			return result, pagination
 		}

@@ -2,8 +2,10 @@ package controller
 
 import (
 	"crypto/ecdsa"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/nextdotid/proof_server/model"
@@ -28,6 +30,7 @@ func insert_proof(t *testing.T) {
 			Pubkey:        pubkey,
 			Identity:      "yeiwb",
 			ProofLocation: "1469221200140574721",
+			CreatedAt:     time.Date(1970, time.Month(1), 1, 0, 0, 0, 0, time.UTC),
 			Signature:     []byte{1},
 		},
 		{
@@ -65,6 +68,7 @@ func insert_proof_exact(t *testing.T) {
 			Identity:      "yeiwb",
 			ProofLocation: "1469221200140574721",
 			Signature:     []byte{1},
+			CreatedAt:     time.Date(1970, time.Month(1), 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
 			Platform:      types.Platforms.Ethereum,
@@ -77,6 +81,7 @@ func insert_proof_exact(t *testing.T) {
 			Extra: map[string]string{
 				"ethereum_pubkey": "0x04ae5933a45605e7fff23cd010455911c1f0194479438859af5140d749937e53fd935d768efa9229ae8be3314631e945c56f915778ad4565b4efafcd13864e2fd7",
 			},
+			CreatedAt: time.Date(1971, time.Month(1), 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
 			Platform:      types.Platforms.Twitter,
@@ -86,6 +91,7 @@ func insert_proof_exact(t *testing.T) {
 			Identity:      "yeiwb_fuzzy",
 			ProofLocation: "1469221200140574722",
 			Signature:     []byte{3},
+			CreatedAt:     time.Date(2022, time.Month(1), 1, 0, 0, 0, 0, time.UTC),
 		},
 	}
 
@@ -232,5 +238,35 @@ func Test_proofQuery(t *testing.T) {
 
 		APITestCall(Engine, "GET", "/v1/proof?platform=twitter&identity=yeiwb&exact=true", "", &resp)
 		require.Equal(t, 1, len(resp.IDs))
+	})
+
+	t.Run("sort", func(t *testing.T) {
+		before_each(t)
+		insert_proof(t)
+
+		ascResp := ProofQueryResponse{}
+		APITestCall(Engine, "GET", "/v1/proof?sort=platform&order=asc&identity="+persona+"&platform=nextid", "", &ascResp)
+		require.Equal(t, types.Platform("ethereum"), ascResp.IDs[0].Proofs[0].Platform)
+
+		descResp := ProofQueryResponse{}
+		APITestCall(Engine, "GET", "/v1/proof?sort=platform&order=desc&identity="+persona+"&platform=nextid", "", &descResp)
+		require.Equal(t, types.Platform("twitter"), descResp.IDs[0].Proofs[0].Platform)
+	})
+
+	t.Run("sort_activated_at", func(t *testing.T) {
+		before_each(t)
+		insert_proof_exact(t)
+
+		ascResp := ProofQueryResponse{}
+		APITestCall(Engine, "GET", "/v1/proof?sort=activated_at&order=asc&identity=yeiwb&platform=twitter", "", &ascResp)
+		first, _ := strconv.ParseInt(ascResp.IDs[0].ActivatedAt, 10, 64)
+		second, _ := strconv.ParseInt(ascResp.IDs[1].ActivatedAt, 10, 64)
+		require.Less(t, first, second)
+
+		descResp := ProofQueryResponse{}
+		APITestCall(Engine, "GET", "/v1/proof?sort=activated_at&order=desc&identity=yeiwb&platform=twitter", "", &descResp)
+		first, _ = strconv.ParseInt(descResp.IDs[0].ActivatedAt, 10, 64)
+		second, _ = strconv.ParseInt(descResp.IDs[1].ActivatedAt, 10, 64)
+		require.Greater(t, first, second)
 	})
 }
