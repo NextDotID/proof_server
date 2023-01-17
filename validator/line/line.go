@@ -99,7 +99,8 @@ func (line *Line) Validate() (err error) {
         return mycrypto.ValidatePersonalSignature(line.SignaturePayload, line.Signature, line.Pubkey)
     }
 
-            // Message link of the public channel message,
+            // Message link of the public group message,eg-https://line.me/R/ti/p/@linecharacter
+         
     u, err := url.Parse(line.ProofLocation)
     if err != nil {
         return xerrors.Errorf("Error when parsing line proof location: %v", err)
