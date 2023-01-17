@@ -61,7 +61,8 @@ type TelegramPlatformConfig struct {
 type LinePlatformConfig struct {
 	AccessToken       string `json:"access_token"`
 	AccessTokenSecret string `json:"access_token_secret"`
-	PublicChannelName string `json:"public_channel_name"`
+	GroupID           string `json:"group_id"`
+        RoomID            string `json:"room_id"`
 }
 
 type EthereumPlatformConfig struct {
