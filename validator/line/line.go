@@ -16,8 +16,7 @@ import (
     "github.com/sirupsen/logrus"
     "golang.org/x/xerrors"
 
-    "github.com/gotd/td/line"
-    "github.com/gotd/td/ln"
+    "github.com/line/line-bot-sdk-go/v7/linebot"
     "github.com/nextdotid/proof_server/validator"
 )
 
