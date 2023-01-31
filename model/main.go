@@ -23,7 +23,7 @@ func Init() {
 	if DB != nil { // initialized
 		return
 	}
-dsn := config.GetDatabaseDSN(config.C.DB.Host)
+	dsn := config.GetDatabaseDSN(config.C.DB.Host)
 	var err error
 
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})

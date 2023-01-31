@@ -10,13 +10,13 @@ jobs:
       matrix:
         go: ['1.19']
     steps:
+    - name: Check out code
+      uses: actions/checkout@v3
     - name: Setup Go v1.x
       uses: actions/setup-go@v3
       with:
         go-version: ${{ matrix.go }}
         cache: true
-    - name: Check out code
-      uses: actions/checkout@v3
     - name: Check format
       run: if [ -z $(gofmt -l .) ]; then echo 'Format check passed.'; else echo 'Format check failed. Please run gofmt by yourself before committing.'; exit 1; fi
     - name: Build
