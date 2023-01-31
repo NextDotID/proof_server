@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nextdotid/proof_server/common"
 	"github.com/nextdotid/proof_server/model"
 	"github.com/nextdotid/proof_server/types"
 	"github.com/nextdotid/proof_server/util/sqs"
@@ -231,13 +232,27 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 }
 
 func triggerRevalidate(proofID int64) error {
-	msg := types.QueueMessage{
-		Action:  types.QueueActions.Revalidate,
-		ProofID: proofID,
-	}
+	switch common.CurrentRuntime {
+	case common.Runtimes.Standalone:
+		// Revalidate it in a block way since this func will
+		// be called under goroutine.
+		// FIXME: basiclly duplicated to `cmd/lambda_worker.revalidate_single()`
+		proof := model.Proof{}
+		tx := model.DB.Preload("ProofChain").Preload("ProofChain.Previous").Where("id = ?", proofID).First(&proof)
+		if tx.Error != nil {
+			return xerrors.Errorf("%w", tx.Error)
+		}
+		return proof.Revalidate()
+	case common.Runtimes.Lambda:
+		// Use AWS SQS to send message to workers
+		msg := types.QueueMessage{
+			Action:  types.QueueActions.Revalidate,
+			ProofID: proofID,
+		}
 
-	if err := sqs.Send(msg); err != nil {
-		return xerrors.Errorf("Failed to send message to queue: %w", err)
+		if err := sqs.Send(msg); err != nil {
+			return xerrors.Errorf("Failed to send message to queue: %w", err)
+		}
 	}
 
 	return nil
