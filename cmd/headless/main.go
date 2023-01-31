@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	flagPort       = flag.Int("port", 9801, "Listen port")
+	flagPort = flag.Int("port", 9801, "Listen port")
 )
 
 func main() {

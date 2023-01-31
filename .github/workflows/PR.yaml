@@ -1,0 +1,29 @@
+name: Pull Request Check
+on:
+  pull_request:
+    branches: [develop, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ['1.19']
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+    - name: Setup Go v1.x
+      uses: actions/setup-go@v3
+      with:
+        go-version: ${{ matrix.go }}
+        cache: true
+    - name: Check format
+      run: if [ -z $(gofmt -l .) ]; then echo 'Format check passed.'; else echo 'Format check failed. Please run gofmt by yourself before committing.'; exit 1; fi
+    - name: Build
+      env:
+        CGO_ENABLED: '0'
+        GOARCH: amd64
+        GOOS: linux
+      run: go build -ldflags "-X 'github.com/nextdotid/proof_server/common.Environment=development' -X 'github.com/nextdotid/proof_server/common.Revision=${{ github.sha }}' -X 'github.com/nextdotid/proof_server/common.BuildTime=$(date +%s)'" ./...
+    # - name: Test
+    #   run: go test -v ./...

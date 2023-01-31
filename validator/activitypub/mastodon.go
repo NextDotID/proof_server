@@ -12,7 +12,7 @@ const MASTODON_API_STATUS = "https://%s/api/v1/statuses/%s"
 
 type MastodonResponse struct {
 	Account MastodonResponseAccount `json:"account"`
-	Content string `json:"content"`
+	Content string                  `json:"content"`
 }
 
 type MastodonResponseAccount struct {
