@@ -33,14 +33,14 @@ func generate() Steam {
 	createdAt, _ := util.TimestampStringToTime("1666257424")
 	return Steam{
 		Base: &validator.Base{
-			Platform:         types.Platforms.Steam,
-			Previous:         "",
-			Action:           types.Actions.Create,
-			Pubkey:           pk,
-			Identity:         "menyk",
-			AltID:            "",
-			CreatedAt:       createdAt,
-			Uuid:             uuid.MustParse("d035591e-f25f-4b06-8045-b96c1d9af454"),
+			Platform:  types.Platforms.Steam,
+			Previous:  "",
+			Action:    types.Actions.Create,
+			Pubkey:    pk,
+			Identity:  "menyk",
+			AltID:     "",
+			CreatedAt: createdAt,
+			Uuid:      uuid.MustParse("d035591e-f25f-4b06-8045-b96c1d9af454"),
 		},
 	}
 }

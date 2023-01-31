@@ -132,7 +132,7 @@ func (steam *Steam) Validate() (err error) {
 	foundValid := false
 	lo.ForEach(found, func(matched []string, index int) {
 		if len(matched) != 2 {
-			err = xerrors.Errorf("Invalid result on proof record No.%d", index + 1)
+			err = xerrors.Errorf("Invalid result on proof record No.%d", index+1)
 			return
 		}
 		sigBytes, matchedErr := util.DecodeString(matched[1])

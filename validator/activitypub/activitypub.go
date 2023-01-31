@@ -24,7 +24,7 @@ type NodeInfo struct {
 }
 
 type NodeInfoLink struct {
-	Rel string `json:"rel"`
+	Rel  string `json:"rel"`
 	Href string `json:"href"`
 }
 
@@ -33,21 +33,21 @@ type ActivityPub struct {
 }
 
 const (
-	POST_TEMPLATE = "Validate my ActivityPub identity @%s for Avatar 0x%s:\n\nSignature: %%SIG_BASE64%%\nUUID: %s\nPrevious: %s\nCreatedAt: %d\n\nPowered by Next.ID - Connect All Digital Identities.\n"
+	POST_TEMPLATE  = "Validate my ActivityPub identity @%s for Avatar 0x%s:\n\nSignature: %%SIG_BASE64%%\nUUID: %s\nPrevious: %s\nCreatedAt: %d\n\nPowered by Next.ID - Connect All Digital Identities.\n"
 	MATCH_TEMPLATE = "^Signature: (.*)$"
 )
 
 var (
-	l = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "activitypub"})
-	re = regexp.MustCompile(MATCH_TEMPLATE)
+	l       = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "activitypub"})
+	re      = regexp.MustCompile(MATCH_TEMPLATE)
 	Servers = struct {
 		Mastodon ServerSoftware
-		Misskey ServerSoftware
-		Pleroma ServerSoftware
+		Misskey  ServerSoftware
+		Pleroma  ServerSoftware
 	}{
 		Mastodon: "mastodon",
-		Misskey: "misskey",
-		Pleroma: "pleroma",
+		Misskey:  "misskey",
+		Pleroma:  "pleroma",
 	}
 )
 
@@ -60,7 +60,6 @@ func Init() {
 		return &ap
 	}
 }
-
 
 func (ap *ActivityPub) SplitID() (username, server string, err error) {
 	// Trim initial @
@@ -77,7 +76,7 @@ func (ap *ActivityPub) SplitID() (username, server string, err error) {
 func (ap *ActivityPub) DetectServerSoftware() (server ServerSoftware, err error) {
 	e := func(err error) error {
 		return xerrors.Errorf("error when detecting server software: %w", err)
-	};
+	}
 	_, serverURL, err := ap.SplitID()
 	if err != nil {
 		return "", e(err)
