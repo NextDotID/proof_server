@@ -55,6 +55,7 @@ func healthz(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"hello":       "proof service",
+		"runtime":     common.CurrentRuntime,
 		"platforms":   platforms,
 		"environment": common.Environment,
 		"revision":    common.Revision,
