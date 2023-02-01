@@ -1,4 +1,4 @@
-name: build
+name: Build binary and deploy to official server
 on:
   push:
     branches: [master, develop]
