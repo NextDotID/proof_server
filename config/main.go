@@ -32,7 +32,7 @@ type PlatformConfig struct {
 	Telegram TelegramPlatformConfig `json:"telegram"`
 	Ethereum EthereumPlatformConfig `json:"ethereum"`
 	Discord  DiscordPlatformConfig  `json:"discord"`
-        Line     LinePlatformConfig     `json:"line"`
+        Slack    SlackPlatformConfig    `json:"slack"`
 }
 
 type ArweaveConfig struct {
@@ -58,11 +58,10 @@ type TelegramPlatformConfig struct {
 	PublicChannelName string `json:"public_channel_name"`
 }
 
-type LinePlatformConfig struct {
+type SlackPlatformConfig struct {
 	AccessToken       string `json:"access_token"`
 	AccessTokenSecret string `json:"access_token_secret"`
-	GroupID           string `json:"group_id"`
-        RoomID            string `json:"room_id"`
+	PublicChannelName string `json:"public_channel_name"`
 }
 
 type EthereumPlatformConfig struct {
