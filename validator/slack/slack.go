@@ -9,7 +9,7 @@ import (
     "strconv"
     "strings"
 
-"github.com/slack-go/slack"
+"github.com/nlopes/slack"
 
 "github.com/nextdotid/proof_server/config"
     "github.com/nextdotid/proof_server/types"
