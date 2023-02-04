@@ -59,8 +59,8 @@ type TelegramPlatformConfig struct {
 }
 
 type SlackPlatformConfig struct {
-        ApiToken       string  `json:"api_token"`   
-        PublicChannelID string `json:"public_channel_id"`
+        ApiToken          string `json:"api_token"`   
+        PublicChannelID   string `json:"public_channel_id"`
 }
 
 type EthereumPlatformConfig struct {
