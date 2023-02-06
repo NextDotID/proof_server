@@ -69,14 +69,14 @@ func GetPostWithHeadlessBrowser(url string, regexp string) (post string, err err
 	request := headless.FindRequest{
 		Location: url,
 		Timeout:  "120s",
-		Match:    headless.Match{
-			Type:        "regexp",
+		Match: headless.Match{
+			Type: "regexp",
 			MatchRegExp: &headless.MatchRegExp{
 				Selector: "*",
 				Value:    regexp,
 			},
-			MatchXPath:  nil,
-			MatchJS:     nil,
+			MatchXPath: nil,
+			MatchJS:    nil,
 		},
 	}
 	// POST request body to entrypoint headless server
