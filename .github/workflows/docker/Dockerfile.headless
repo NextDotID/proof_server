@@ -1,15 +1,12 @@
-FROM docker.io/alpine:3.15
+# syntax=docker/dockerfile:1
+# WARNING: For github workflow only.
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Base image: https://github.com/Zenika/alpine-chrome
+FROM gcr.io/zenika-hub/aloine-chrome:100
 LABEL org.opencontainers.image.authors="Nyk Ma <nykma@next.id>"
 
-RUN apk update && \
-    apk add chromium chromium-chromedriver && \
-    which chromium-browser && \
-    apk clean
-
-USER 1000:1000
-WORKDIR /app
 EXPOSE 9801
-CMD ["/usr/local/bin/headless", "-browser", "$(which chromium-browser)", "-port", "9801"]
+CMD ["/usr/local/bin/ps_headless", "-chromium", "$(which chromium-browser)", "-port", "9801"]
 
 ARG TARGETARCH
-COPY ./headless_${TARGETARCH} /usr/local/bin/headless
+COPY ./headless_${TARGETARCH} /usr/local/bin/ps_headless

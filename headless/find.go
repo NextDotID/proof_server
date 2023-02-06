@@ -6,7 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/proto"
+	"github.com/nextdotid/proof_server/common"
 	"github.com/ssoroka/slice"
 	"golang.org/x/xerrors"
 )
@@ -80,7 +82,14 @@ func validate(c *gin.Context) {
 		return
 	}
 
-	launcher := newLauncher(LauncherPath)
+	var launcher *launcher.Launcher
+	switch common.CurrentRuntime {
+	case common.Runtimes.Lambda:
+		launcher = newLambdaLauncher(LauncherPath)
+	case common.Runtimes.Standalone:
+		launcher = newLauncher(LauncherPath)
+	}
+
 	defer launcher.Cleanup()
 	defer launcher.Kill()
 

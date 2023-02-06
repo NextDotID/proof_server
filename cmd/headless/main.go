@@ -18,8 +18,8 @@ var (
 func main() {
 	flag.Parse()
 	logrus.SetLevel(logrus.DebugLevel)
-	headless.Init(*flagChromiumPath)
 	common.CurrentRuntime = common.Runtimes.Standalone
+	headless.Init(*flagChromiumPath)
 
 	listen := fmt.Sprintf("0.0.0.0:%d", *flagPort)
 	fmt.Printf("Headless browser server now running on %s", listen)
