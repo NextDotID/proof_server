@@ -6,7 +6,8 @@ FROM gcr.io/zenika-hub/alpine-chrome:100
 LABEL org.opencontainers.image.authors="Nyk Ma <nykma@next.id>"
 
 EXPOSE 9801
-CMD ["/usr/local/bin/ps_headless", "-chromium", "$(which chromium-browser)", "-port", "9801"]
+ENTRYPOINT ["/bin/ash", "-c"]
+CMD ["/usr/local/bin/ps_headless", "-chromium", "/usr/bin/chromium-browser", "-port", "9801"]
 
 ARG TARGETARCH
 COPY ./headless_${TARGETARCH} /usr/local/bin/ps_headless

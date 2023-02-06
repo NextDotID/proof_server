@@ -11,7 +11,7 @@ import (
 
 var (
 	flagPort         = flag.Int("port", 9801, "Listen port")
-	flagChromiumPath = flag.String("chromium", "/usr/bin/chromium", "Path to Chromium executable")
+	flagChromiumPath = flag.String("chromium", "/usr/bin/chromium-browser", "Path to Chromium executable")
 )
 
 func main() {
@@ -21,6 +21,5 @@ func main() {
 	headless.Init(*flagChromiumPath)
 
 	listen := fmt.Sprintf("0.0.0.0:%d", *flagPort)
-	fmt.Printf("Headless browser server now running on %s", listen)
 	headless.Engine.Run(listen)
 }
