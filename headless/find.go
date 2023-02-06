@@ -90,8 +90,8 @@ func validate(c *gin.Context) {
 		launcher = newLauncher(LauncherPath)
 	}
 
-	defer launcher.Cleanup()
 	defer launcher.Kill()
+	defer launcher.Cleanup()
 
 	u, err := launcher.Launch()
 	if err != nil {
