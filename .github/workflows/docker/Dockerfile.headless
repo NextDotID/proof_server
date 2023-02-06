@@ -2,7 +2,7 @@
 # WARNING: For github workflow only.
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # Base image: https://github.com/Zenika/alpine-chrome
-FROM gcr.io/zenika-hub/aloine-chrome:100
+FROM gcr.io/zenika-hub/alpine-chrome:100
 LABEL org.opencontainers.image.authors="Nyk Ma <nykma@next.id>"
 
 EXPOSE 9801

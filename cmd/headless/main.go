@@ -10,10 +10,9 @@ import (
 )
 
 var (
-	flagPort = flag.Int("port", 9801, "Listen port")
+	flagPort         = flag.Int("port", 9801, "Listen port")
 	flagChromiumPath = flag.String("chromium", "/usr/bin/chromium", "Path to Chromium executable")
 )
-
 
 func main() {
 	flag.Parse()
