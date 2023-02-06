@@ -2,9 +2,10 @@ name: Build headless browser docker containers
 
 on:
   push:
-    branches: [master, develop]
-    tags:
-    - v*.*.*
+    # DEBUG
+    # branches: [master, develop]
+    # tags:
+    # - v*.*.*
 
 jobs:
   pack-headless-image:
