@@ -1,0 +1,15 @@
+FROM docker.io/alpine:3.15
+LABEL org.opencontainers.image.authors="Nyk Ma <nykma@next.id>"
+
+RUN apk update && \
+    apk add chromium chromium-chromedriver && \
+    which chromium-browser && \
+    apk clean
+
+USER 1000:1000
+WORKDIR /app
+EXPOSE 9801
+CMD ["/usr/local/bin/headless", "-browser", "$(which chromium-browser)", "-port", "9801"]
+
+ARG TARGETARCH
+COPY ./headless_${TARGETARCH} /usr/local/bin/headless

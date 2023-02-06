@@ -11,14 +11,17 @@ import (
 
 var (
 	flagPort = flag.Int("port", 9801, "Listen port")
+	flagChromiumPath = flag.String("chromium", "/usr/bin/chromium", "Path to Chromium executable")
 )
+
 
 func main() {
 	flag.Parse()
 	logrus.SetLevel(logrus.DebugLevel)
-	headless.Init("")
+	headless.Init(*flagChromiumPath)
 	common.CurrentRuntime = common.Runtimes.Standalone
 
-	fmt.Printf("Server now running on 0.0.0.0:%d", *flagPort)
-	headless.Engine.Run(fmt.Sprintf("0.0.0.0:%d", *flagPort))
+	listen := fmt.Sprintf("0.0.0.0:%d", *flagPort)
+	fmt.Printf("Headless browser server now running on %s", listen)
+	headless.Engine.Run(listen)
 }
