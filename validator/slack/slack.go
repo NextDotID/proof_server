@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"net/url"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -141,4 +141,16 @@ func (slack *Slack) validateText() (err error) {
 		return mycrypto.ValidatePersonalSignature(slack.SignaturePayload, sigBytes, slack.Pubkey)
 	}
 	return xerrors.Errorf("Signature not found in the slack message.")
+}
+
+func initClient(){
+	if client != nil{
+		return
+	}
+
+	httpClient := httpClient{}
+	client =
+slack.NewClient(config.C.Platform.Slack.ApiToken
+	slack.OptionHTTPClient(&httpClient))	
+
 }
