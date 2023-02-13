@@ -44,7 +44,7 @@ var (
 func Init() {
 	initClient()
 	if validator.PlatformFactories == nil {
-		validator.PlatformFactories = make(map[types.Platform]func(*validator.Base) validator.IValidator)
+		validator.PlatformFactories = make(map[types.Platform.]func(*validator.Base) validator.IValidator)
 	}
 	validator.PlatformFactories[types.Platforms.Slack] = func(base *validator.Base) validator.IValidator {
 		slack := &Slack{base}
