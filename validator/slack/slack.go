@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"string"
-
+	
 	"github.com/nextdotid/proof_server/config"
 	types "github.com/nextdotid/proof_server/types"
 	util "github.com/nextdotid/proof_server/util"
