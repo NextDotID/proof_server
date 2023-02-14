@@ -8,12 +8,14 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"net/http"
 
 	"github.com/nextdotid/proof_server/config"
 	types "github.com/nextdotid/proof_server/types"
 	util "github.com/nextdotid/proof_server/util"
 	mycrypto "github.com/nextdotid/proof_server/util/crypto"
 	"github.com/sirupsen/logrus"
+	"github.com/slack-go/slack"
 	slackClient "github.com/slack-go/slack"
 	"golang.org/x/xerrors"
 
@@ -84,7 +86,7 @@ func (slack *Slack) GenerateSignPayload() (payload string) {
 }
 
 func (slack *Slack) Validate() (err error) {
-	initClient()
+	client := initClient()
 	slack.Identity = strings.ToLower(slack.Identity)
 	slack.SignaturePayload = slack.GenerateSignPayload()
 
@@ -107,21 +109,22 @@ func (slack *Slack) Validate() (err error) {
 		return xerrors.Errorf("Error when parsing slack message ID %s: %s", slack.ProofLocation, err.Error())
 	}
 
-	user, err := GetUser(channelID, messageID)
+	msgResp, err := client.GetChannelMessage(channelID, messageID)
 	if err != nil {
-		return xerrors.Errorf("Error when fetching user from slack: %v", err)
+		return xerrors.Errorf("Error getting the message from slack: %w", err)
 	}
 
+    user := msgResp.User
 	userID := strconv.FormatInt(user.ID, 10)
 	if !strings.EqualFold(userID, slack.Identity) {
-		return xerrors.Errorf("slack username mismatch: expect %s - actual %s", slack.Identity, user.Username)
+		return xerrors.Errorf("slack userID mismatch: expect %s - actual %s", slack.Identity, userID)
 	}
 
-	slack.Text = user.Message
-	slack.AltID = user.Username
+	slack.Text = msgResp.Message
+	slack.AltID = userID
 	slack.Identity = userID
 
-	return slack.ValidateText()
+	return slack.validateText()
 }
 
 func (slack *Slack) validateText() (err error) {
@@ -143,14 +146,13 @@ func (slack *Slack) validateText() (err error) {
 	return xerrors.Errorf("Signature not found in the slack message.")
 }
 
-func initClient(){
-	if client != nil{
-		return
-	}
+var client *slack.Client
 
-	httpClient := httpClient{}
-	client =
-slack.NewClient(config.C.Platform.Slack.ApiToken
-	slack.OptionHTTPClient(&httpClient))	
+func initClient() *slack.Client {
+	if client == nil {
+        httpClient := httpClient{}
+	    client = slack.New(config.C.Platform.Slack.ApiToken, slack.OptionHTTPClient(&httpClient))
+	}
+	return client			
 
 }
