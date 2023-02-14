@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"string"
-	
+
 	"github.com/nextdotid/proof_server/config"
 	types "github.com/nextdotid/proof_server/types"
 	util "github.com/nextdotid/proof_server/util"
@@ -113,7 +113,7 @@ func (slack *Slack) Validate() (err error) {
 		return xerrors.Errorf("Error getting the message from slack: %w", err)
 	}
 
-    user := msgResp.User
+	user := msgResp.User
 	userID := strconv.FormatInt(user.ID, 10)
 	if !strings.EqualFold(userID, slack.Identity) {
 		return xerrors.Errorf("slack userID mismatch: expect %s - actual %s", slack.Identity, userID)
@@ -145,13 +145,11 @@ func (slack *Slack) validateText() (err error) {
 	return xerrors.Errorf("Signature not found in the slack message.")
 }
 
-var client *slack.Client
-
 func initClient() *slack.Client {
 	if client == nil {
-        httpClient := httpClient{}
-	    client = slack.New(config.C.Platform.Slack.ApiToken, slack.OptionHTTPClient(&httpClient))
+		httpClient := httpClient{}
+		client = slack.New(config.C.Platform.Slack.ApiToken, slack.OptionHTTPClient(&httpClient))
 	}
-	return client			
+	return client
 
 }
