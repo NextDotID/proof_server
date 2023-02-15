@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"regexp"
 	"strconv"
-	"string"
+	"strings"
 
 	"github.com/nextdotid/proof_server/config"
 	types "github.com/nextdotid/proof_server/types"
@@ -85,7 +85,7 @@ func (slack *Slack) GenerateSignPayload() (payload string) {
 }
 
 func (slack *Slack) Validate() (err error) {
-	client := initClient()
+	initClient()
 	slack.Identity = strings.ToLower(slack.Identity)
 	slack.SignaturePayload = slack.GenerateSignPayload()
 
@@ -108,18 +108,36 @@ func (slack *Slack) Validate() (err error) {
 		return xerrors.Errorf("Error when parsing slack message ID %s: %s", slack.ProofLocation, err.Error())
 	}
 
-	msgResp, err := client.GetChannelMessage(channelID, messageID)
+	// Get conversation history
+	history, err := client.GetConversationHistory(&slackClient.GetConversationHistoryParameters{
+		ChannelID: channelID,
+	})
 	if err != nil {
-		return xerrors.Errorf("Error getting the message from slack: %w", err)
+		return xerrors.Errorf("Error getting the conversation history from slack: %w", err)
 	}
 
-	user := msgResp.User
-	userID := strconv.FormatInt(user.ID, 10)
+	var foundMsg *slackClient.Message
+	for _, msg := range history.Messages {
+		if msg.ClientMsgID == strconv.FormatInt(messageID, 10) {
+			foundMsg = &msg
+			break
+		}
+	}
+
+	if foundMsg == nil {
+		return xerrors.Errorf("Could not find message with ID %d in conversation history", messageID)
+	}
+
+	userInt, err := strconv.ParseInt(foundMsg.User, 10, 64)
+	if err != nil {
+		return xerrors.Errorf("failed to parse user ID as int64: %v", err)
+	}
+	userID := strconv.FormatInt(userInt, 10)
 	if !strings.EqualFold(userID, slack.Identity) {
 		return xerrors.Errorf("slack userID mismatch: expect %s - actual %s", slack.Identity, userID)
 	}
 
-	slack.Text = msgResp.Message
+	slack.Text = foundMsg.Text
 	slack.AltID = userID
 	slack.Identity = userID
 
@@ -145,11 +163,12 @@ func (slack *Slack) validateText() (err error) {
 	return xerrors.Errorf("Signature not found in the slack message.")
 }
 
-func initClient() *slack.Client {
-	if client == nil {
-		httpClient := httpClient{}
-		client = slack.New(config.C.Platform.Slack.ApiToken, slack.OptionHTTPClient(&httpClient))
+func initClient() {
+	if client != nil {
+		return
 	}
-	return client
-
+	client = slack.New(config.C.Platform.Slack.ApiToken)
+	if _, err := client.AuthTest(); err != nil {
+		panic(fmt.Errorf("failed to authenticate the slack bot: %v, err"))
+	}
 }
