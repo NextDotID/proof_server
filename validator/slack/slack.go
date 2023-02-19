@@ -124,7 +124,11 @@ func (slack *Slack) Validate() (err error) {
 		}
 	}
 
-	if foundMsg == nil {
+	for foundMsg != nil {
+		break
+	}
+
+	if !history.HasMore {
 		return xerrors.Errorf("Could not find message with ID %d in conversation history", messageID)
 	}
 
