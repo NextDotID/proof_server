@@ -19,20 +19,6 @@ func (s *Slack) GeneratePostPayload() map[string]string {
 	return payload
 }
 
-func (s *Slack) Validate() error {
-	if len(s.Identity) < 4 {
-		return types.ErrIdentityTooShort
-	}
-	if s.ProofLocation == "" {
-		return types.ErrProofLocationNotFound
-	}
-	if s.ChannelID == "" {
-		return types.ErrInvalidChannelID
-	}
-
-	return nil
-}
-
 func before_each(t *testing.T) {
 	logrus.SetLevel(logrus.DebugLevel)
 	config.Init("../../config/config.test.json")
@@ -48,12 +34,11 @@ func generate() Slack {
 			Action:        types.Actions.Create,
 			Pubkey:        pubkey,
 			Identity:      "yeiwb",
-			ProofLocation: "p123456789012345",
+			ProofLocation: "https://app.slack.com/client/T04PR0R7DC3/C04Q3P6H7TK",
 			Text:          "",
 			Uuid:          uuid.MustParse("c6fa1483-1bad-4f07-b661-678b191ab4b3"),
 			CreatedAt:     created_at,
-		},
-		ChannelID: "C12345678",
+		}
 	}
 }
 
@@ -67,12 +52,11 @@ func generate() Slack {
 			Action:        types.Actions.Create,
 			Pubkey:        pubkey,
 			Identity:      "SannieInMeta",
-			ProofLocation: "p123456789012345",
+			ProofLocation: "https://app.slack.com/client/T04PR0R7DC3/C04Q3P6H7TK",
 			Text:          "",
 			Uuid:          uuid.MustParse("223a5c86-540b-49b7-8674-94e04a390cd0"),
 			CreatedAt:     created_at,
-		},
-		ChannelID: "C12345678",
+		}
 	}
 }
 
