@@ -1,6 +1,7 @@
-name: build
+name: Build binary and deploy to official server
 on:
   push:
+    branches: [master, develop]
 
 jobs:
   build:
@@ -12,20 +13,13 @@ jobs:
         appenv: ['staging', 'production']
     runs-on: ubuntu-latest
     steps:
+    - name: Check out code
+      uses: actions/checkout@v3
     - name: Setup Go v1.x
       uses: actions/setup-go@v3
       with:
         go-version: ${{ matrix.go }}
-
-    - name: Check out code
-      uses: actions/checkout@v3
-
-    - name: Go mod package cache
-      uses: actions/cache@v3
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ matrix.go }}-${{ hashFiles('go.mod') }}
-
+        cache: true
     - name: Build
       env:
         CGO_ENABLED: '0'

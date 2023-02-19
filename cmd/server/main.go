@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/nextdotid/proof_server/common"
 	"github.com/nextdotid/proof_server/config"
 	"github.com/nextdotid/proof_server/controller"
 	"github.com/nextdotid/proof_server/model"
@@ -44,6 +45,7 @@ func main() {
 	flag.Parse()
 	config.Init(*flagConfigPath)
 	logrus.SetLevel(logrus.DebugLevel)
+	common.CurrentRuntime = common.Runtimes.Standalone
 
 	model.Init()
 	controller.Init()

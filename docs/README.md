@@ -15,7 +15,7 @@ you on any supported platform.
 | Twitter     | `twitter`        | `twitter_username`           | Proof tweet ID (`1415362679095635970`)                                         |                                                         |
 | Keybase     | `keybase`        | `keybase_username`           | N/A (use `https://your_identity.keybase.pub/NextID/COMPRESSED_PUBKEY_HEX.txt`) |                                                         |
 | Ethereum    | `ethereum`       | Wallet address `0x123AbC...` | N/A (Two-way signatures created from persona sk and wallet sk)                 |                                                         |
-| Github      | `github`         | `github_username`            | Public visible Gist ID `a6dddd2811af21b671fd`                                  | Gist should contains `0xPUBKEY_COMRESSED_HEX.json` file |
+| Github      | `github`         | `github_username`            | Public visible Gist ID `a6dddd2811af21b671fd`                                  | Gist should contain `0xPUBKEY_COMRESSED_HEX.json` file |
 | Discord     | `discord`        | `UserName#0000`              | message link (`https://discord.com/channels/DIGITS/DIGITS/DIGITS`)             |                                                         |
 | DotBit      | `dotbit`         | `address.bit`                | Custom type Record (`nextid_proof_0xPUBKEY_COMRESSED_HEX`)                     | Formerly known as DAS (Decentralized Account System)    |
 | Solana      | `solana`         | Wallet address `AbCdEfG9...` | N/A (Two-way signatures created from persona sk and wallet sk)                 |                                                         |
@@ -57,15 +57,15 @@ proof modification for any persona.
 
 ## FAQ
 
-### Can this be decentrialized?
+### Can this be decentralized?
 
 TLDR: If it is, the whole system will become weak against "junk proof"
 attack. For example:
 
-Can an attacker claims himself as `@elonmusk` (and provides an
+Can an attacker claims himself as `@elonmusk` (and provides a
 seem-to-be-normal proof tweet link)?
 
-Of course he can, since this network is decentrialized, there is no
+Of course he can, since this network is decentralized, there is no
 "gatekeeper", anybody can publish any data in their own namespace.
 
 Well, how should other users trust this claim?  They can only fetch this
@@ -75,12 +75,12 @@ The result is:
 
 1. EVERY user should set fetch methods for EVERY platform available
    (typically API key) for their own.  Since they can only trust their
-   own verfification result.  This will increase the difficulty of
+   own verification result.  This will increase the difficulty of
    deployment for every single user in this network.
 
-2. With "junk proofs" grow more and more (they will not disappear or
-   being deleted by someone, decentrialized, you know), every user
-   will waste more and more API usage on these unsuccessful proof.
+2. With "junk proofs" growing more and more (they will not disappear or
+   be deleted by someone, decentralized, you know), every user
+   will waste more and more API usage on these unsuccessful proofs.
    In the end the whole network is flooded.
 
 ## Presentation

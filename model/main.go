@@ -15,7 +15,7 @@ var (
 	// to init an array here.  When lambda scaled to a very large
 	// number, servers in `read_only_hosts` will be used evenly.
 	ReadOnlyDB *gorm.DB
-	l  = logrus.WithFields(logrus.Fields{"module": "model"})
+	l          = logrus.WithFields(logrus.Fields{"module": "model"})
 )
 
 // Init initializes DB connection instance and do migration at startup.

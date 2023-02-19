@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
+	"github.com/nextdotid/proof_server/common"
 	myconfig "github.com/nextdotid/proof_server/config"
 	"github.com/nextdotid/proof_server/controller"
 	"github.com/nextdotid/proof_server/model"
@@ -64,6 +65,7 @@ func init() {
 	}
 	init_config_from_aws_secret()
 	logrus.SetLevel(logrus.WarnLevel)
+	common.CurrentRuntime = common.Runtimes.Lambda
 
 	init_db(cfg)
 	init_sqs(cfg)

@@ -16,6 +16,7 @@ import (
 	"github.com/everFinance/goar"
 	artypes "github.com/everFinance/goar/types"
 	"github.com/everFinance/goar/utils"
+	"github.com/nextdotid/proof_server/common"
 	myconfig "github.com/nextdotid/proof_server/config"
 	"github.com/nextdotid/proof_server/model"
 	"github.com/nextdotid/proof_server/types"
@@ -259,6 +260,7 @@ func init() {
 	if err != nil {
 		logrus.Fatalf("Unable to load AWS config: %s", err)
 	}
+	common.CurrentRuntime = common.Runtimes.Lambda
 	init_config_from_aws_secret()
 	logrus.SetLevel(logrus.WarnLevel)
 
