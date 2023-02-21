@@ -108,28 +108,38 @@ func (slack *Slack) Validate() (err error) {
 		return xerrors.Errorf("Error when parsing slack message ID %s: %s", slack.ProofLocation, err.Error())
 	}
 
-	// Get conversation history
-	history, err := client.GetConversationHistory(&slackClient.GetConversationHistoryParameters{
-		ChannelID: channelID,
-	})
-	if err != nil {
-		return xerrors.Errorf("Error getting the conversation history from slack: %w", err)
-	}
-
 	var foundMsg *slackClient.Message
-	for _, msg := range history.Messages {
-		if msg.ClientMsgID == strconv.FormatInt(messageID, 10) {
-			foundMsg = &msg
+	var latestTs string
+
+	for {
+		// Get conversation history
+		history, err := client.GetConversationHistory(&slackClient.GetConversationHistoryParameters{
+			ChannelID: channelID,
+			Latest:    latestTs,
+			Inclusive: true,
+			Oldest:    "",
+			Limit:     1000, // Slack API max limit per page
+		})
+		if err != nil {
+			return xerrors.Errorf("Error getting the conversation history from slack: %w", err)
+		}
+
+		for _, msg := range history.Messages {
+			if msg.ClientMsgID == strconv.FormatInt(messageID, 10) {
+				foundMsg = &msg
+				break
+			}
+		}
+
+		if foundMsg != nil {
 			break
 		}
-	}
 
-	for foundMsg != nil {
-		break
-	}
+		if !history.HasMore {
+			return xerrors.Errorf("Could not find message with ID %d in conversation history", messageID)
+		}
 
-	if !history.HasMore {
-		return xerrors.Errorf("Could not find message with ID %d in conversation history", messageID)
+		latestTs = history.Messages[len(history.Messages)-1].Timestamp
 	}
 
 	userInt, err := strconv.ParseInt(foundMsg.User, 10, 64)
