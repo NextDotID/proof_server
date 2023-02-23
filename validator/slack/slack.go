@@ -107,11 +107,16 @@ func (slack *Slack) Validate() (err error) {
 	if err != nil {
 		return xerrors.Errorf("Error when parsing slack message ID %s: %s", slack.ProofLocation, err.Error())
 	}
-
+	maxPages := 10 // maximum number of pages to fetch
+	pageCount := 0
 	var foundMsg *slackClient.Message
 	var latestTs string
 
 	for {
+		if pageCount >= maxPages {
+			return xerrors.Errorf("Reached max number of pages (%d) while searching for message with ID %d in conversation history", maxPages, messageID)
+		}
+
 		// Get conversation history
 		history, err := client.GetConversationHistory(&slackClient.GetConversationHistoryParameters{
 			ChannelID: channelID,
@@ -140,6 +145,7 @@ func (slack *Slack) Validate() (err error) {
 		}
 
 		latestTs = history.Messages[len(history.Messages)-1].Timestamp
+		pageCount++
 	}
 
 	userInt, err := strconv.ParseInt(foundMsg.User, 10, 64)
