@@ -1,23 +1,18 @@
 package slack
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/nextdotid/proof_server/config"
 	"github.com/nextdotid/proof_server/types"
 	"github.com/nextdotid/proof_server/util"
-	mycrypto "github.com/nextdotid/proof_server/util/crypto"
+	"github.com/nextdotid/proof_server/util/crypto"
 	"github.com/nextdotid/proof_server/validator"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
-
-func (s *Slack) GeneratePostPayload() map[string]string {
-	payload := make(map[string]string)
-	payload["default"] = "Verifying my Slack ID: " + s.Identity + "\n\n" + s.Text + "\n\n" + "%SIG_BASE64%"
-	return payload
-}
 
 func before_each(t *testing.T) {
 	logrus.SetLevel(logrus.DebugLevel)
@@ -25,49 +20,48 @@ func before_each(t *testing.T) {
 }
 
 func generate() Slack {
-	pubkey, _ := mycrypto.StringToPubkey("0x04666b700aeb6a6429f13cbb263e1bc566cd975a118b61bc796204109c1b351d19b7df23cc47f004e10fef41df82bad646b027578f8881f5f1d2f70c80dfcd8031")
-	created_at, _ := util.TimestampStringToTime("1647503071")
-	return Slack{
-		Base: &validator.Base{
-			Platform:      types.Platforms.Slack,
-			Previous:      "",
-			Action:        types.Actions.Create,
-			Pubkey:        pubkey,
-			Identity:      "yeiwb",
-			ProofLocation: "https://app.slack.com/client/T04PR0R7DC3/C04Q3P6H7TK",
-			Text:          "",
-			Uuid:          uuid.MustParse("c6fa1483-1bad-4f07-b661-678b191ab4b3"),
-			CreatedAt:     created_at,
-		}
-	}
-}
+	pubkey, _ := crypto.StringToPubkey("0x4ec73e36f64ea6e2aa28c101dcae56203e02bd56b4b08c7848b5e791c7bfb9ca2b30f657bd822756533731e201faf57a0aaf6af36bd51f921f7132c9830c6fdf")
+	created_at, _ := util.TimestampStringToTime("1677339048")
+	uuid := uuid.MustParse("5032b8b3-d91d-434e-be3f-f172267e4006")
 
-func generate() Slack {
-	pubkey, _ := mycrypto.StringToPubkey("0x04d7c5e01bedf1c993f40ec302d9bf162620daea93a7155cd9a8019ae3a2c2a476873e66c7ab9c5dbf9a6bd24ef4432298e70c5c7e7b148a54724a1d7b59e06bd8")
-	created_at, _ := util.TimestampStringToTime("1650883741")
 	return Slack{
 		Base: &validator.Base{
 			Platform:      types.Platforms.Slack,
 			Previous:      "",
 			Action:        types.Actions.Create,
 			Pubkey:        pubkey,
-			Identity:      "SannieInMeta",
-			ProofLocation: "https://app.slack.com/client/T04PR0R7DC3/C04Q3P6H7TK",
-			Text:          "",
-			Uuid:          uuid.MustParse("223a5c86-540b-49b7-8674-94e04a390cd0"),
+			Identity:      "ashfaqur",
+			ProofLocation: "https://ashfaqur.slack.com/archives/C04Q3P6H7TK/p1677499644698189",
 			CreatedAt:     created_at,
-		}
+			Uuid:          uuid,
+		},
 	}
 }
 
 func Test_GeneratePostPayload(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
+
 		slack := generate()
-		result := slack.GeneratePostPayload()
-		require.Contains(t, result["default"], "Verifying my Slack ID")
-		require.Contains(t, result["default"], slack.Identity)
-		require.Contains(t, result["default"], "%SIG_BASE64%")
+		post := slack.GeneratePostPayload()
+		post_default, ok := post["default"]
+		require.True(t, ok)
+		require.Contains(t, post_default, "Verifying my Slack ID")
+		require.Contains(t, post_default, slack.Identity)
+		require.Contains(t, post_default, slack.Uuid.String())
+		require.Contains(t, post_default, "%SIG_BASE64%")
+	})
+}
+
+func Test_GenerateSignPayload(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		before_each(t)
+
+		slack := generate()
+		payload := slack.GenerateSignPayload()
+		require.Contains(t, payload, slack.Uuid.String())
+		require.Contains(t, payload, strconv.FormatInt(slack.CreatedAt.Unix(), 10))
+		require.Contains(t, payload, slack.Identity)
 	})
 }
 
@@ -75,35 +69,8 @@ func Test_Validate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
 
-		message := generate()
-		require.Nil(t, message.Validate())
-		require.Greater(t, len(message.Text), 10)
-		require.NotEmpty(t, message.Text)
-		require.Equal(t, "yeiwb", message.Identity)
-		require.Equal(t, "1468853291941773312", message.AltID)
-	})
-
-	t.Run("success on encode base1024", func(t *testing.T) {
-		before_each(t)
-		message := generateBase1024Encode()
-		require.Nil(t, message.Validate())
-		require.Greater(t, len(message.Text), 10)
-		require.NotEmpty(t, message.Text)
-		require.Equal(t, "sannieinmeta", message.Identity)
-	})
-
-	t.Run("should return identity error", func(t *testing.T) {
-		before_each(t)
-
-		message := generate()
-		message.Identity = "foobar"
-		require.NotNil(t, message.Validate())
-	})
-
-	t.Run("should return proof location not found", func(t *testing.T) {
-		before_each(t)
-		message := generate()
-		message.ProofLocation = "123456"
-		require.NotNil(t, message.Validate())
+		slack := generate()
+		require.NoError(t, slack.Validate())
+		require.Equal(t, "U04Q3NRDWHX", slack.AltID)
 	})
 }
