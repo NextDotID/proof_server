@@ -107,7 +107,10 @@ func (slack *Slack) Validate() (err error) {
 	if err != nil {
 		return xerrors.Errorf("Error when parsing slack message ID %s: %s", slack.ProofLocation, err.Error())
 	}
-	maxPages := 10 // maximum number of pages to fetch
+	const (
+		maxPages        = 10   // maximum number of pages to fetch
+		historyPageSize = 1000 // Slack API max limit per page
+	)
 	pageCount := 0
 	var foundMsg *slackClient.Message
 	var latestTs string
@@ -123,7 +126,7 @@ func (slack *Slack) Validate() (err error) {
 			Latest:    latestTs,
 			Inclusive: true,
 			Oldest:    "",
-			Limit:     1000, // Slack API max limit per page
+			Limit:     historyPageSize,
 		})
 		if err != nil {
 			return xerrors.Errorf("Error getting the conversation history from slack: %w", err)
@@ -189,6 +192,6 @@ func initClient() {
 	}
 	client = slack.New(config.C.Platform.Slack.ApiToken)
 	if _, err := client.AuthTest(); err != nil {
-		panic(fmt.Errorf("failed to authenticate the slack bot: %v, err"))
+		panic(fmt.Errorf("failed to authenticate the slack: %v", err))
 	}
 }
