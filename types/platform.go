@@ -18,6 +18,7 @@ var Platforms = struct {
 	ENS         Platform
 	Steam       Platform
 	ActivityPub Platform
+	Slack       Platform
 }{
 	Github:      "github",
 	NextID:      "nextid",
@@ -33,4 +34,5 @@ var Platforms = struct {
 	ENS:         "ens",
 	Steam:       "steam",
 	ActivityPub: "activitypub",
+	Slack:       "slack",
 }
