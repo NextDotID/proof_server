@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/ecdsa"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -81,6 +82,7 @@ func GetPostWithHeadlessBrowser(url string, regexp string) (post string, err err
 	}
 	// POST request body to entrypoint headless server
 	requestBody, err := json.Marshal(request)
+	fmt.Println(string(requestBody))
 	if err != nil {
 		return "", err
 	}

@@ -5,9 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/url"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/nextdotid/proof_server/config"
@@ -112,97 +110,103 @@ func (telegram *Telegram) GenerateSignPayload() (payload string) {
 }
 
 func (telegram *Telegram) Validate() (err error) {
-	initClient()
+	//initClient()
 	telegram.Identity = strings.ToLower(telegram.Identity)
 	telegram.SignaturePayload = telegram.GenerateSignPayload()
-	// Deletion. No need to fetch the telegram message.
-	if telegram.Action == types.Actions.Delete {
-		return mycrypto.ValidatePersonalSignature(telegram.SignaturePayload, telegram.Signature, telegram.Pubkey)
-	}
 
-	// Message link of the public channel message, e.g. https://t.me/some_public_channel/CHAT_ID_DIGITS
-	u, err := url.Parse(telegram.ProofLocation)
+	post, err := validator.GetPostWithHeadlessBrowser(telegram.ProofLocation, telegram.Identity)
 	if err != nil {
-		return xerrors.Errorf("Error when parsing telegram proof location: %v", err)
-
+		return xerrors.Errorf("fetching tweet with headless browser: %w", err)
 	}
-	msgPath := strings.Trim(u.Path, "/")
-	parts := strings.Split(msgPath, "/")
-	if len(parts) != 2 {
-		return xerrors.Errorf("Error: malformatted telegram proof location: %v", telegram.ProofLocation)
-	}
-	channelName := parts[0]
-	messageId, err := strconv.ParseInt(parts[1], 10, 64)
-	if err != nil {
-		return xerrors.Errorf("Error when parsing telegram message ID %s: %s", telegram.ProofLocation, err.Error())
-	}
-
-	// Optional, could be removed
-	if channelName != config.C.Platform.Telegram.PublicChannelName {
-		return xerrors.New("Unknown channel")
-	}
-
-	if err := client.Run(context.Background(), func(ctx context.Context) error {
-
-		if _, err := client.Auth().Bot(ctx, config.C.Platform.Telegram.BotToken); err != nil {
-			return xerrors.Errorf("Error when authenticating the telegram bot: %v,", err)
-		}
-
-		resolved, err := client.API().ContactsResolveUsername(ctx, channelName)
-		if err != nil {
-			return xerrors.Errorf("Error while resolving the public channel name: %v,", err)
-		}
-
-		if len(resolved.Chats) != 1 {
-			return xerrors.New("The resulting telegram public channel is empty")
-		}
-
-		channel, ok := resolved.Chats[0].(*tg.Channel)
-		if !ok {
-			return xerrors.New("The resulting telegram public channel is empty")
-		}
-
-		msgsClass, err := client.API().ChannelsGetMessages(ctx, &tg.ChannelsGetMessagesRequest{
-			Channel: &tg.InputChannel{
-				ChannelID:  channel.ID,
-				AccessHash: channel.AccessHash,
-			},
-			ID: []tg.InputMessageClass{
-				&tg.InputMessageID{ID: int(messageId)},
-			},
-		})
-
-		if err != nil {
-			return xerrors.Errorf("Error while fetching the public channel message: %v,", err)
-		}
-
-		msgList, ok := msgsClass.(*tg.MessagesChannelMessages)
-		if !ok || len(msgList.Messages) != 1 || len(msgList.Messages) != 2 {
-			return xerrors.New("Please try again sending an original message")
-		}
-		user, userOk := msgList.Users[0].(*tg.User)
-		if !userOk {
-			return xerrors.New("Please try again sending an original message")
-		}
-		if user.Bot {
-			user, userOk = msgList.Users[1].(*tg.User)
-		}
-		msg, msgOk := msgList.Messages[0].(*tg.Message)
-		if !msgOk || !userOk {
-			return xerrors.New("Please try again sending an original message")
-		}
-		userId := strconv.FormatInt(user.ID, 10)
-		if strings.EqualFold(userId, telegram.Identity) {
-			return xerrors.Errorf("Telegram username mismatch: expect %s - actual %s", telegram.Identity, user.Username)
-		}
-
-		telegram.Text = msg.Message
-		telegram.AltID = user.Username
-		telegram.Identity = userId
-		return telegram.validateText()
-	}); err != nil {
-		return xerrors.Errorf("Error inside the telegram client context: %v", err)
-	}
+	telegram.Text = post
+	//// Deletion. No need to fetch the telegram message.
+	//if telegram.Action == types.Actions.Delete {
+	//	return mycrypto.ValidatePersonalSignature(telegram.SignaturePayload, telegram.Signature, telegram.Pubkey)
+	//}
+	//
+	//// Message link of the public channel message, e.g. https://t.me/some_public_channel/CHAT_ID_DIGITS
+	//u, err := url.Parse(telegram.ProofLocation)
+	//if err != nil {
+	//	return xerrors.Errorf("Error when parsing telegram proof location: %v", err)
+	//
+	//}
+	//msgPath := strings.Trim(u.Path, "/")
+	//parts := strings.Split(msgPath, "/")
+	//if len(parts) != 2 {
+	//	return xerrors.Errorf("Error: malformatted telegram proof location: %v", telegram.ProofLocation)
+	//}
+	//channelName := parts[0]
+	//messageId, err := strconv.ParseInt(parts[1], 10, 64)
+	//if err != nil {
+	//	return xerrors.Errorf("Error when parsing telegram message ID %s: %s", telegram.ProofLocation, err.Error())
+	//}
+	//
+	//// Optional, could be removed
+	//if channelName != config.C.Platform.Telegram.PublicChannelName {
+	//	return xerrors.New("Unknown channel")
+	//}
+	//
+	//if err := client.Run(context.Background(), func(ctx context.Context) error {
+	//
+	//	if _, err := client.Auth().Bot(ctx, config.C.Platform.Telegram.BotToken); err != nil {
+	//		return xerrors.Errorf("Error when authenticating the telegram bot: %v,", err)
+	//	}
+	//
+	//	resolved, err := client.API().ContactsResolveUsername(ctx, channelName)
+	//	if err != nil {
+	//		return xerrors.Errorf("Error while resolving the public channel name: %v,", err)
+	//	}
+	//
+	//	if len(resolved.Chats) != 1 {
+	//		return xerrors.New("The resulting telegram public channel is empty")
+	//	}
+	//
+	//	channel, ok := resolved.Chats[0].(*tg.Channel)
+	//	if !ok {
+	//		return xerrors.New("The resulting telegram public channel is empty")
+	//	}
+	//
+	//	msgsClass, err := client.API().ChannelsGetMessages(ctx, &tg.ChannelsGetMessagesRequest{
+	//		Channel: &tg.InputChannel{
+	//			ChannelID:  channel.ID,
+	//			AccessHash: channel.AccessHash,
+	//		},
+	//		ID: []tg.InputMessageClass{
+	//			&tg.InputMessageID{ID: int(messageId)},
+	//		},
+	//	})
+	//
+	//	if err != nil {
+	//		return xerrors.Errorf("Error while fetching the public channel message: %v,", err)
+	//	}
+	//
+	//	msgList, ok := msgsClass.(*tg.MessagesChannelMessages)
+	//	if !ok || len(msgList.Messages) != 1 || len(msgList.Messages) != 2 {
+	//		return xerrors.New("Please try again sending an original message")
+	//	}
+	//	user, userOk := msgList.Users[0].(*tg.User)
+	//	if !userOk {
+	//		return xerrors.New("Please try again sending an original message")
+	//	}
+	//	if user.Bot {
+	//		user, userOk = msgList.Users[1].(*tg.User)
+	//	}
+	//	msg, msgOk := msgList.Messages[0].(*tg.Message)
+	//	if !msgOk || !userOk {
+	//		return xerrors.New("Please try again sending an original message")
+	//	}
+	//	userId := strconv.FormatInt(user.ID, 10)
+	//	if strings.EqualFold(userId, telegram.Identity) {
+	//		return xerrors.Errorf("Telegram username mismatch: expect %s - actual %s", telegram.Identity, user.Username)
+	//	}
+	//
+	//	telegram.Text = msg.Message
+	//	telegram.AltID = user.Username
+	//	telegram.Identity = userId
+	//	return telegram.validateText()
+	//}); err != nil {
+	//	return xerrors.Errorf("Error inside the telegram client context: %v", err)
+	//}
 	return xerrors.New("Unknown error")
 }
 
