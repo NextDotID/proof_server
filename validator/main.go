@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/ecdsa"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -64,7 +63,7 @@ func BaseToInterface(v *Base) IValidator {
 	return performer_factory(v)
 }
 
-func GetPostWithHeadlessBrowser(url string, regexp string) (post string, err error) {
+func GetPostWithHeadlessBrowser(url string, selector string, regexp string) (post string, err error) {
 	headlessEntrypoint := lo.Sample(config.C.Headless.Urls)
 	headlessEntrypoint += "/v1/find"
 	request := headless.FindRequest{
@@ -73,7 +72,7 @@ func GetPostWithHeadlessBrowser(url string, regexp string) (post string, err err
 		Match: headless.Match{
 			Type: "regexp",
 			MatchRegExp: &headless.MatchRegExp{
-				Selector: "*",
+				Selector: selector,
 				Value:    regexp,
 			},
 			MatchXPath: nil,
@@ -82,7 +81,6 @@ func GetPostWithHeadlessBrowser(url string, regexp string) (post string, err err
 	}
 	// POST request body to entrypoint headless server
 	requestBody, err := json.Marshal(request)
-	fmt.Println(string(requestBody))
 	if err != nil {
 		return "", err
 	}

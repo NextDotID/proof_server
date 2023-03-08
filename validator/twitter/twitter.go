@@ -93,6 +93,7 @@ func (twitter *Twitter) Validate() (err error) {
 
 	post, err := validator.GetPostWithHeadlessBrowser(
 		fmt.Sprintf("https://twitter.com/%s/status/%d", twitter.Identity, tweetID),
+		"*",
 		"Sig:",
 	)
 	if err != nil {
