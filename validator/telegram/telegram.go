@@ -85,11 +85,20 @@ func (telegram *Telegram) Validate() (err error) {
 		return mycrypto.ValidatePersonalSignature(telegram.SignaturePayload, telegram.Signature, telegram.Pubkey)
 	}
 
-	post, err := validator.GetPostWithHeadlessBrowser(fmt.Sprintf("%s%s", telegram.ProofLocation, "?embed=1&mode=tme"), "div.tgme_widget_message_text.js-message_text", "Sig:")
+	userLink, err := validator.GetPostWithHeadlessBrowser(fmt.Sprintf("%s%s", telegram.ProofLocation, "?embed=1&mode=tme"), "div.tgme_widget_message_user", "^$", "href")
 	if err != nil {
 		return xerrors.Errorf("fetching post message with headless browser: %w", err)
 	}
-	// TODO validate user
+
+	username := userLink[strings.LastIndex(userLink, "/")+1 : len(userLink)]
+	if username != telegram.Identity {
+		return xerrors.Errorf("User name mismatch: expect %s - actual %s", telegram.Identity, username)
+	}
+
+	post, err := validator.GetPostWithHeadlessBrowser(fmt.Sprintf("%s%s", telegram.ProofLocation, "?embed=1&mode=tme"), "div.tgme_widget_message_text.js-message_text", "Sig:", "text")
+	if err != nil {
+		return xerrors.Errorf("fetching post message with headless browser: %w", err)
+	}
 
 	telegram.Text = post
 	return telegram.validateText()

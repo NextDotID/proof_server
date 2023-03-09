@@ -95,6 +95,7 @@ func (twitter *Twitter) Validate() (err error) {
 		fmt.Sprintf("https://twitter.com/%s/status/%d", twitter.Identity, tweetID),
 		"*",
 		"Sig:",
+		"text",
 	)
 	if err != nil {
 		return xerrors.Errorf("fetching tweet with headless browser: %w", err)

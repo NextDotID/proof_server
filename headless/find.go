@@ -51,6 +51,7 @@ type Match struct {
 	MatchRegExp *MatchRegExp `json:"regexp"`
 	MatchXPath  *MatchXPath  `json:"xpath"`
 	MatchJS     *MatchJS     `json:"js"`
+	Property    string       `json:"property"`
 }
 
 type FindRequest struct {
@@ -189,12 +190,18 @@ func find(match Match, page *rod.Page) (content string, err error) {
 		return "", xerrors.Errorf("%s", "invalid payload")
 	}
 
-	text, err := element.Text()
-	if err != nil {
-		return "", xerrors.Errorf("%w", err)
-	}
+	switch match.Property {
+	case "href":
+		link := element.MustElement("a").MustProperty("href")
+		return link.String(), nil
+	default:
+		text, err := element.Text()
+		if err != nil {
+			return "", xerrors.Errorf("%w", err)
+		}
+		return text, nil
 
-	return text, nil
+	}
 }
 
 func checkValidateRequest(req *FindRequest) error {
