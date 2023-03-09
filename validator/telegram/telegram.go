@@ -40,8 +40,8 @@ func Init() {
 	}
 
 	validator.PlatformFactories[types.Platforms.Telegram] = func(base *validator.Base) validator.IValidator {
-		twi := Telegram{base}
-		return &twi
+		telg := Telegram{base}
+		return &telg
 	}
 }
 
@@ -58,7 +58,7 @@ func (telegram *Telegram) GenerateSignPayload() (payload string) {
 	payloadStruct := validator.H{
 		"action":     string(telegram.Action),
 		"identity":   telegram.Identity,
-		"platform":   "telegram",
+		"platform":   string(types.Platforms.Telegram),
 		"prev":       nil,
 		"created_at": util.TimeToTimestampString(telegram.CreatedAt),
 		"uuid":       telegram.Uuid.String(),
@@ -89,6 +89,7 @@ func (telegram *Telegram) Validate() (err error) {
 	if err != nil {
 		return xerrors.Errorf("fetching post message with headless browser: %w", err)
 	}
+	// TODO validate user
 
 	telegram.Text = post
 	return telegram.validateText()
@@ -101,7 +102,6 @@ func (telegram *Telegram) validateText() (err error) {
 		if len(matched) < 2 {
 			continue // Search for next line
 		}
-
 		sigBase64 := matched[1]
 		sigBytes, err := util.DecodeString(sigBase64)
 		if err != nil {
