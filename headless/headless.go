@@ -38,5 +38,6 @@ func healthz(c *gin.Context) {
 		"environment": common.Environment,
 		"revision":    common.Revision,
 		"built_at":    common.BuildTime,
+		"runtime":     common.CurrentRuntime,
 	})
 }
