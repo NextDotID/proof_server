@@ -223,7 +223,7 @@ func (steam *Steam) GetUserInfo() (err error) {
 
 }
 
-func parseSteamXML(xmlBody []byte) (uid string, username string, descripton string, err error) {
+func parseSteamXML(xmlBody []byte) (uid string, username string, description string, err error) {
 	errorResponse := new(SteamErrorResponse)
 	err = xml.Unmarshal(xmlBody, errorResponse)
 	if err == nil { // Error response
