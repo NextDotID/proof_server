@@ -22,7 +22,7 @@ type Twitter struct {
 }
 
 const (
-	MATCH_TEMPLATE = "^Sig: (.*)$"
+	MATCH_TEMPLATE = "\\bSig: (.+?)[\\s\\n]"
 )
 
 var (
