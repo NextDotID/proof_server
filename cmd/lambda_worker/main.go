@@ -227,7 +227,12 @@ func revalidate_single(ctx context.Context, message *types.QueueMessage) error {
 	if tx.Error != nil {
 		return xerrors.Errorf("%w", tx.Error)
 	}
-	return proof.Revalidate()
+	if proof.IsOutdated() {
+		return proof.Revalidate()
+	} else {
+		return nil
+	}
+
 }
 
 func init_db(cfg aws.Config) {
