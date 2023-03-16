@@ -65,6 +65,7 @@ func Test_GeneratePostPayload(t *testing.T) {
 	})
 }
 
+// FIXME: Have tested manually after headless browser is implemented.
 func Test_Validate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
@@ -99,5 +100,14 @@ func Test_Validate(t *testing.T) {
 		tweet := generate()
 		tweet.ProofLocation = "123456"
 		require.NotNil(t, tweet.Validate())
+	})
+}
+
+func Test_MatchTemplateText(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		text := " Verifying my Twitter ID @test123 for @NextDotID. Sig: s/c7gBZHbABYeFhhJfidrZ57EUgiTPO+PKiEM6mJoNBAvzcJ8R+YEAiTCQZzxEXaNiYQ5O6jvulp8Y0pBWsyfxw= Powered by Next.ID"
+		matched := re.FindStringSubmatch(text)
+		require.Equal(t, 2, len(matched))
+		require.Equal(t, "s/c7gBZHbABYeFhhJfidrZ57EUgiTPO+PKiEM6mJoNBAvzcJ8R+YEAiTCQZzxEXaNiYQ5O6jvulp8Y0pBWsyfxw=", matched[1])
 	})
 }

@@ -10,7 +10,7 @@ import (
 func init() {
 	logrus.SetLevel(logrus.WarnLevel)
 	common.CurrentRuntime = common.Runtimes.Lambda
-	headless.Init("/opt/chromium")
+	headless.Init("/opt/chromium", "")
 }
 
 func main() {

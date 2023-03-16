@@ -2,11 +2,14 @@ package headless
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/proto"
+	"github.com/nextdotid/proof_server/common"
 	"github.com/ssoroka/slice"
 	"golang.org/x/xerrors"
 )
@@ -71,7 +74,7 @@ func errorResp(c *gin.Context, error_code int, err error) {
 func validate(c *gin.Context) {
 	var req FindRequest
 	if err := c.Bind(&req); err != nil {
-		errorResp(c, http.StatusBadRequest, xerrors.Errorf("Param error"))
+		errorResp(c, http.StatusBadRequest, xerrors.Errorf("Param error: %v", err))
 		return
 	}
 
@@ -80,9 +83,16 @@ func validate(c *gin.Context) {
 		return
 	}
 
-	launcher := newLauncher(LauncherPath)
-	defer launcher.Cleanup()
+	var launcher *launcher.Launcher
+	switch common.CurrentRuntime {
+	case common.Runtimes.Lambda:
+		launcher = newLambdaLauncher(LauncherPath)
+	case common.Runtimes.Standalone:
+		launcher = newLauncher(LauncherPath)
+	}
+
 	defer launcher.Kill()
+	defer launcher.Cleanup()
 
 	u, err := launcher.Launch()
 	if err != nil {
@@ -91,14 +101,13 @@ func validate(c *gin.Context) {
 	}
 
 	browser := rod.New().ControlURL(u)
+	defer browser.Close()
 	if err := browser.Connect(); err != nil {
 		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
 		return
 	}
 
-	defer browser.Close()
-
-	page, err := browser.Page(proto.TargetCreateTarget{URL: req.Location})
+	page, err := browser.Page(proto.TargetCreateTarget{URL: ReplaceLocation(req.Location)})
 	if err != nil {
 		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
 		return
@@ -234,4 +243,17 @@ func checkValidateRequest(req *FindRequest) error {
 	}
 
 	return nil
+}
+
+/// ReplaceLocation uses URLReplacement as rule to replace part of the original URL.
+func ReplaceLocation(originalURL string) string {
+	if len(URLReplacement) == 0 {
+		return originalURL
+	}
+
+	for original, replacement := range URLReplacement {
+		originalURL = strings.ReplaceAll(originalURL, original, replacement)
+	}
+
+	return originalURL
 }
