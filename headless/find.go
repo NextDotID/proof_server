@@ -2,6 +2,7 @@ package headless
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -73,7 +74,7 @@ func errorResp(c *gin.Context, error_code int, err error) {
 func validate(c *gin.Context) {
 	var req FindRequest
 	if err := c.Bind(&req); err != nil {
-		errorResp(c, http.StatusBadRequest, xerrors.Errorf("Param error"))
+		errorResp(c, http.StatusBadRequest, xerrors.Errorf("Param error: %v", err))
 		return
 	}
 
@@ -100,14 +101,14 @@ func validate(c *gin.Context) {
 	}
 
 	browser := rod.New().ControlURL(u)
+	defer browser.Close()
 	if err := browser.Connect(); err != nil {
 		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
 		return
 	}
 
-	defer browser.Close()
-
-	page, err := browser.Page(proto.TargetCreateTarget{URL: req.Location})
+	location := req.Location
+	page, err := browser.Page(proto.TargetCreateTarget{URL: location})
 	if err != nil {
 		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
 		return
@@ -243,4 +244,17 @@ func checkValidateRequest(req *FindRequest) error {
 	}
 
 	return nil
+}
+
+/// ReplaceLocation uses URLReplacement as rule to replace part of the original URL.
+func ReplaceLocation(originalURL string) string {
+	if len(URLReplacement) == 0 {
+		return originalURL
+	}
+
+	for original, replacement := range URLReplacement {
+		originalURL = strings.ReplaceAll(originalURL, original, replacement)
+	}
+
+	return originalURL
 }

@@ -174,3 +174,14 @@ func Test_Find(t *testing.T) {
 		assert.Equal(t, success.Content, "")
 	})
 }
+
+func Test_ReplaceLocation(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		headless.URLReplacement = map[string]string{
+			"abc.com": "test.org",
+		}
+		originalURL := "https://abc.com/test"
+		expectedURL := "https://test.org/test"
+		assert.Equal(t, expectedURL, headless.ReplaceLocation(originalURL))
+	})
+}
