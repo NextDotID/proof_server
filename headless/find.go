@@ -107,8 +107,7 @@ func validate(c *gin.Context) {
 		return
 	}
 
-	location := req.Location
-	page, err := browser.Page(proto.TargetCreateTarget{URL: location})
+	page, err := browser.Page(proto.TargetCreateTarget{URL: ReplaceLocation(req.Location)})
 	if err != nil {
 		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
 		return
