@@ -1,11 +1,18 @@
 package validator
 
 import (
+	"bytes"
 	"crypto/ecdsa"
+	"encoding/json"
+	"net/http"
 	"time"
 
+	"github.com/go-faster/errors"
 	"github.com/google/uuid"
+	"github.com/nextdotid/proof_server/config"
+	"github.com/nextdotid/proof_server/headless"
 	"github.com/nextdotid/proof_server/types"
+	"github.com/samber/lo"
 )
 
 var (
@@ -54,6 +61,44 @@ func BaseToInterface(v *Base) IValidator {
 	}
 
 	return performer_factory(v)
+}
+
+func GetPostWithHeadlessBrowser(url string, regexp string) (post string, err error) {
+	headlessEntrypoint := lo.Sample(config.C.Headless.Urls)
+	headlessEntrypoint += "/v1/find"
+	request := headless.FindRequest{
+		Location: url,
+		Timeout:  "120s",
+		Match: headless.Match{
+			Type: "regexp",
+			MatchRegExp: &headless.MatchRegExp{
+				Selector: "*",
+				Value:    regexp,
+			},
+			MatchXPath: nil,
+			MatchJS:    nil,
+		},
+	}
+	// POST request body to entrypoint headless server
+	requestBody, err := json.Marshal(request)
+	if err != nil {
+		return "", err
+	}
+	respRaw, err := http.Post(headlessEntrypoint, "application/json", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return "", err
+	}
+	defer respRaw.Body.Close()
+	response := headless.FindRespond{}
+	err = json.NewDecoder(respRaw.Body).Decode(&response)
+	if err != nil {
+		return "", err
+	}
+	if response.Message != "" {
+		return "", errors.Errorf("Error when fetching post from headless browser: %s", response.Message)
+	}
+
+	return response.Content, nil
 }
 
 // H for JSON builder.

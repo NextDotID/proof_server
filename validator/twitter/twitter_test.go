@@ -65,6 +65,7 @@ func Test_GeneratePostPayload(t *testing.T) {
 	})
 }
 
+// FIXME: Have tested manually after headless browser is implemented.
 func Test_Validate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
