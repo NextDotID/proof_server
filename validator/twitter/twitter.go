@@ -8,6 +8,9 @@ import (
 	"strconv"
 	"strings"
 
+	t "github.com/dghubble/go-twitter/twitter"
+	"github.com/dghubble/oauth1"
+	"github.com/nextdotid/proof_server/config"
 	"github.com/nextdotid/proof_server/types"
 	"github.com/nextdotid/proof_server/util"
 	mycrypto "github.com/nextdotid/proof_server/util/crypto"
@@ -26,6 +29,7 @@ const (
 )
 
 var (
+	client      *t.Client
 	l           = logrus.WithFields(logrus.Fields{"module": "validator", "validator": "twitter"})
 	re          = regexp.MustCompile(MATCH_TEMPLATE)
 	POST_STRUCT = map[string]string{
@@ -36,6 +40,7 @@ var (
 )
 
 func Init() {
+	initClient()
 	if validator.PlatformFactories == nil {
 		validator.PlatformFactories = make(map[types.Platform]func(*validator.Base) validator.IValidator)
 	}
@@ -79,6 +84,7 @@ func (twitter *Twitter) GenerateSignPayload() (payload string) {
 }
 
 func (twitter *Twitter) Validate() (err error) {
+	initClient()
 	twitter.Identity = strings.ToLower(twitter.Identity)
 	twitter.SignaturePayload = twitter.GenerateSignPayload()
 	// Deletion. No need to fetch tweet.
@@ -88,18 +94,21 @@ func (twitter *Twitter) Validate() (err error) {
 
 	tweetID, err := strconv.ParseInt(twitter.ProofLocation, 10, 64)
 	if err != nil {
-		return xerrors.Errorf("parsing tweet ID %s: %s", twitter.ProofLocation, err.Error())
+		return xerrors.Errorf("Error when parsing tweet ID %s: %s", twitter.ProofLocation, err.Error())
 	}
 
-	post, err := validator.GetPostWithHeadlessBrowser(
-		fmt.Sprintf("https://twitter.com/%s/status/%d", twitter.Identity, tweetID),
-		"Sig:",
-	)
+	tweet, _, err := client.Statuses.Show(tweetID, &t.StatusShowParams{
+		TweetMode: "extended",
+	})
 	if err != nil {
-		return xerrors.Errorf("fetching tweet with headless browser: %w", err)
+		return xerrors.Errorf("Error when getting tweet %s: %w", twitter.ProofLocation, err)
+	}
+	if strings.ToLower(tweet.User.ScreenName) != strings.ToLower(twitter.Identity) {
+		return xerrors.Errorf("Screen name mismatch: expect %s - actual %s", twitter.Identity, tweet.User.ScreenName)
 	}
 
-	twitter.Text = post
+	twitter.Text = tweet.FullText
+	twitter.AltID = strconv.FormatInt(tweet.User.ID, 10)
 	return twitter.validateText()
 }
 
@@ -114,10 +123,26 @@ func (twitter *Twitter) validateText() (err error) {
 		sigBase64 := matched[1]
 		sigBytes, err := util.DecodeString(sigBase64)
 		if err != nil {
-			return xerrors.Errorf("decoding signature %s: %s", sigBase64, err.Error())
+			return xerrors.Errorf("Error when decoding signature %s: %s", sigBase64, err.Error())
 		}
 		twitter.Signature = sigBytes
 		return mycrypto.ValidatePersonalSignature(twitter.SignaturePayload, sigBytes, twitter.Pubkey)
 	}
 	return xerrors.Errorf("Signature not found in tweet text.")
+}
+
+func initClient() {
+	if client != nil {
+		return
+	}
+	oauthToken := oauth1.NewToken(
+		config.C.Platform.Twitter.AccessToken,
+		config.C.Platform.Twitter.AccessTokenSecret,
+	)
+	oauthConfig := oauth1.NewConfig(
+		config.C.Platform.Twitter.ConsumerKey,
+		config.C.Platform.Twitter.ConsumerSecret,
+	)
+	httpClient := oauthConfig.Client(oauth1.NoContext, oauthToken)
+	client = t.NewClient(httpClient)
 }

@@ -12,7 +12,6 @@ import (
 
 type Config struct {
 	DB       DBConfig       `json:"db"`
-	Headless HeadlessConfig `json:"headless"`
 	Platform PlatformConfig `json:"platform"`
 	Arweave  ArweaveConfig  `json:"arweave"`
 	Sqs      SqsConfig      `json:"sqs"`
@@ -28,11 +27,8 @@ type DBConfig struct {
 	TZ            string   `json:"tz"`
 }
 
-type HeadlessConfig struct {
-	Urls []string `json:"urls"`
-}
-
 type PlatformConfig struct {
+	Twitter  TwitterPlatformConfig  `json:"twitter"`
 	Telegram TelegramPlatformConfig `json:"telegram"`
 	Ethereum EthereumPlatformConfig `json:"ethereum"`
 	Discord  DiscordPlatformConfig  `json:"discord"`
@@ -46,6 +42,13 @@ type ArweaveConfig struct {
 
 type SqsConfig struct {
 	QueueName string `json:"queue_name"`
+}
+
+type TwitterPlatformConfig struct {
+	AccessToken       string `json:"access_token"`
+	AccessTokenSecret string `json:"access_token_secret"`
+	ConsumerKey       string `json:"consumer_key"`
+	ConsumerSecret    string `json:"consumer_secret"`
 }
 
 type TelegramPlatformConfig struct {
