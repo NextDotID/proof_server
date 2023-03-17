@@ -51,8 +51,10 @@ func main() {
 	lambda.Start(handler)
 }
 
-func handler(ctx context.Context, sqs_event events.SQSEvent) error {
-	arweaveMsgs := []*types.QueueMessage{}
+func handler(ctx context.Context, sqs_event events.SQSEvent) (events.SQSEventResponse, error) {
+	failures := []events.SQSBatchItemFailure{}
+	// Key: persona, Value: message id; persona as key to uniq
+	arweaveMsgs := map[string]string{}
 	for _, raw_message := range sqs_event.Records {
 		fmt.Printf(
 			"[%s] Received from [%s]: %s \n",
@@ -64,39 +66,39 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) error {
 		message := types.QueueMessage{}
 		err := json.Unmarshal([]byte(raw_message.Body), &message)
 		if err != nil {
-			return err
+			fmt.Printf("error deserializing sqs records: %+v\n", raw_message.Body)
+			failures = append(failures, events.SQSBatchItemFailure{ItemIdentifier: raw_message.MessageId})
 		}
 
 		switch message.Action {
 		case types.QueueActions.ArweaveUpload:
-			arweaveMsgs = append(arweaveMsgs, &message)
+			arweaveMsgs[message.Persona] = raw_message.MessageId
 		case types.QueueActions.Revalidate:
 			if err := revalidate_single(ctx, &message); err != nil {
 				fmt.Printf("error revalidating proof record %d: %s\n", message.ProofID, err)
+				failures = append(failures, events.SQSBatchItemFailure{ItemIdentifier: raw_message.MessageId})
 			}
 		default:
 			logrus.Warnf("unsupported queue action: %s", message.Action)
+			failures = append(failures, events.SQSBatchItemFailure{ItemIdentifier: raw_message.MessageId})
 		}
 	}
 
-	arweaveMsgs = lo.UniqBy(arweaveMsgs, func(msg *types.QueueMessage) string {
-		return msg.Persona
+	arweaveFailed := lo.MapToSlice(arweaveMsgs, func(persona string, id string) events.SQSBatchItemFailure {
+		return events.SQSBatchItemFailure{ItemIdentifier: id}
 	})
-	if len(arweaveMsgs) > 0 {
-		// At least we need 5 persona in a batch to be cost-effective
-		if len(arweaveMsgs) < MIN_PERSONAS {
-			return xerrors.Errorf("received less than minimum: %d", len(arweaveMsgs))
-		}
 
-		if err := arweave_upload_many(arweaveMsgs); err != nil {
-			return err
-		}
+	// At least we need 5 persona in a batch to be cost-effective
+	if len(arweaveMsgs) < MIN_PERSONAS {
+		failures = append(failures, arweaveFailed...)
+	} else if err := arweave_upload_many(lo.Keys(arweaveMsgs)); err != nil {
+		failures = append(failures, arweaveFailed...)
 	}
 
-	return nil
+	return events.SQSEventResponse{BatchItemFailures: failures}, nil
 }
 
-func arweave_upload_many(messages []*types.QueueMessage) error {
+func arweave_upload_many(personas []string) error {
 	if wallet == nil {
 		return xerrors.New("wallet is not initialized")
 	}
@@ -104,11 +106,11 @@ func arweave_upload_many(messages []*types.QueueMessage) error {
 	tx := model.DB.Begin()
 	items := []artypes.BundleItem{}
 
-	for _, message := range messages {
+	for _, persona := range personas {
 		chains := []*model.ProofChain{}
 		findTx := tx.
 			Clauses(clause.Locking{Strength: "UPDATE"}).
-			Where("persona = ?", message.Persona).
+			Where("persona = ?", persona).
 			Order("ID asc").
 			Find(&chains)
 		if findTx.Error != nil {
@@ -117,7 +119,7 @@ func arweave_upload_many(messages []*types.QueueMessage) error {
 		}
 
 		if len(chains) == 0 {
-			logrus.Warnf("no chains to upload: %s", message.Persona)
+			logrus.Warnf("no chains to upload: %s", persona)
 			return nil
 		}
 
