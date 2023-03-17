@@ -245,7 +245,7 @@ func checkValidateRequest(req *FindRequest) error {
 	return nil
 }
 
-// / ReplaceLocation uses URLReplacement as rule to replace part of the original URL.
+// ReplaceLocation uses URLReplacement as rule to replace part of the original URL.
 func ReplaceLocation(originalURL string) string {
 	if len(URLReplacement) == 0 {
 		return originalURL
