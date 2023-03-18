@@ -7,9 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/proto"
-	"github.com/nextdotid/proof_server/common"
 	"github.com/ssoroka/slice"
 	"golang.org/x/xerrors"
 )
@@ -83,35 +81,12 @@ func validate(c *gin.Context) {
 		return
 	}
 
-	var launcher *launcher.Launcher
-	switch common.CurrentRuntime {
-	case common.Runtimes.Lambda:
-		launcher = newLambdaLauncher(LauncherPath)
-	case common.Runtimes.Standalone:
-		launcher = newLauncher(LauncherPath)
-	}
-
-	defer launcher.Kill()
-	defer launcher.Cleanup()
-
-	u, err := launcher.Launch()
+	page, err := Browser.Page(proto.TargetCreateTarget{URL: ReplaceLocation(req.Location)})
 	if err != nil {
 		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
 		return
 	}
-
-	browser := rod.New().ControlURL(u)
-	defer browser.Close()
-	if err := browser.Connect(); err != nil {
-		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
-		return
-	}
-
-	page, err := browser.Page(proto.TargetCreateTarget{URL: ReplaceLocation(req.Location)})
-	if err != nil {
-		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
-		return
-	}
+	defer page.Close()
 
 	timeout := req.Timeout
 	if timeout == "" {
