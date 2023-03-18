@@ -56,6 +56,7 @@ type FindRequest struct {
 	Location string `json:"location"`
 	Timeout  string `json:"timeout"`
 	Match    Match  `json:"match"`
+	WaitXHR  bool   `json:"wait_xhr"`
 }
 
 type FindRespond struct {
@@ -127,7 +128,10 @@ func validate(c *gin.Context) {
 	}
 
 	// Wait for XHR
-	page.WaitNavigation(proto.PageLifecycleEventNameNetworkAlmostIdle)()
+	if req.WaitXHR {
+		page.WaitNavigation(proto.PageLifecycleEventNameNetworkAlmostIdle)()
+	}
+
 	content, err := find(req.Match, page)
 	if err != nil {
 		c.JSON(http.StatusOK, FindRespond{Content: "", Message: err.Error()})
@@ -220,7 +224,7 @@ func checkValidateRequest(req *FindRequest) error {
 	return nil
 }
 
-/// ReplaceLocation uses URLReplacement as rule to replace part of the original URL.
+// / ReplaceLocation uses URLReplacement as rule to replace part of the original URL.
 func ReplaceLocation(originalURL string) string {
 	if len(URLReplacement) == 0 {
 		return originalURL

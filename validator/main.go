@@ -78,6 +78,7 @@ func GetPostWithHeadlessBrowser(url string, regexp string) (post string, err err
 			MatchXPath: nil,
 			MatchJS:    nil,
 		},
+		WaitXHR: false,
 	}
 	// POST request body to entrypoint headless server
 	requestBody, err := json.Marshal(request)
