@@ -7,9 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/proto"
-	"github.com/nextdotid/proof_server/common"
 	"github.com/ssoroka/slice"
 	"golang.org/x/xerrors"
 )
@@ -58,6 +56,7 @@ type FindRequest struct {
 	Location string `json:"location"`
 	Timeout  string `json:"timeout"`
 	Match    Match  `json:"match"`
+	WaitXHR  bool   `json:"wait_xhr"`
 }
 
 type FindRespond struct {
@@ -83,35 +82,12 @@ func validate(c *gin.Context) {
 		return
 	}
 
-	var launcher *launcher.Launcher
-	switch common.CurrentRuntime {
-	case common.Runtimes.Lambda:
-		launcher = newLambdaLauncher(LauncherPath)
-	case common.Runtimes.Standalone:
-		launcher = newLauncher(LauncherPath)
-	}
-
-	defer launcher.Kill()
-	defer launcher.Cleanup()
-
-	u, err := launcher.Launch()
+	page, err := Browser.Page(proto.TargetCreateTarget{URL: ReplaceLocation(req.Location)})
 	if err != nil {
 		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
 		return
 	}
-
-	browser := rod.New().ControlURL(u)
-	defer browser.Close()
-	if err := browser.Connect(); err != nil {
-		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
-		return
-	}
-
-	page, err := browser.Page(proto.TargetCreateTarget{URL: ReplaceLocation(req.Location)})
-	if err != nil {
-		errorResp(c, http.StatusInternalServerError, xerrors.Errorf("%w", err))
-		return
-	}
+	defer page.Close()
 
 	timeout := req.Timeout
 	if timeout == "" {
@@ -152,7 +128,10 @@ func validate(c *gin.Context) {
 	}
 
 	// Wait for XHR
-	page.WaitNavigation(proto.PageLifecycleEventNameNetworkAlmostIdle)()
+	if req.WaitXHR {
+		page.WaitNavigation(proto.PageLifecycleEventNameNetworkAlmostIdle)()
+	}
+
 	content, err := find(req.Match, page)
 	if err != nil {
 		c.JSON(http.StatusOK, FindRespond{Content: "", Message: err.Error()})
@@ -245,7 +224,7 @@ func checkValidateRequest(req *FindRequest) error {
 	return nil
 }
 
-/// ReplaceLocation uses URLReplacement as rule to replace part of the original URL.
+// / ReplaceLocation uses URLReplacement as rule to replace part of the original URL.
 func ReplaceLocation(originalURL string) string {
 	if len(URLReplacement) == 0 {
 		return originalURL
