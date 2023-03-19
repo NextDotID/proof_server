@@ -175,17 +175,18 @@ func (pc *ProofChain) RestoreValidator() (v *validator.Base, err error) {
 		return nil, xerrors.Errorf("UUID parse error: %w", err)
 	}
 	v = &validator.Base{
-		Platform:      pc.Platform,
-		Previous:      previousSig,
-		Action:        pc.Action,
-		Pubkey:        pc.Pubkey(),
-		Identity:      pc.Identity,
-		AltID:         pc.AltID,
-		ProofLocation: pc.Location,
-		Signature:     pc.SignatureBytes(),
-		Extra:         extra,
-		Uuid:          parsedUuid,
-		CreatedAt:     pc.CreatedAt,
+		Platform:         pc.Platform,
+		Previous:         previousSig,
+		Action:           pc.Action,
+		Pubkey:           pc.Pubkey(),
+		Identity:         pc.Identity,
+		AltID:            pc.AltID,
+		ProofLocation:    pc.Location,
+		Signature:        pc.SignatureBytes(),
+		Extra:            extra,
+		Uuid:             parsedUuid,
+		CreatedAt:        pc.CreatedAt,
+		SignaturePayload: pc.SignaturePayload,
 	}
 
 	return v, nil
