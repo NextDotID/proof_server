@@ -7,16 +7,16 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.16.5
 	github.com/aws/aws-sdk-go-v2/config v1.15.4
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.15.6
-	github.com/dghubble/go-twitter v0.0.0-20220413154426-14d8abde2e80
-	github.com/dghubble/oauth1 v0.7.1
 	github.com/everFinance/goar v1.4.2
 	github.com/gagliardetto/solana-go v1.4.0
 	github.com/gin-gonic/gin v1.7.7
+	github.com/go-faster/errors v0.6.1
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/go-rod/rod v0.112.0
 	github.com/gotd/td v0.71.0
 	github.com/mr-tron/base58 v1.2.0
 	github.com/sirupsen/logrus v1.9.0
+	github.com/slack-go/slack v0.12.1
 	github.com/spf13/viper v1.11.0
 	github.com/ssoroka/slice v0.0.0-20220402005549-78f0cea3df8b
 	github.com/wealdtech/go-ens/v3 v3.5.5
@@ -44,7 +44,6 @@ require (
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70 // indirect
-	github.com/dghubble/sling v1.4.0 // indirect
 	github.com/everFinance/gojwk v1.0.0 // indirect
 	github.com/everFinance/ttcrsa v1.1.3 // indirect
 	github.com/fatih/color v1.13.0 // indirect
@@ -52,7 +51,6 @@ require (
 	github.com/gagliardetto/binary v0.6.1 // indirect
 	github.com/gagliardetto/treeout v0.1.4 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/go-faster/errors v0.6.1 // indirect
 	github.com/go-faster/jx v0.40.0 // indirect
 	github.com/go-faster/xor v0.3.0 // indirect
 	github.com/go-ole/go-ole v1.2.1 // indirect
@@ -108,7 +106,6 @@ require (
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
-	github.com/slack-go/slack v0.12.1 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
