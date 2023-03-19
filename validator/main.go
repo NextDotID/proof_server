@@ -68,7 +68,7 @@ func GetPostWithHeadlessBrowser(url string, regexp string) (post string, err err
 	headlessEntrypoint += "/v1/find"
 	request := headless.FindRequest{
 		Location: url,
-		Timeout:  "120s",
+		Timeout:  "5s",
 		Match: headless.Match{
 			Type: "regexp",
 			MatchRegExp: &headless.MatchRegExp{
