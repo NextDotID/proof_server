@@ -67,7 +67,7 @@ func (et *Ethereum) GenerateSignPayload() (payload string) {
 
 // Both persona-signed and wallelt-signed request are vaild.
 func (et *Ethereum) Validate() (err error) {
-	if (et.SignaturePayload == "") {
+	if et.SignaturePayload == "" {
 		et.SignaturePayload = et.GenerateSignPayload()
 	}
 
