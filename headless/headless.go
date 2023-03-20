@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
 	"github.com/nextdotid/proof_server/common"
 	"github.com/sirupsen/logrus"
 )
@@ -15,6 +17,7 @@ var (
 	LauncherPath   string
 	l              = logrus.WithFields(logrus.Fields{"module": "headless"})
 	URLReplacement = map[string]string{}
+	Browser        *rod.Browser
 )
 
 func middlewareCors() gin.HandlerFunc {
@@ -27,6 +30,7 @@ func Init(launcherPath string, urlReplacementRule string) {
 		return
 	}
 
+	InitBrowser()
 	InitUrlReplacementRule(urlReplacementRule)
 	Engine = gin.Default()
 	Engine.Use(middlewareCors())
@@ -58,5 +62,28 @@ func InitUrlReplacementRule(rule string) {
 		}
 
 		URLReplacement[parts[0]] = parts[1]
+	}
+}
+
+func InitBrowser() {
+	var launcher *launcher.Launcher
+	switch common.CurrentRuntime {
+	case common.Runtimes.Lambda:
+		launcher = newLambdaLauncher(LauncherPath)
+	case common.Runtimes.Standalone:
+		launcher = newLauncher(LauncherPath)
+	}
+	// defer launcher.Kill()
+	// defer launcher.Cleanup()
+
+	u, err := launcher.Launch()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	Browser = rod.New().ControlURL(u)
+	// defer browser.Close()
+	if err := Browser.Connect(); err != nil {
+		panic(err.Error())
 	}
 }

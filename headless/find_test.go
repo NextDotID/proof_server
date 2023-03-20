@@ -88,6 +88,8 @@ func Test_Find(t *testing.T) {
 	defer ts.Close()
 
 	t.Run("success", func(t *testing.T) {
+		headless.InitBrowser()
+		defer headless.Browser.Close()
 		// using regexp
 		req := newValidRequest(ts.URL, "regexp")
 		res := headless.FindRespond{}
@@ -117,6 +119,8 @@ func Test_Find(t *testing.T) {
 	})
 
 	t.Run("error ", func(t *testing.T) {
+		headless.InitBrowser()
+		defer headless.Browser.Close()
 		// invalid location
 		req := newValidRequest(ts.URL, "regexp")
 		res := headless.FindRespond{}
