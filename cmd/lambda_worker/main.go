@@ -51,7 +51,7 @@ func main() {
 	lambda.Start(handler)
 }
 
-func handler(ctx context.Context, sqs_event events.SQSEvent) events.SQSEventResponse {
+func handler(ctx context.Context, sqs_event events.SQSEvent) (events.SQSEventResponse, error) {
 	failures := []events.SQSBatchItemFailure{}
 	// Key: persona, Value: message id; persona as key to uniq
 	arweaveMsgs := map[string]string{}
@@ -96,7 +96,7 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) events.SQSEventResp
 		failures = append(failures, arweaveFailed...)
 	}
 
-	return events.SQSEventResponse{BatchItemFailures: failures}
+	return events.SQSEventResponse{BatchItemFailures: failures}, nil
 }
 
 func arweave_upload_many(personas []string) error {
