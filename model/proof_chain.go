@@ -140,7 +140,8 @@ func (pc *ProofChain) deleteProof() (err error) {
 		Persona:  pc.Persona,
 		Platform: pc.Platform,
 		Identity: pc.Identity,
-		Location: pc.Location,
+		// Delete all bindings regardless of proof location.
+		// Location: pc.Location,
 	})
 	if tx.Error != nil {
 		return xerrors.Errorf("%w", tx.Error)
