@@ -118,8 +118,12 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 	switch req.Platform {
 	case string(types.Platforms.NextID):
 		{
+			var total int64
+			countTx := tx
+			countTx.Where("proof.persona IN ?", req.Identity).Count(&total)
+			pagination.Total = total
+
 			tx = tx.Where("proof.persona IN ?", req.Identity).Offset(offsetCount).Limit(pagination.Per).Find(&proofs)
-			pagination.Total = tx.RowsAffected
 		}
 	case "":
 		{ // All platform
