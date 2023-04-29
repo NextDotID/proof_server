@@ -30,9 +30,9 @@ var (
 	re          = regexp.MustCompile(MATCH_TEMPLATE)
 	POST_STRUCT = map[string]string{
 		// Misc info: UUID|CreatedAt|Previous
-		"default": "🎭 Verifying my Twitter ID @%s for @NextDotID.\nSig: %%SIG_BASE64%%\nMisc info: %s|%s\n\nPowered by Next.ID - Connect All Digital Identities.\n",
-		"en_US":   "🎭 Verifying my Twitter ID @%s for @NextDotID.\nSig: %%SIG_BASE64%%\nMisc info: %s|%s\n\nPowered by Next.ID - Connect All Digital Identities.\n",
-		"zh_CN":   "🎭 正在通过 @NextDotID 验证我的 Twitter 帐号 @%s 。\nSig: %%SIG_BASE64%%\n其它信息: %s|%s\n\n由 Next.ID 支持 - 连接全域数字身份。\n",
+		"default": "🎭 Verifying @%s using @NextDotID.\nSig: %%SIG_BASE64%%\nMisc: %s|%s|%s\n\nPowered by Next.ID",
+		"en_US":   "🎭 Verifying @%s using @NextDotID.\nSig: %%SIG_BASE64%%\nMisc: %s|%s|%s\n\nPowered by Next.ID",
+		"zh_CN":   "🎭 通过 @NextDotID 验证帐号 @%s 。\nSig: %%SIG_BASE64%%\n其它信息: %s|%s|%s\n\n由 Next.ID 支持。\n",
 	}
 )
 
@@ -50,7 +50,7 @@ func Init() {
 func (twitter *Twitter) GeneratePostPayload() (post map[string]string) {
 	post = make(map[string]string, 0)
 	for lang_code, template := range POST_STRUCT {
-		post[lang_code] = fmt.Sprintf(template, twitter.Identity, twitter.Uuid.String(), util.TimeToTimestampString(twitter.CreatedAt))
+		post[lang_code] = fmt.Sprintf(template, twitter.Identity, twitter.Uuid.String(), util.TimeToTimestampString(twitter.CreatedAt), twitter.Previous)
 	}
 
 	return post
