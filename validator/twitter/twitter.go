@@ -30,9 +30,9 @@ var (
 	re          = regexp.MustCompile(MATCH_TEMPLATE)
 	POST_STRUCT = map[string]string{
 		// Misc info: UUID|CreatedAt|Previous
-		"default": "🎭 Verifying @%s using @NextDotID.\nSig: %%SIG_BASE64%%\nMisc: %s|%s|%s\n\nPowered by Next.ID",
-		"en_US":   "🎭 Verifying @%s using @NextDotID.\nSig: %%SIG_BASE64%%\nMisc: %s|%s|%s\n\nPowered by Next.ID",
-		"zh_CN":   "🎭 通过 @NextDotID 验证帐号 @%s 。\nSig: %%SIG_BASE64%%\n其它信息: %s|%s|%s\n\n由 Next.ID 支持。\n",
+		"default": "🎭 Verify @%s with @NextDotID.\nSig: %%SIG_BASE64%%\nMisc: %s|%s|%s",
+		"en_US":   "🎭 Verify @%s with @NextDotID.\nSig: %%SIG_BASE64%%\nMisc: %s|%s|%s",
+		"zh_CN":   "🎭 由 @NextDotID 验证 @%s 。\nSig: %%SIG_BASE64%%\n其它信息: %s|%s|%s",
 	}
 )
 
