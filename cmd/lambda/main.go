@@ -64,7 +64,7 @@ func init() {
 		logrus.Fatalf("Unable to load AWS config: %s", err)
 	}
 	init_config_from_aws_secret()
-	logrus.SetLevel(logrus.WarnLevel)
+	logrus.SetLevel(logrus.InfoLevel)
 	common.CurrentRuntime = common.Runtimes.Lambda
 
 	init_db(cfg)

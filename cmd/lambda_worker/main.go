@@ -265,7 +265,7 @@ func init() {
 	}
 	common.CurrentRuntime = common.Runtimes.Lambda
 	init_config_from_aws_secret()
-	logrus.SetLevel(logrus.WarnLevel)
+	logrus.SetLevel(logrus.InfoLevel)
 
 	init_db(cfg)
 	// init_sqs(cfg)
