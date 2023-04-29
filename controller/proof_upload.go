@@ -39,6 +39,8 @@ func proofUpload(c *gin.Context) {
 		errorResp(c, 400, xerrors.Errorf("parse request failed: %w", err))
 		return
 	}
+
+	l.Infof("UPLOADING PROOF: %+v", req)
 	pubkey, err := mycrypto.StringToPubkey(req.PublicKey)
 	if err != nil {
 		errorResp(c, 400, xerrors.Errorf("%w", err))
