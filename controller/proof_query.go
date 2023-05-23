@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	PER_PAGE = 100
+	PER_PAGE = 40
 )
 
 type ProofQueryRequest struct {
