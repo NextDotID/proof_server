@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-
 	"github.com/nextdotid/proof_server/common"
 	"github.com/nextdotid/proof_server/config"
 	"github.com/nextdotid/proof_server/controller"
@@ -18,6 +17,7 @@ import (
 	"github.com/nextdotid/proof_server/validator/minds"
 	"github.com/nextdotid/proof_server/validator/solana"
 	"github.com/nextdotid/proof_server/validator/steam"
+	"github.com/nextdotid/proof_server/validator/telegram"
 	"github.com/nextdotid/proof_server/validator/twitter"
 	"github.com/sirupsen/logrus"
 )
@@ -39,6 +39,7 @@ func init_validators() {
 	dns.Init()
 	steam.Init()
 	activitypub.Init()
+	telegram.Init()
 }
 
 func main() {

@@ -63,7 +63,7 @@ func BaseToInterface(v *Base) IValidator {
 	return performer_factory(v)
 }
 
-func GetPostWithHeadlessBrowser(url string, regexp string) (post string, err error) {
+func GetPostWithHeadlessBrowser(url string, selector string, regexp string, property string) (post string, err error) {
 	headlessEntrypoint := lo.Sample(config.C.Headless.Urls)
 	headlessEntrypoint += "/v1/find"
 	request := headless.FindRequest{
@@ -72,11 +72,12 @@ func GetPostWithHeadlessBrowser(url string, regexp string) (post string, err err
 		Match: headless.Match{
 			Type: "regexp",
 			MatchRegExp: &headless.MatchRegExp{
-				Selector: "*",
+				Selector: selector,
 				Value:    regexp,
 			},
 			MatchXPath: nil,
 			MatchJS:    nil,
+			Property:   property,
 		},
 		WaitXHR: false,
 	}
