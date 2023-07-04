@@ -95,15 +95,22 @@ func (twitter *Twitter) Validate() (err error) {
 		return xerrors.Errorf("parsing tweet ID %s: %s", twitter.ProofLocation, err.Error())
 	}
 
-	post, err := validator.GetPostWithHeadlessBrowser(
-		fmt.Sprintf("https://twitter.com/%s/status/%d", twitter.Identity, tweetID),
-		"Sig:",
-	)
-	if err != nil {
-		return xerrors.Errorf("fetching tweet with headless browser: %w", err)
-	}
+	// post, err := validator.GetPostWithHeadlessBrowser(
+	// 	fmt.Sprintf("https://twitter.com/%s/status/%d", twitter.Identity, tweetID),
+	// 	"Sig:",
+	// )
+	// if err != nil {
+	// 	return xerrors.Errorf("fetching tweet with headless browser: %w", err)
+	// }
 
-	twitter.Text = post
+	tweet, err := fetchPostWithSyndication(fmt.Sprint(tweetID))
+	if err != nil {
+		return xerrors.Errorf("fetching tweet with syndication API: %w", err)
+	}
+	if twitter.Identity != strings.ToLower(tweet.User.ScreenName) {
+		return xerrors.Errorf("Tweet is not sent by this account.")
+	}
+	twitter.Text = tweet.Text
 	return twitter.validateText()
 }
 
