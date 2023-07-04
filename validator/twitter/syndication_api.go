@@ -29,6 +29,7 @@ const (
 
 func fetchPostWithSyndication(id string) (tweet *SyndicationAPIResponse, err error) {
 	url := fmt.Sprintf(TWEET_SINDICATION_API, id)
+	l.Debugf("URL: %s", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
