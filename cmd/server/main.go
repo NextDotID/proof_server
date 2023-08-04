@@ -47,7 +47,7 @@ func main() {
 	logrus.SetLevel(logrus.DebugLevel)
 	common.CurrentRuntime = common.Runtimes.Standalone
 
-	model.Init()
+	model.Init(true)
 	controller.Init()
 	init_validators()
 

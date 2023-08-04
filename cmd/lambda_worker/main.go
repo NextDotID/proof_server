@@ -234,7 +234,7 @@ func revalidate_single(ctx context.Context, message *types.QueueMessage) error {
 }
 
 func init_db(cfg aws.Config) {
-	model.Init()
+	model.Init(false) // TODO: should read auto migrate from ENV
 }
 
 // func init_sqs(cfg aws.Config) {

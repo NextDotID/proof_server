@@ -33,7 +33,7 @@ var (
 )
 
 func init_db(cfg aws.Config) {
-	model.Init()
+	model.Init(false) // TODO: should read auto migrate flag from ENV
 }
 
 func init_sqs(cfg aws.Config) {

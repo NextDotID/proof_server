@@ -27,7 +27,7 @@ func before_each(t *testing.T) {
 
 func TestMain(m *testing.M) {
 	config.Init("../config/config.test.json")
-	model.Init()
+	model.Init(true)
 	Init()
 
 	twitter.Init()

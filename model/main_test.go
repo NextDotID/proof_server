@@ -15,7 +15,7 @@ func before_each(t *testing.T) {
 
 func TestMain(m *testing.M) {
 	config.Init("../config/config.test.json")
-	Init()
+	Init(true)
 	before_each(nil)
 
 	os.Exit(m.Run())

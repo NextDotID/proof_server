@@ -19,7 +19,7 @@ var (
 )
 
 // Init initializes DB connection instance and do migration at startup.
-func Init() {
+func Init(autoMigrate bool) {
 	if DB != nil { // initialized
 		return
 	}
@@ -31,12 +31,14 @@ func Init() {
 		l.Fatalf("Error when opening DB: %s\n", err.Error())
 	}
 
-	err = DB.AutoMigrate(
-		&Proof{},
-		&ProofChain{},
-	)
-	if err != nil {
-		panic(err)
+	if (autoMigrate) {
+		err = DB.AutoMigrate(
+			&Proof{},
+			&ProofChain{},
+		)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	readOnlyHost := lo.Sample(config.C.DB.ReadOnlyHosts)
