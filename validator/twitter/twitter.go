@@ -104,7 +104,7 @@ func (twitter *Twitter) Validate() (err error) {
 	// 	return xerrors.Errorf("fetching tweet with headless browser: %w", err)
 	// }
 
-	tweet, err := fetchPostWithSyndication(fmt.Sprint(tweetID), 5)
+	tweet, err := fetchPostWithSyndication(fmt.Sprint(tweetID), 3)
 	if err != nil {
 		return xerrors.Errorf("fetching tweet with syndication API: %w", err)
 	}
