@@ -112,6 +112,7 @@ func (twitter *Twitter) Validate() (err error) {
 		return xerrors.Errorf("Tweet is not sent by this account.")
 	}
 	twitter.Text = tweet.Text
+	twitter.AltID = tweet.User.ID
 	return twitter.validateText()
 }
 
