@@ -167,6 +167,10 @@ func (slack *Slack) Validate() (err error) {
 	return slack.validateText()
 }
 
+func (slack *Slack) GetAltID() string {
+	return slack.AltID
+}
+
 func (slack *Slack) validateText() (err error) {
 	scanner := bufio.NewScanner(strings.NewReader(slack.Text))
 	for scanner.Scan() {

@@ -119,6 +119,10 @@ func (minds *Minds) Validate() (err error) {
 	return minds.validatePayload(post)
 }
 
+func (minds *Minds) GetAltID() string {
+	return minds.AltID
+}
+
 func (minds *Minds) getContent() (post *MindsPayload, err error) {
 	url := fmt.Sprintf(URL, minds.ProofLocation)
 	resp, err := http.Get(url)

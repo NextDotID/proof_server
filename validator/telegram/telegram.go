@@ -206,6 +206,10 @@ func (telegram *Telegram) Validate() (err error) {
 	return xerrors.New("Unknown error")
 }
 
+func (telegram *Telegram) GetAltID() (altID string) {
+	return telegram.AltID
+}
+
 func (telegram *Telegram) validateText() (err error) {
 	scanner := bufio.NewScanner(strings.NewReader(telegram.Text))
 	for scanner.Scan() {

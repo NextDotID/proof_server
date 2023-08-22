@@ -90,6 +90,10 @@ func (et *Ethereum) Validate() (err error) {
 	}
 }
 
+func (et *Ethereum) GetAltID() string {
+	return et.AltID
+}
+
 func (et *Ethereum) validateCreate() (err error) {
 	// ETH wallet signature
 	wallet_sig, ok := et.Extra["wallet_signature"]

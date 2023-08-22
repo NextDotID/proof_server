@@ -116,6 +116,13 @@ func (kb *Keybase) Validate() (err error) {
 	return kb.validateBody(payload)
 }
 
+func (kb *Keybase) GetAltID() string {
+	// TODO: implement AltID for Keybase:
+	// https://keybase.io/_/api/1.0/user/lookup.json?usernames=chris
+	// jq .them[0].id
+	return kb.AltID
+}
+
 func (kb *Keybase) validateBody(payload *KeybasePayload) error {
 	if payload.Persona != ("0x" + mycrypto.CompressedPubkeyHex(kb.Pubkey)) {
 		return xerrors.Errorf("Persona mismatch")

@@ -108,6 +108,10 @@ func (dc *Discord) Validate() (err error) {
 	return dc.validateText()
 }
 
+func (dc *Discord) GetAltID() string {
+	return dc.AltID
+}
+
 func (dc *Discord) validateText() (err error) {
 	scanner := bufio.NewScanner(strings.NewReader(dc.Text))
 	for scanner.Scan() {

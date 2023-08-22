@@ -194,6 +194,10 @@ func (ap *ActivityPub) Validate() (err error) {
 	return crypto.ValidatePersonalSignature(ap.GenerateSignPayload(), ap.Signature, ap.Pubkey)
 }
 
+func (ap *ActivityPub) GetAltID() (altID string) {
+	return ap.AltID
+}
+
 func (ap *ActivityPub) ExtractSignature() (err error) {
 	// Extract signature using regexp
 	scanner := bufio.NewScanner(strings.NewReader(ap.Text))

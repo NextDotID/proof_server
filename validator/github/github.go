@@ -131,3 +131,7 @@ func (gh *Github) Validate() (err error) {
 	}
 	return crypto.ValidatePersonalSignature(payload.SignPayload, signature, pubkey_recovered)
 }
+
+func (gh *Github) GetAltID() string {
+	return gh.AltID
+}

@@ -132,6 +132,10 @@ func (das *Das) Validate() (err error) {
 	return das.validateRecord(result)
 }
 
+func (das *Das) GetAltID() string {
+	return das.AltID
+}
+
 func (das *Das) validateRecord(resp *DasResponse) error {
 	if resp.ErrorNumber != 0 {
 		return xerrors.Errorf("err_no %d: %s", resp.ErrorNumber, resp.ErrorMessage)

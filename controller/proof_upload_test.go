@@ -37,6 +37,7 @@ func Test_ProofUpload(t *testing.T) {
 		assert.Equal(t, req.PublicKey, pc.Persona)
 		orig_created_at, _ := util.TimestampStringToTime(req.CreatedAt)
 		assert.Equal(t, pc.CreatedAt, orig_created_at)
+		assert.Equal(t, pc.AltID, "1468853291941773312")
 
 		proof := model.Proof{
 			Platform: req.Platform,

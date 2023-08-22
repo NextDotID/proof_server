@@ -26,8 +26,10 @@ type IValidator interface {
 	GeneratePostPayload() (post map[string]string)
 	// GenerateSignPayload generates a string to be signed.
 	GenerateSignPayload() (payload string)
-
+	// Validate validates the proof.
 	Validate() (err error)
+	// GetAltID returns the altID of the proof.
+	GetAltID() (altID string)
 }
 
 type Base struct {

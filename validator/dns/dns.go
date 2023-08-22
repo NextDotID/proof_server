@@ -151,6 +151,10 @@ func (dns *DNS) Validate() (err error) {
 	return crypto.ValidatePersonalSignature(dns.SignaturePayload, dns.Signature, dns.Pubkey)
 }
 
+func (dns *DNS) GetAltID() string {
+	return dns.AltID
+}
+
 func query(domain string) (doh_response *DOHResponse, err error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf(DOH, domain), nil)
 	req.Header.Set("Accept", "application/dns-json")

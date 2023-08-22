@@ -157,6 +157,10 @@ func (steam *Steam) Validate() (err error) {
 	return
 }
 
+func (steam *Steam) GetAltID() (altID string) {
+	return steam.AltID
+}
+
 // See also: https://developer.valvesoftware.com/wiki/SteamID
 func ExtractSteamID(idInDecimal string) (universe uint, userID uint, y uint, err error) {
 	id, err := strconv.ParseUint(idInDecimal, 10, 64)

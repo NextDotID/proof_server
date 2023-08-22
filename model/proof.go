@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/nextdotid/proof_server/types"
@@ -63,18 +64,23 @@ func (proof *Proof) Revalidate() (err error) {
 
 	err = iv.Validate()
 	if err != nil {
-		proof.touchValid(err.Error())
+		proof.touchValid(err.Error(), iv.GetAltID())
 		return xerrors.Errorf("validate failed: %w", err)
 	}
 
-	proof.touchValid("")
+	proof.touchValid("", iv.GetAltID())
 	// TODO: need to update `identity` and `alt_id` here.
 	return nil
 }
 
-func (proof *Proof) touchValid(reason string) {
+func (proof *Proof) touchValid(reason, altID string) {
+	fmt.Printf("AltID: %s\n", altID)
 	proof.LastCheckedAt = time.Now()
 	proof.IsValid = (reason == "")
 	proof.InvalidReason = reason
+	if altID != "" {
+		proof.AltID = altID
+	}
+
 	DB.Save(proof)
 }

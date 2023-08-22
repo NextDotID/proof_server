@@ -119,6 +119,10 @@ func (ens *ENS) Validate() (err error) {
 	return crypto.ValidatePersonalSignature(ens.SignaturePayload, ens.Signature, ens.Pubkey)
 }
 
+func (ens *ENS) GetAltID() string {
+	return ens.AltID
+}
+
 func parseTxt(txtField string) (result TXTPayload, err error) {
 	kv := make(map[string]string)
 

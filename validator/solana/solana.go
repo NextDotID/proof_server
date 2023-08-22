@@ -89,6 +89,10 @@ func (sol *Solana) validateCreate() (err error) {
 	return nil
 }
 
+func (solana *Solana) GetAltID() string {
+	return solana.AltID
+}
+
 func (sol *Solana) validateDelete() (err error) {
 	walletSig, ok := sol.Extra["wallet_signature"]
 

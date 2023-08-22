@@ -116,6 +116,10 @@ func (twitter *Twitter) Validate() (err error) {
 	return twitter.validateText()
 }
 
+func (twitter *Twitter) GetAltID() string {
+	return twitter.AltID
+}
+
 func (twitter *Twitter) validateText() (err error) {
 	scanner := bufio.NewScanner(strings.NewReader(twitter.Text))
 	for scanner.Scan() {
