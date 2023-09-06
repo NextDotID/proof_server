@@ -287,12 +287,12 @@ Not found.
 + Request
 
   + Parameters
-    + public_key (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`)
+    + avatar (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`)
     + page (number, optional) - Pagination. First page is number `1`.
 
   + Example
 
-    `GET /v1/proofchain?public_key=0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3&page=1`
+    `GET /v1/proofchain?avatar=0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3&page=1`
 
 + Response 200 (application/json)
 
