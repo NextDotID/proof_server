@@ -157,7 +157,7 @@ func fetchPost(postID string) (post *SyndicationAPIResponse, err error) {
 	}
 	instruction := response.Data.ThreadedConversationWithInjections.Instructions[0]
 	entry, found := lo.Find(instruction.Entries, func(entry GraphQLAPIEntry) bool {
-		return entry.EntryID == ("tweet-"+postID)
+		return entry.EntryID == ("tweet-" + postID)
 	})
 	if !found {
 		return nil, xerrors.Errorf("Tweet specified in ProofLocation is not found in API response")

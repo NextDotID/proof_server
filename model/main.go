@@ -31,7 +31,7 @@ func Init(autoMigrate bool) {
 		l.Fatalf("Error when opening DB: %s\n", err.Error())
 	}
 
-	if (autoMigrate) {
+	if autoMigrate {
 		err = DB.AutoMigrate(
 			&Proof{},
 			&ProofChain{},

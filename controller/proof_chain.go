@@ -9,8 +9,8 @@ import (
 )
 
 type ProofChainRequest struct {
-	PersonaPubkeyHex string `form:"public_key"`
-	Page             int    `form:"page"`
+	Avatar string `form:"avatar"`
+	Page   int    `form:"page"`
 }
 
 type ProofChainResponse struct {
@@ -31,7 +31,7 @@ func proofChainQuery(c *gin.Context) {
 		errorResp(c, http.StatusBadRequest, xerrors.Errorf("Param error"))
 		return
 	}
-	if len(req.PersonaPubkeyHex) == 0 {
+	if len(req.Avatar) == 0 {
 		errorResp(c, http.StatusBadRequest, xerrors.Errorf("Param missing"))
 		return
 	}
@@ -60,7 +60,7 @@ func performProofChainQuery(req ProofChainRequest) ([]model.ProofChainItem, Proo
 	}
 	offsetCount := pagination.Per * (pagination.Current - 1)
 
-	total, rs, err := model.ProofChainFindByPersona(req.PersonaPubkeyHex, false, offsetCount, pagination.Per)
+	total, rs, err := model.ProofChainFindByPersona(req.Avatar, false, offsetCount, pagination.Per)
 	pagination.Total = total
 	if total > int64(pagination.Per*pagination.Current) {
 		pagination.Next = pagination.Current + 1
