@@ -23,7 +23,7 @@ type Twitter struct {
 
 const (
 	HEADLESS_MATCH_TEMPLATE = "\\bSig: (.+?)[\\s\\n]"
-	MATCH_TEMPLATE = "^Sig: (.+?)$"
+	MATCH_TEMPLATE          = "^Sig: (.+?)$"
 )
 
 var (

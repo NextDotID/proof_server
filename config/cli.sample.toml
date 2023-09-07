@@ -1,5 +1,6 @@
 [server]
-hostname = "http://localhost:9800"
+#hostname = "http://localhost:9800"
+hostname = "https://proof-service.next.id"
 query_path = "/v1/proof"
 upload_path = "/v1/proof"
 generate_path = "/v1/proof/payload"
