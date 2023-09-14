@@ -52,6 +52,11 @@ func (proof *Proof) IsOutdated() bool {
 // Revalidate validates current proof, will update `IsValid` and
 // `LastCheckedAt`. Must be used after `DB.Preload("ProofChain")`.
 func (proof *Proof) Revalidate() (err error) {
+	// FIXME: platform twitter causes too many errors. Disable for now.
+	if proof.Platform == types.Platforms.Twitter {
+		return nil
+	}
+
 	v, err := proof.ProofChain.RestoreValidator()
 	if err != nil || v == nil {
 		return xerrors.Errorf("restoring validator: %w", err)
