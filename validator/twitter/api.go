@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/nextdotid/proof_server/util"
 	"github.com/samber/lo"
 	"golang.org/x/xerrors"
 )
@@ -20,16 +21,18 @@ type APIResponse struct {
 	Text string `json:"text"`
 }
 
-const (
-	BASIC_AUTH_USERNAME = "3rJOl1ODzm9yZy63FACdg"
-	BASIC_AUTH_PASSWORD = "5jPoQ5kQvMJFDYRNE8bQ4rHuds4xJqhvgNJM4awaE8"
-)
+type Tokens struct {
+	AccessToken string `json:"access_token"`
+	GuestToken  string `json:"guest_token"`
+	FlowToken   string `json:"flow_token"`
+	OAuthKey    string `json:"oauth_key"`
+	OAuthSecret string `json:"oauth_secret"`
+	CreatedAt   string `json:"created_at"`
+}
 
-var (
-	// TODO: should save accessToken to somewhere else (shared by all Lambda instances)
-	accessToken string
-	guestToken  string
-	flowToken   string
+const (
+	TWITTER_CONSUMER_KEY    = "3rJOl1ODzm9yZy63FACdg"
+	TWITTER_CONSUMER_SECRET = "5jPoQ5kQvMJFDYRNE8bQ4rHuds4xJqhvgNJM4awaE8"
 )
 
 func fetchPostWithAPI(id string, maxRetries int) (tweet *APIResponse, err error) {
@@ -38,7 +41,7 @@ func fetchPostWithAPI(id string, maxRetries int) (tweet *APIResponse, err error)
 	return nil, nil
 }
 
-func setHeaders(req *http.Request, setAccessToken, setGuestToken bool) {
+func setHeaders(req *http.Request, tokens *Tokens, setAccessToken, setGuestToken bool) {
 	req.Header.Set("User-Agent", "TwitterAndroid/9.95.0-release.0 (29950000-r-0) ONEPLUS+A3010/9 (OnePlus;ONEPLUS+A3010;OnePlus;OnePlus3;0;;1;2016)")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
@@ -49,20 +52,23 @@ func setHeaders(req *http.Request, setAccessToken, setGuestToken bool) {
 	req.Header.Set("System-User-Agent", "Dalvik/2.1.0 (Linux; U; Android 9; ONEPLUS A3010 Build/PKQ1.181203.001)")
 	req.Header.Set("X-Twitter-Active-User", "yes")
 	if setGuestToken {
-		req.Header.Set("X-Guest-Token", guestToken)
+		req.Header.Set("X-Guest-Token", tokens.GuestToken)
 	}
 	if setAccessToken {
-		req.Header.Set("Authorization", "Bearer "+accessToken)
+		req.Header.Set("Authorization", "Bearer "+tokens.AccessToken)
 	}
 }
 
-func GetOauthToken() (err error) {
-	if flowToken == "" {
-		if err := getFlowToken(); err != nil {
-			return err
-		}
+// GenerateOauthToken generates a new Twitter OAuth guest token
+// which can be used in calling Official APIs.
+func GenerateOauthToken() (tokens *Tokens, err error) {
+	tokens = new(Tokens)
+	tokens.CreatedAt = util.TimeToTimestampString(time.Now())
+
+	if err := tokens.getFlowToken(); err != nil {
+		return nil, err
 	}
-	l.Infof("Access token: %s\nGuest token: %s\nFlow token: %s\n", accessToken, guestToken, flowToken)
+	l.Infof("Access token: %s\nGuest token: %s\nFlow token: %s\n", tokens.AccessToken, tokens.GuestToken, tokens.FlowToken)
 
 	requestBody := fmt.Sprintf(`{
         "flow_token": "%s",
@@ -128,22 +134,22 @@ func GetOauthToken() (err error) {
             "location_permission_prompt": 2,
             "notifications_permission_prompt": 4
         }
-    }`, flowToken)
+    }`, tokens.FlowToken)
 
 	req, err := http.NewRequest("POST", "https://api.twitter.com/1.1/onboarding/task.json", strings.NewReader(requestBody))
 	if err != nil {
-		return err
+		return nil, err
 	}
-	setHeaders(req, true, true)
+	setHeaders(req, tokens, true, true)
 
 	resp, err := new(http.Client).Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	l.Infof("Response: \n%s\n", body)
 	type ResponseSubtask struct {
@@ -163,36 +169,37 @@ func GetOauthToken() (err error) {
 		// Should be "success"
 		Status string `json:"status"`
 		// A new flow token, usually ends with ":3"
-		FlowToken string             `json:"flow_token"`
+		FlowToken string            `json:"flow_token"`
 		Subtasks  []ResponseSubtask `json:"subtasks"`
 	}
 	response := new(Response)
 	err = json.Unmarshal(body, response)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if response.Errors != nil {
-		return xerrors.Errorf("error when getting oauth token: %+v", *response.Errors)
+		return nil, xerrors.Errorf("error when getting oauth token: %+v", *response.Errors)
 	}
 	if response.Status != "success" {
-		return xerrors.Errorf("wrong API status: %s", response.Status)
+		return nil, xerrors.Errorf("wrong API status: %s", response.Status)
 	}
 
 	st, found := lo.Find(response.Subtasks, func(subtask ResponseSubtask) bool {
 		return (subtask.OpenAccount != nil)
 	})
 	if !found {
-		return xerrors.Errorf("oauth token not found in response")
+		return nil, xerrors.Errorf("oauth token not found in response")
 	}
-	flowToken = response.FlowToken
+	// Update new FlowToken
+	tokens.FlowToken = response.FlowToken
 	l.Infof("OAUTH TOKEN REGISTERED: %s --- %s", st.OpenAccount.OauthToken, st.OpenAccount.OauthTokenSecret)
 
-	return nil
+	return tokens, nil
 }
 
-func getFlowToken() (err error) {
-	if guestToken == "" {
-		if err := getGuestToken(); err != nil {
+func (tokens *Tokens) getFlowToken() (err error) {
+	if tokens.GuestToken == "" {
+		if err := tokens.getGuestToken(); err != nil {
 			return err
 		}
 	}
@@ -269,7 +276,7 @@ func getFlowToken() (err error) {
 	if err != nil {
 		return err
 	}
-	setHeaders(req, true, true)
+	setHeaders(req, tokens, true, true)
 
 	resp, err := new(http.Client).Do(req)
 	if err != nil {
@@ -293,16 +300,16 @@ func getFlowToken() (err error) {
 		return xerrors.Errorf("empty FlowToken")
 	}
 
-	flowToken = response.FlowToken
+	tokens.FlowToken = response.FlowToken
 	return nil
 }
 
-func getGuestToken() (err error) {
-	if guestToken != "" {
+func (tokens *Tokens) getGuestToken() (err error) {
+	if tokens.GuestToken != "" {
 		return nil
 	}
-	if accessToken == "" {
-		if err = getAccessToken(); err != nil {
+	if tokens.AccessToken == "" {
+		if err = tokens.getAccessToken(); err != nil {
 			return err
 		}
 	}
@@ -310,7 +317,7 @@ func getGuestToken() (err error) {
 	if err != nil {
 		return err
 	}
-	setHeaders(req, true, false)
+	setHeaders(req, tokens, true, false)
 	type Response struct {
 		GuestToken string `json:"guest_token"`
 	}
@@ -333,13 +340,13 @@ func getGuestToken() (err error) {
 	if response.GuestToken == "" {
 		return xerrors.Errorf("Wrong guest token: %s", response.GuestToken)
 	}
-	guestToken = response.GuestToken
+	tokens.GuestToken = response.GuestToken
 
 	return nil
 }
 
-func getAccessToken() (err error) {
-	if accessToken != "" {
+func (tokens *Tokens) getAccessToken() (err error) {
+	if tokens.AccessToken != "" {
 		return nil
 	}
 
@@ -351,8 +358,8 @@ func getAccessToken() (err error) {
 	if err != nil {
 		return err
 	}
-	setHeaders(req, false, false)
-	req.SetBasicAuth(BASIC_AUTH_USERNAME, BASIC_AUTH_PASSWORD)
+	setHeaders(req, tokens, false, false)
+	req.SetBasicAuth(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
 	resp, err := new(http.Client).Do(req)
 	if err != nil {
 		return err
@@ -373,6 +380,13 @@ func getAccessToken() (err error) {
 		return xerrors.Errorf("Wrong bearer token: %s %s", response.TokenType, response.AccessToken)
 	}
 
-	accessToken = response.AccessToken
+	tokens.AccessToken = response.AccessToken
 	return nil
+}
+
+func (tokens *Tokens) IsExpired() bool {
+	const EXPIRED_AT = "24h"
+	expiredAt, _ := time.ParseDuration(EXPIRED_AT)
+	createdAt, _ := util.TimestampStringToTime(tokens.CreatedAt)
+	return createdAt.Add(expiredAt).Before(time.Now())
 }

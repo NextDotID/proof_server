@@ -8,33 +8,38 @@ import (
 
 func Test_getAccessToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		require.NoError(t, getAccessToken())
-		require.NotEmpty(t, accessToken)
-		t.Logf("Access token: %s", accessToken)
+		tokens := new(Tokens)
+		require.NoError(t, tokens.getAccessToken())
+		require.NotEmpty(t, tokens.AccessToken)
+		t.Logf("Access token: %s", tokens.AccessToken)
 	})
 }
 
 func Test_getGuestToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		require.NoError(t, getGuestToken())
-		require.NotEmpty(t, guestToken)
-		t.Logf("Guest token: %s", guestToken)
+		tokens := new(Tokens)
+		require.NoError(t, tokens.getGuestToken())
+		require.NotEmpty(t, tokens.GuestToken)
+		t.Logf("Guest token: %s", tokens.GuestToken)
 	})
 }
 
 func Test_FlowToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		require.NoError(t, getFlowToken())
-		require.NotEmpty(t, flowToken)
-		t.Logf("Flow token: %s", flowToken)
+		tokens := new(Tokens)
+		require.NoError(t, tokens.getFlowToken())
+		require.NotEmpty(t, tokens.FlowToken)
+		t.Logf("Flow token: %s", tokens.FlowToken)
 	})
 }
 
 func Test_OauthToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		require.NoError(t, GetOauthToken())
-		t.Logf("Access token: %s", accessToken)
-		t.Logf("Guest token: %s", guestToken)
-		t.Logf("Flow token: %s", flowToken)
+		tokens, err := GenerateOauthToken()
+		require.NoError(t, err)
+		require.False(t, tokens.IsExpired())
+		t.Logf("Access token: %s", tokens.AccessToken)
+		t.Logf("Guest token: %s", tokens.GuestToken)
+		t.Logf("Flow token: %s", tokens.FlowToken)
 	})
 }

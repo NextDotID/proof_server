@@ -3,11 +3,13 @@ package types
 type QueueAction string
 
 var QueueActions = struct {
-	Revalidate    QueueAction
-	ArweaveUpload QueueAction
+	Revalidate               QueueAction
+	ArweaveUpload            QueueAction
+	TwitterOAuthTokenAcquire QueueAction
 }{
-	Revalidate:    "revalidate",
-	ArweaveUpload: "arweave_upload",
+	Revalidate:               "revalidate",
+	ArweaveUpload:            "arweave_upload",
+	TwitterOAuthTokenAcquire: "twitter_oauth_token_acquire",
 }
 
 // QueueMessage indicates structure of messages in Amazon SQS.

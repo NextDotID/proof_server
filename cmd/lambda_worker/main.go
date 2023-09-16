@@ -74,10 +74,18 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) (events.SQSEventRes
 		case types.QueueActions.ArweaveUpload:
 			arweaveMsgs[message.Persona] = raw_message.MessageId
 		case types.QueueActions.Revalidate:
-			if err := revalidate_single(ctx, &message); err != nil {
+			if err := revalidateSingle(ctx, &message); err != nil {
 				fmt.Printf("error revalidating proof record %d: %s\n", message.ProofID, err)
 				// Ignore failed revalidation job since failed job will still update DB.
 				// failures = append(failures, events.SQSBatchItemFailure{ItemIdentifier: raw_message.MessageId})
+			}
+		case types.QueueActions.TwitterOAuthTokenAcquire:
+			{
+				err := twitterRetrieveOAuthToken()
+				if err != nil {
+					// Ignore errors for now
+					fmt.Printf("Error when retrieving Twitter OAuth key: %s", err.Error())
+				}
 			}
 		default:
 			logrus.Warnf("unsupported queue action: %s", message.Action)
@@ -137,7 +145,7 @@ func arweave_upload_many(personas []string) error {
 				break
 			}
 
-			item, err := arweave_bundle_single(pc, previous)
+			item, err := arweaveBundleSingle(pc, previous)
 			if err != nil {
 				logrus.Errorf("error marshalling proof chain %s: %w", pc.Uuid, err)
 				break
@@ -169,7 +177,7 @@ func arweave_upload_many(personas []string) error {
 	return nil
 }
 
-func arweave_bundle_single(pc *model.ProofChain, previous *model.ProofChain) (*artypes.BundleItem, error) {
+func arweaveBundleSingle(pc *model.ProofChain, previous *model.ProofChain) (*artypes.BundleItem, error) {
 	previousUuid := ""
 	previousArweaveID := ""
 	if previous != nil {
@@ -224,7 +232,7 @@ func arweave_bundle_single(pc *model.ProofChain, previous *model.ProofChain) (*a
 	return &item, nil
 }
 
-func revalidate_single(ctx context.Context, message *types.QueueMessage) error {
+func revalidateSingle(ctx context.Context, message *types.QueueMessage) error {
 	proof := model.Proof{}
 	tx := model.DB.Preload("ProofChain").Preload("ProofChain.Previous").Where("id = ?", message.ProofID).First(&proof)
 	if tx.Error != nil {
@@ -233,7 +241,7 @@ func revalidate_single(ctx context.Context, message *types.QueueMessage) error {
 	return proof.Revalidate()
 }
 
-func init_db(cfg aws.Config) {
+func initDB(cfg aws.Config) {
 	model.Init(false) // TODO: should read auto migrate from ENV
 }
 
@@ -241,7 +249,7 @@ func init_db(cfg aws.Config) {
 // 	sqs.Init(cfg)
 // }
 
-func init_validators() {
+func initValidators() {
 	twitter.Init()
 	ethereum.Init()
 	keybase.Init()
@@ -264,19 +272,19 @@ func init() {
 		logrus.Fatalf("Unable to load AWS config: %s", err)
 	}
 	common.CurrentRuntime = common.Runtimes.Lambda
-	init_config_from_aws_secret()
+	initConfigFromAWSSecret()
 	logrus.SetLevel(logrus.InfoLevel)
 
-	init_db(cfg)
+	initDB(cfg)
 	// init_sqs(cfg)
-	init_validators()
+	initValidators()
 }
 
-func init_config_from_aws_secret() {
+func initConfigFromAWSSecret() {
 	if initialized {
 		return
 	}
-	secret_name := getE("SECRET_NAME", "")
+	secretName := getE("SECRET_NAME", "")
 	region := getE("SECRET_REGION", "")
 
 	// Create a Secrets Manager client
@@ -290,7 +298,7 @@ func init_config_from_aws_secret() {
 
 	client := secretsmanager.NewFromConfig(cfg)
 	input := secretsmanager.GetSecretValueInput{
-		SecretId:     aws.String(secret_name),
+		SecretId:     aws.String(secretName),
 		VersionStage: aws.String("AWSCURRENT"),
 	}
 	result, err := client.GetSecretValue(context.Background(), &input)
@@ -319,17 +327,33 @@ func init_config_from_aws_secret() {
 	initialized = true
 }
 
-func getE(env_key, default_value string) string {
-	result := os.Getenv(env_key)
+func getE(envKey, defaultValue string) string {
+	result := os.Getenv(envKey)
 	if len(result) == 0 {
-		if len(default_value) > 0 {
-			return default_value
+		if len(defaultValue) > 0 {
+			return defaultValue
 		} else {
-			logrus.Fatalf("ENV %s must be given! Abort.", env_key)
+			logrus.Fatalf("ENV %s must be given! Abort.", envKey)
 			return ""
 		}
 
 	} else {
 		return result
 	}
+}
+
+func twitterRetrieveOAuthToken() (err error) {
+	type TokenList struct {
+		Tokens []twitter.Tokens `json:"tokens"`
+	}
+	// TODO: Retrieve existed token from a storage space (i.e., KV / S3)
+
+	tokens, err := twitter.GenerateOauthToken()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("TWITTER OAUTH KEY REGISTERED: %+v", *tokens)
+
+	// TODO: save new token to a storage space (i.e., KV / S3)
+	return nil
 }
