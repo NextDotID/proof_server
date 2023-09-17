@@ -15,3 +15,11 @@ func Test_fetchPostWithAPI(t *testing.T) {
 		require.Equal(t, tweet.User.ID, "292254624")
 	})
 }
+
+func Test_fetchUserName(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		userName, err := fetchUserName("292254624")
+		require.NoError(t, err)
+		require.Equal(t, "bgm38", userName)
+	})
+}

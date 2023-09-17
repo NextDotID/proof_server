@@ -31,18 +31,23 @@ func (a authorize) Add(req *http.Request) {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", a.Token))
 }
 
+func initTwitterClient() {
+	if twitterClient != nil {
+		return
+	}
+	twitterClient = &twitter.Client{
+		Authorizer: authorize{
+			Token: config.C.Platform.Twitter.OauthToken,
+		},
+		Client: http.DefaultClient,
+		Host:   "https://api.twitter.com",
+	}
+}
+
 // Fetch tweet using twitter OAuth2.0 API.
 // FIXME: should be switched to guest OAuth token solution.
 func fetchPostWithAPI(id string, maxRetries int) (*APIResponse, error) {
-	if twitterClient == nil {
-		twitterClient = &twitter.Client{
-			Authorizer: authorize{
-				Token: config.C.Platform.Twitter.OauthToken,
-			},
-			Client: http.DefaultClient,
-			Host:   "https://api.twitter.com",
-		}
-	}
+	initTwitterClient()
 	opts := twitter.TweetLookupOpts{
 		Expansions:  []twitter.Expansion{twitter.ExpansionEntitiesMentionsUserName, twitter.ExpansionAuthorID},
 		TweetFields: []twitter.TweetField{twitter.TweetFieldText, twitter.TweetFieldCreatedAt, twitter.TweetFieldEntities},
@@ -60,13 +65,30 @@ func fetchPostWithAPI(id string, maxRetries int) (*APIResponse, error) {
 		Text: tweet.Text,
 	}
 	response.User.ID = tweet.AuthorID
-	if len(tweet.Entities.Mentions) > 0 {
-		// Expect to be the user himself
-		mention := tweet.Entities.Mentions[0]
-		response.User.ScreenName = strings.ToLower(mention.UserName)
+	userName, err := fetchUserName(tweet.AuthorID)
+	if err != nil {
+		return nil, err
 	}
+	response.User.ScreenName = userName
 
 	return &response, nil
+}
+
+func fetchUserName(userID string) (userName string, err error) {
+	initTwitterClient()
+	opts := twitter.UserLookupOpts{
+		UserFields:  []twitter.UserField{twitter.UserFieldUserName},
+	}
+	result, err := twitterClient.UserLookup(context.Background(), []string{userID}, opts)
+	if err != nil {
+		return "", xerrors.Errorf("error when fetching twitter username: %w", err)
+	}
+	users := result.Raw.UserDictionaries()
+	user, ok := users[userID]
+	if !ok {
+		return "", xerrors.Errorf("error when fetching twitter username: user not found for ID %s", userID)
+	}
+	return strings.ToLower(user.User.UserName), nil
 }
 
 // func fetchPostWithAPI(id string, maxRetries int) (tweet *APIResponse, err error) {
