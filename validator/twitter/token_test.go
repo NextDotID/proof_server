@@ -8,7 +8,7 @@ import (
 
 func Test_getAccessToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		tokens := new(Tokens)
+		tokens := new(Token)
 		require.NoError(t, tokens.getAccessToken())
 		require.NotEmpty(t, tokens.AccessToken)
 		t.Logf("Access token: %s", tokens.AccessToken)
@@ -17,7 +17,7 @@ func Test_getAccessToken(t *testing.T) {
 
 func Test_getGuestToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		tokens := new(Tokens)
+		tokens := new(Token)
 		require.NoError(t, tokens.getGuestToken())
 		require.NotEmpty(t, tokens.GuestToken)
 		t.Logf("Guest token: %s", tokens.GuestToken)
@@ -26,7 +26,7 @@ func Test_getGuestToken(t *testing.T) {
 
 func Test_FlowToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		tokens := new(Tokens)
+		tokens := new(Token)
 		require.NoError(t, tokens.getFlowToken())
 		require.NotEmpty(t, tokens.FlowToken)
 		t.Logf("Flow token: %s", tokens.FlowToken)

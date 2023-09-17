@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -20,6 +19,8 @@ import (
 	myconfig "github.com/nextdotid/proof_server/config"
 	"github.com/nextdotid/proof_server/model"
 	"github.com/nextdotid/proof_server/types"
+	"github.com/nextdotid/proof_server/util"
+	utilS3 "github.com/nextdotid/proof_server/util/s3"
 	"github.com/nextdotid/proof_server/validator/activitypub"
 	"github.com/nextdotid/proof_server/validator/das"
 	"github.com/nextdotid/proof_server/validator/discord"
@@ -38,6 +39,7 @@ import (
 )
 
 var (
+	awsConfig   aws.Config
 	initialized = false
 	wallet      *goar.Wallet
 )
@@ -81,7 +83,7 @@ func handler(ctx context.Context, sqs_event events.SQSEvent) (events.SQSEventRes
 			}
 		case types.QueueActions.TwitterOAuthTokenAcquire:
 			{
-				err := twitterRetrieveOAuthToken()
+				err := twitterRefreshOAuthToken()
 				if err != nil {
 					// Ignore errors for now
 					fmt.Printf("Error when retrieving Twitter OAuth key: %s", err.Error())
@@ -134,7 +136,7 @@ func arweave_upload_many(personas []string) error {
 
 		for _, pc := range chains {
 			if pc.ArweaveID != "" {
-				continue
+
 			}
 
 			previous, ok := lo.Find(chains, func(item *model.ProofChain) bool {
@@ -241,8 +243,9 @@ func revalidateSingle(ctx context.Context, message *types.QueueMessage) error {
 	return proof.Revalidate()
 }
 
-func initDB(cfg aws.Config) {
-	model.Init(false) // TODO: should read auto migrate from ENV
+func initDB() {
+	shouldMigrate := util.GetE("DB_MIGRATE", "false")
+	model.Init(shouldMigrate == "true")
 }
 
 // func init_sqs(cfg aws.Config) {
@@ -264,7 +267,8 @@ func initValidators() {
 }
 
 func init() {
-	cfg, err := config.LoadDefaultConfig(
+	var err error
+	awsConfig, err = config.LoadDefaultConfig(
 		context.Background(),
 		config.WithRegion("ap-east-1"),
 	)
@@ -275,7 +279,7 @@ func init() {
 	initConfigFromAWSSecret()
 	logrus.SetLevel(logrus.InfoLevel)
 
-	initDB(cfg)
+	initDB()
 	// init_sqs(cfg)
 	initValidators()
 }
@@ -284,8 +288,8 @@ func initConfigFromAWSSecret() {
 	if initialized {
 		return
 	}
-	secretName := getE("SECRET_NAME", "")
-	region := getE("SECRET_REGION", "")
+	secretName := util.GetE("SECRET_NAME", "")
+	region := util.GetE("SECRET_REGION", "")
 
 	// Create a Secrets Manager client
 	cfg, err := config.LoadDefaultConfig(
@@ -327,33 +331,34 @@ func initConfigFromAWSSecret() {
 	initialized = true
 }
 
-func getE(envKey, defaultValue string) string {
-	result := os.Getenv(envKey)
-	if len(result) == 0 {
-		if len(defaultValue) > 0 {
-			return defaultValue
-		} else {
-			logrus.Fatalf("ENV %s must be given! Abort.", envKey)
-			return ""
-		}
-
-	} else {
-		return result
+func twitterRefreshOAuthToken() (err error) {
+	const VALID_TOKEN_AMOUNT = 5
+	if err = utilS3.Init(awsConfig); err != nil {
+		logrus.Fatalf("Error during initializing S3 client: %s", err.Error())
 	}
-}
-
-func twitterRetrieveOAuthToken() (err error) {
-	type TokenList struct {
-		Tokens []twitter.Tokens `json:"tokens"`
-	}
-	// TODO: Retrieve existed token from a storage space (i.e., KV / S3)
-
-	tokens, err := twitter.GenerateOauthToken()
+	ctx := context.Background()
+	tokens, err := twitter.GetTokenListFromS3(ctx)
 	if err != nil {
-		return err
+		logrus.Fatalf("Error when loading Twitter token list from S3: %s", err.Error())
 	}
-	fmt.Printf("TWITTER OAUTH KEY REGISTERED: %+v", *tokens)
 
-	// TODO: save new token to a storage space (i.e., KV / S3)
+	validTokens := lo.Filter(tokens.Tokens, func(token twitter.Token, _index int) bool {
+		return !token.IsExpired()
+	})
+	if len(validTokens) < VALID_TOKEN_AMOUNT {
+		// Generate a new one
+		newToken, err := twitter.GenerateOauthToken()
+		if err != nil {
+			return err
+		}
+		fmt.Printf("TWITTER OAUTH KEY REGISTERED: %+v", *tokens)
+		validTokens = append(validTokens, *newToken)
+		newTokenList := twitter.TokenList{
+			Tokens: validTokens,
+		}
+		newTokenListJSON, _ := newTokenList.ToJSON()
+		utilS3.PutToS3(ctx, twitter.TWITTER_TOKEN_LIST_FILENAME, newTokenListJSON)
+	}
+
 	return nil
 }
