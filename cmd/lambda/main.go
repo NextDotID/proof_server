@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"os"
 
 	"github.com/akrylysov/algnhsa"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -13,6 +12,8 @@ import (
 	myconfig "github.com/nextdotid/proof_server/config"
 	"github.com/nextdotid/proof_server/controller"
 	"github.com/nextdotid/proof_server/model"
+	"github.com/nextdotid/proof_server/util"
+	utilS3 "github.com/nextdotid/proof_server/util/s3"
 	"github.com/nextdotid/proof_server/util/sqs"
 	"github.com/nextdotid/proof_server/validator/activitypub"
 	"github.com/nextdotid/proof_server/validator/das"
@@ -33,7 +34,8 @@ var (
 )
 
 func init_db(cfg aws.Config) {
-	model.Init(false) // TODO: should read auto migrate flag from ENV
+	shouldMigrate := util.GetE("DB_MIGRATE", "false")
+	model.Init(shouldMigrate == "true")
 }
 
 func init_sqs(cfg aws.Config) {
@@ -70,6 +72,7 @@ func init() {
 	init_db(cfg)
 	init_sqs(cfg)
 	init_validators()
+	// utilS3.Init(cfg)
 	controller.Init()
 }
 
@@ -81,8 +84,8 @@ func init_config_from_aws_secret() {
 	if initialized {
 		return
 	}
-	secret_name := getE("SECRET_NAME", "")
-	region := getE("SECRET_REGION", "")
+	secret_name := util.GetE("SECRET_NAME", "")
+	region := util.GetE("SECRET_REGION", "")
 
 	// Create a Secrets Manager client
 	cfg, err := config.LoadDefaultConfig(
@@ -115,19 +118,4 @@ func init_config_from_aws_secret() {
 		logrus.Fatalf("Error during parsing config JSON: %v", err)
 	}
 	initialized = true
-}
-
-func getE(env_key, default_value string) string {
-	result := os.Getenv(env_key)
-	if len(result) == 0 {
-		if len(default_value) > 0 {
-			return default_value
-		} else {
-			logrus.Fatalf("ENV %s must be given! Abort.", env_key)
-			return ""
-		}
-
-	} else {
-		return result
-	}
 }

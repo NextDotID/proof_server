@@ -33,10 +33,16 @@ type HeadlessConfig struct {
 }
 
 type PlatformConfig struct {
+	Twitter  TwitterPlatformConfig  `json:"twitter"`
 	Telegram TelegramPlatformConfig `json:"telegram"`
 	Ethereum EthereumPlatformConfig `json:"ethereum"`
 	Discord  DiscordPlatformConfig  `json:"discord"`
 	Slack    SlackPlatformConfig    `json:"slack"`
+}
+
+type TwitterPlatformConfig struct {
+	// Twitter API v2 Bearer token
+	OauthToken string `json:"oauth_token"`
 }
 
 type ArweaveConfig struct {
