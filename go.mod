@@ -48,6 +48,7 @@ require (
 	github.com/everFinance/ttcrsa v1.1.3 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.3 // indirect
+	github.com/g8rswimmer/go-twitter/v2 v2.1.5 // indirect
 	github.com/gagliardetto/binary v0.6.1 // indirect
 	github.com/gagliardetto/treeout v0.1.4 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
