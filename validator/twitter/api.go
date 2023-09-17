@@ -20,7 +20,7 @@ type APIResponse struct {
 }
 
 var (
-	twitterClient    *twitter.Client
+	twitterClient *twitter.Client
 )
 
 type authorize struct {
@@ -77,7 +77,7 @@ func fetchPostWithAPI(id string, maxRetries int) (*APIResponse, error) {
 func fetchUserName(userID string) (userName string, err error) {
 	initTwitterClient()
 	opts := twitter.UserLookupOpts{
-		UserFields:  []twitter.UserField{twitter.UserFieldUserName},
+		UserFields: []twitter.UserField{twitter.UserFieldUserName},
 	}
 	result, err := twitterClient.UserLookup(context.Background(), []string{userID}, opts)
 	if err != nil {
