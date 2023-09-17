@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	s3Client *s3.Client
+	s3Client   *s3.Client
 	bucketName string
 )
 

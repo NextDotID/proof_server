@@ -13,8 +13,8 @@ import (
 	"github.com/nextdotid/proof_server/controller"
 	"github.com/nextdotid/proof_server/model"
 	"github.com/nextdotid/proof_server/util"
-	"github.com/nextdotid/proof_server/util/sqs"
 	utilS3 "github.com/nextdotid/proof_server/util/s3"
+	"github.com/nextdotid/proof_server/util/sqs"
 	"github.com/nextdotid/proof_server/validator/activitypub"
 	"github.com/nextdotid/proof_server/validator/das"
 	"github.com/nextdotid/proof_server/validator/discord"
@@ -72,7 +72,7 @@ func init() {
 	init_db(cfg)
 	init_sqs(cfg)
 	init_validators()
-	utilS3.Init(cfg)
+	// utilS3.Init(cfg)
 	controller.Init()
 }
 
