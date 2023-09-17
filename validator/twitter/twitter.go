@@ -104,12 +104,12 @@ func (twitter *Twitter) Validate() (err error) {
 	// 	return xerrors.Errorf("fetching tweet with headless browser: %w", err)
 	// }
 
-	tweet, err := fetchPostWithSyndication(fmt.Sprint(tweetID), 3)
+	tweet, err := fetchPostWithAPI(fmt.Sprint(tweetID), 3)
 	if err != nil {
 		return xerrors.Errorf("fetching tweet with syndication API: %w", err)
 	}
-	if twitter.Identity != strings.ToLower(tweet.User.ScreenName) {
-		return xerrors.Errorf("Tweet is not sent by this account.")
+	if twitter.Identity != tweet.User.ScreenName {
+		return xerrors.Errorf("tweet is not sent by this account.")
 	}
 	twitter.Text = tweet.Text
 	twitter.AltID = tweet.User.ID

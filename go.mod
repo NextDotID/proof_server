@@ -8,6 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.15.4
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.15.6
 	github.com/everFinance/goar v1.4.2
+	github.com/g8rswimmer/go-twitter/v2 v2.1.5
 	github.com/gagliardetto/solana-go v1.4.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-faster/errors v0.6.1
