@@ -151,6 +151,7 @@ require (
 	github.com/akrylysov/algnhsa v0.12.1
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.18.6
 	github.com/bwmarrin/discordgo v0.25.0
+	github.com/deckarep/golang-set/v2 v2.3.1
 	github.com/ethereum/go-ethereum v1.10.25
 	github.com/gin-contrib/cors v1.3.1
 	github.com/google/go-github/v41 v41.0.0

@@ -193,9 +193,9 @@ func (pc *ProofChain) RestoreValidator() (v *validator.Base, err error) {
 	return v, nil
 }
 
-// MarshalPersona accepts *ecdsa.Pubkey | string type of pubkey,
+// MarshalAvatar accepts *ecdsa.Pubkey | string type of pubkey,
 // returns a string to be stored into DB.
-func MarshalPersona(persona any) string {
+func MarshalAvatar(persona any) string {
 	switch p := persona.(type) {
 	case *ecdsa.PublicKey:
 		return "0x" + crypto.CompressedPubkeyHex(p)
@@ -204,7 +204,7 @@ func MarshalPersona(persona any) string {
 		if err != nil {
 			return ""
 		}
-		return MarshalPersona(pubkey)
+		return MarshalAvatar(pubkey)
 	default:
 		return ""
 	}
@@ -217,7 +217,7 @@ func MarshalSignature(signature []byte) string {
 
 func ProofChainFindLatest(persona string) (pc *ProofChain, err error) {
 	pc = new(ProofChain)
-	tx := ReadOnlyDB.Where("persona = ?", MarshalPersona(persona)).Order("id DESC").Take(pc)
+	tx := ReadOnlyDB.Where("persona = ?", MarshalAvatar(persona)).Order("id DESC").Take(pc)
 	if tx.Error != nil {
 		if strings.Contains(tx.Error.Error(), "record not found") {
 			return nil, nil
@@ -241,7 +241,7 @@ func ProofChainFindBySignature(signature string) (pc *ProofChain, err error) {
 func ProofChainCreateFromValidator(validator *validator.Base) (pc *ProofChain, err error) {
 	pc = &ProofChain{
 		Action:           validator.Action,
-		Persona:          MarshalPersona(validator.Pubkey),
+		Persona:          MarshalAvatar(validator.Pubkey),
 		Identity:         validator.Identity, // TODO: exception may occur
 		AltID:            validator.AltID,
 		Platform:         validator.Platform,

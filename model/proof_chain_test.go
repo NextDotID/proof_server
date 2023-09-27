@@ -6,12 +6,31 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/nextdotid/proof_server/types"
 	"github.com/nextdotid/proof_server/util"
 	"github.com/nextdotid/proof_server/util/crypto"
 	"github.com/nextdotid/proof_server/validator"
 	"github.com/stretchr/testify/assert"
 )
+
+func GenerateProofChain() (*ProofChain) {
+	pk, _ := crypto.GenerateKeypair()
+	pc := ProofChain{
+		Action:    types.Actions.Create,
+		Persona:   MarshalAvatar(pk),
+		Identity:  "yeiwb",
+		Location:  "1469221200140574721",
+		Platform:  types.Platforms.Twitter,
+		Signature: MarshalSignature([]byte{1, 2, 3, 4}),
+		Uuid:      uuid.New().String(),
+	}
+	tx := DB.Create(&pc)
+	if tx.Error != nil {
+		panic(tx.Error)
+	}
+	return &pc
+}
 
 func Test_ProofChainFindLatest(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
@@ -83,7 +102,7 @@ func Test_ProofChainCreateFromValidator(t *testing.T) {
 		assert.Equal(t, "yeiwb", pc.Identity)
 		assert.Equal(t, base64.StdEncoding.EncodeToString(v.Signature), pc.Signature)
 		assert.Nil(t, pc.Previous)
-		assert.Equal(t, MarshalPersona(pk), pc.Persona)
+		assert.Equal(t, MarshalAvatar(pk), pc.Persona)
 		assert.Equal(t, "{}", pc.Extra.String())
 	})
 
@@ -167,7 +186,7 @@ func Test_Apply(t *testing.T) {
 
 		pc := ProofChain{
 			Action:    types.Actions.Create,
-			Persona:   MarshalPersona(pk),
+			Persona:   MarshalAvatar(pk),
 			Identity:  "yeiwb",
 			Location:  "1469221200140574721",
 			Platform:  types.Platforms.Twitter,
@@ -196,7 +215,7 @@ func Test_Apply(t *testing.T) {
 		// Delete
 		pc_delete := ProofChain{
 			Action:    types.Actions.Delete,
-			Persona:   MarshalPersona(pk),
+			Persona:   MarshalAvatar(pk),
 			Identity:  "yeiwb",
 			Location:  "1469221200140574721",
 			Platform:  types.Platforms.Twitter,
@@ -212,7 +231,7 @@ func Test_Apply(t *testing.T) {
 		pk, _ := crypto.GenerateKeypair()
 		pc := ProofChain{
 			Action:    types.Actions.Create,
-			Persona:   MarshalPersona(pk),
+			Persona:   MarshalAvatar(pk),
 			Identity:  "yeiwb",
 			Location:  "1469221200140574721",
 			Platform:  types.Platforms.Twitter,
@@ -223,7 +242,7 @@ func Test_Apply(t *testing.T) {
 
 		pc2 := ProofChain{
 			Action:     types.Actions.Create,
-			Persona:    MarshalPersona(pk),
+			Persona:    MarshalAvatar(pk),
 			Identity:   "yeiwb",
 			Platform:   types.Platforms.Twitter,
 			Location:   "1469221200140574721",
@@ -248,7 +267,7 @@ func Test_ProofChain_RestoreValidator(t *testing.T) {
 		created_at, _ := util.TimestampStringToTime("1647503071")
 		pc := ProofChain{
 			Action:    types.Actions.Create,
-			Persona:   MarshalPersona(pk),
+			Persona:   MarshalAvatar(pk),
 			Identity:  "yeiwb",
 			Location:  "1504363098328924163",
 			Platform:  types.Platforms.Twitter,

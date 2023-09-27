@@ -21,7 +21,7 @@ func Test_Proof_Revalidate(t *testing.T) {
 		orig_created_at, _ := util.TimestampStringToTime("1647503071")
 		pc := ProofChain{
 			Action:    types.Actions.Create,
-			Persona:   MarshalPersona(pk),
+			Persona:   MarshalAvatar(pk),
 			Identity:  "yeiwb",
 			Location:  "1504363098328924163",
 			Platform:  types.Platforms.Twitter,
@@ -80,7 +80,7 @@ func Test_FindAllProofByPersona(t *testing.T) {
 		orig_created_at, _ := util.TimestampStringToTime("1647503071")
 		pc := ProofChain{
 			Action:    types.Actions.Create,
-			Persona:   MarshalPersona(pk),
+			Persona:   MarshalAvatar(pk),
 			Identity:  "yeiwb",
 			Location:  "1504363098328924163",
 			Platform:  types.Platforms.Twitter,
@@ -95,7 +95,7 @@ func Test_FindAllProofByPersona(t *testing.T) {
 
 		pc2 := ProofChain{
 			Action:    types.Actions.Create,
-			Persona:   MarshalPersona(pk),
+			Persona:   MarshalAvatar(pk),
 			Identity:  "0x....",
 			Location:  "",
 			Platform:  types.Platforms.Ethereum,

@@ -64,7 +64,7 @@ func proofUpload(c *gin.Context) {
 		return
 	}
 
-	if err = triggerArweave(model.MarshalPersona(pubkey)); err != nil {
+	if err = triggerArweave(model.MarshalAvatar(pubkey)); err != nil {
 		// Do not errorResp here, since it is a tolerable error.
 		l.Warnf("error sending arweave upload message: %v", err)
 	}

@@ -35,6 +35,7 @@ func Init(autoMigrate bool) {
 		err = DB.AutoMigrate(
 			&Proof{},
 			&ProofChain{},
+			&AvatarAlias{},
 		)
 		if err != nil {
 			panic(err)

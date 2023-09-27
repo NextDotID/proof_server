@@ -35,7 +35,7 @@ func (Proof) TableName() string {
 }
 
 func FindAllProofByPersona(persona any, orderBy string) (proofs []Proof, err error) {
-	marshaled_persona := MarshalPersona(persona)
+	marshaled_persona := MarshalAvatar(persona)
 	proofs = make([]Proof, 0)
 	tx := ReadOnlyDB.Model(&Proof{}).Where("persona = ?", marshaled_persona).Order(orderBy).Find(&proofs)
 	if tx.Error != nil {
