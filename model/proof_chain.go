@@ -110,6 +110,10 @@ func (pc *ProofChain) ToProofChainItem() ProofChainItem {
 }
 
 func (pc *ProofChain) createProof() (err error) {
+	if pc.Platform == types.Platforms.NextID {
+		return pc.CreateAlias()
+	}
+
 	proof_condition := Proof{
 		Persona:  pc.Persona,
 		Platform: pc.Platform,
@@ -136,6 +140,9 @@ func (pc *ProofChain) createProof() (err error) {
 }
 
 func (pc *ProofChain) deleteProof() (err error) {
+	if pc.Platform == types.Platforms.NextID {
+		return pc.DeleteAlias()
+	}
 	tx := DB.Delete(&Proof{}, Proof{
 		Persona:  pc.Persona,
 		Platform: pc.Platform,
@@ -191,6 +198,34 @@ func (pc *ProofChain) RestoreValidator() (v *validator.Base, err error) {
 	}
 
 	return v, nil
+}
+
+func (pc *ProofChain) CreateAlias() (err error) {
+	if pc.Platform != types.Platforms.NextID {
+		return xerrors.New("Cannot create alias on a non-nextid ProofChain record")
+	}
+	alias := AvatarAlias{
+		CreatedAt:    time.Now(),
+		Avatar:       MarshalAvatar(pc.Persona),
+		Alias:        MarshalAvatar(pc.Identity),
+		ProofChainID: pc.ID,
+	}
+	tx := DB.Create(&alias)
+	if tx.Error != nil {
+		return xerrors.Errorf("%w", tx.Error)
+	}
+	return nil
+}
+
+func (pc *ProofChain) DeleteAlias() (err error) {
+	if pc.Platform != types.Platforms.NextID {
+		return xerrors.New("Cannot delete alias on a non-nextid ProofChain record")
+	}
+	tx := DB.Delete(&AvatarAlias{}, AvatarAlias{
+		Avatar: MarshalAvatar(pc.Persona),
+		Alias:  MarshalAvatar(pc.Identity),
+	})
+	return tx.Error
 }
 
 // MarshalAvatar accepts *ecdsa.Pubkey | string type of pubkey,
