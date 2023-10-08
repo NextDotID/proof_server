@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func GenerateAliasTo(avatarPubkey any) (string){
+func GenerateAliasTo(avatarPubkey any) string {
 	pc1 := GenerateProofChain()
 
 	avatar := AvatarAlias{

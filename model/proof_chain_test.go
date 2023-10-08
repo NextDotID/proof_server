@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func GenerateProofChain() (*ProofChain) {
+func GenerateProofChain() *ProofChain {
 	pk, _ := crypto.GenerateKeypair()
 	pc := ProofChain{
 		Action:    types.Actions.Create,
