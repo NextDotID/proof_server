@@ -1,6 +1,7 @@
 FORMAT: 1A
 
 # Changelog
+  - <2023-10-09 Mon> :: GET /v1/proof: `alias`
   - <2023-09-07 Thu> :: GET /v1/proofchain: rename `public_key` to `avatar`
   - <2022-12-14 Wed> :: GET /v1/proof: `sort` and `order`
   - <2022-10-21 Fri> :: GET /v1/proof: `activated_at` for all avatar
@@ -188,6 +189,7 @@ Request failed.
       + next (number, required) - Next page. `0` if current page is the last one.
     + ids (array[object], required) - All IDs found. Will be empty array if not found.
       + avatar (string, required) - Avatar public key
+      + alias (array[string], required) - Alias of this avatar.
       + last_arweave_id (string, required) - Arweave transaction ID of last proof this avatar signed
       + activated_at (string, required) - Last activation time of this avatar. (timestamp, unit: second)
       + proofs (array[object], required) - All proofs under this Avatar
@@ -209,6 +211,7 @@ Request failed.
           },
           "ids": [{
             "avatar": "0x04c7cacde73af939c35d527b34e0556ea84bab27e6c0ed7c6c59be70f6d2db59c206b23529977117dc8a5d61fa848f94950422b79d1c142bcf623862e49f9e6575",
+            "alias": ["0x048847323c57cb1f542d00f0b04188bbdd0a26c6510e0c79d6aa1f37e25381ae828ee0c83280a10c21f2cd6ece5ac2af2c57793b92e6801f12ec70850989cfe050"],
             "last_arweave_id": "xxxxxxx",
             "activated_at": "1643099438",
             "proofs": [{

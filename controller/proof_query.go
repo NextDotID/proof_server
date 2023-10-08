@@ -42,6 +42,7 @@ type ProofQueryPaginationResponse struct {
 type ProofQueryResponseSingle struct {
 	Persona       string                          `json:"persona"`
 	Avatar        string                          `json:"avatar"`
+	Alias         []string                        `json:"alias"`
 	LastArweaveID string                          `json:"last_arweave_id"`
 	ActivatedAt   string                          `json:"activated_at"`
 	Proofs        []ProofQueryResponseSingleProof `json:"proofs"`
@@ -200,9 +201,16 @@ func performProofQuery(req ProofQueryRequest) ([]ProofQueryResponseSingle, Proof
 			activatedAt = strconv.FormatInt(latest_pc.CreatedAt.Unix(), 10)
 		}
 
+		aliases, err := model.FindAllAliasByAvatar(persona)
+		if err != nil {
+			l.Warnf("Error when fetching alias for %s: %s", persona, err.Error())
+			aliases = make([]string, 0, 0)
+		}
+
 		single := ProofQueryResponseSingle{
 			Persona:     persona,
 			Avatar:      persona,
+			Alias:       aliases,
 			ActivatedAt: activatedAt,
 			Proofs: lo.Map(proofs, func(proof model.Proof, _index int) ProofQueryResponseSingleProof {
 				return ProofQueryResponseSingleProof{
