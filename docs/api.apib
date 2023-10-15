@@ -1,6 +1,10 @@
 FORMAT: 1A
 
 # Changelog
+  - <2023-10-13 Fri> :: APIs for `subkey`
+    - GET /v1/subkey
+    - POST /v1/subkey/payload
+    - POST /v1/subkey
   - <2023-10-09 Mon> :: GET /v1/proof: `alias`
   - <2023-09-07 Thu> :: GET /v1/proofchain: rename `public_key` to `avatar`
   - <2022-12-14 Wed> :: GET /v1/proof: `sort` and `order`
@@ -478,3 +482,95 @@ Internal error.
   + Attributes
 
     + message (string, required) - Message of which part goes wrong.
+
+# Group Subkey
+
+Format of `subkey_public_key` field:
+
+- for `algorighm: "rs256"` : TODO
+- for `algorighm: "rs256"` : TODO
+- for `algorighm: "secp256k1"` : TODO
+
+Format of `signature` field:
+
+- for `algorighm: "rs256"` : TODO
+- for `algorighm: "rs256"` : TODO
+- for `algorighm: "secp256k1"` : TODO
+
+## Query an existed subkey with subkey or Avatar public key [GET /v1/subkey]
+
++ Request
+
+    + Parameters
+
+      + type (string, required) - `avatar` or `subkey` , determines which type this public key is.
+      + public_key (string, required) - Public key to query. See format above for what this field should be.
+
++ Response 200 (application/json)
+
+  + Attributes (object)
+
+    + subkeys (array[object], required) - All subkeys queried
+      + public_key (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
+      + algorithm (string, required) - Algorithm of this subkey (now supporting `rs256`, `ES256` and `secp256k1`)
+      + subkey_public_key (string, required) - Public key of this subkey. See description above for format.
+      + name (string, required) - Name of this subkey. Usually named by user.
+      + issuer (string, required) - Issuer of this key. Usually it is the website domain / application name which needs this binding
+      + device_name (string, required) - Device name which provides this key. Usually it is device model name (like `iPhone 15 Pro`), OS name (like `Linux`, not hostname) or browser name (like `User-Agent`).
+      + created_at (number, required) - Timestamp of when this subkey binding is created.
+
+  + Body
+
+        {
+          "subkeys": [{
+            "public_key": "0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3",
+            "algorighm": "secp256k1",
+            "subkey_public_key": "TODO",
+            "name": "My YubiKey",
+            "created_at": 1697377298
+          }]
+        }
+
+## Get sign payload for subkey modification [POST /v1/subkey/payload]
+
++ Request
+
+    + Attributes (object)
+
+      + public_key (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
+      + algorithm (string, required) - Algorithm of this subkey (now supporting `rs256`, `es256` and `secp256k1`)
+      + subkey_public_key (string, required) - Public key of this subkey. See description above for format.
+      + issuer (string, required) - Issuer of this key. Usually it is the website domain / application name which needs this binding
+      + device_name (string, required) - Device name which provides this key. Usually it is device model name (like `iPhone 15 Pro`), OS name (like `Linux`, not hostname) or browser name (like `User-Agent`).
+      + name (string, required) - Name of this subkey. Usually named by user.
+
++ Response 200 (application/json)
+
+  + Attributes (object)
+
+    + sign_payload (string, required) - Payload subkey should sign on. TODO: define detail of this sign payload.
+
++ Response 400 (application/json)
+
+`message` should contains one of:
+
+- `param error` : parameters error
+- `already binded` : This subkey has already binded with given Avatar.
+
+## Bind or unbind a new subkey to an avatar [POST /v1/subkey]
+
++ Request
+
+    + Attributes (object)
+
+      + public_key (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
+      + algorithm (string, required) - Algorithm of this subkey (now supporting `rs256`, `es256` and `secp256k1`)
+      + subkey_public_key (string, required) - Public key of this subkey. See description above for format.
+      + issuer (string, required) - Issuer of this key. Usually it is the website domain / application name which needs this binding.
+      + device_name (string, required) - Device name which provides this key. Usually it is device model name (like `iPhone 15 Pro`), OS name (like `Linux`, not hostname) or browser name (like `User-Agent`).
+      + name (string, required) - Name of this subkey. Usually named by user.
+      + signature (string, required) - Signature created by this subkey with payload generated in `POST /v1/subkey/payload`.
+
++ Response 200 (application/json)
+
+Success. Returns an empty object `{}` .
