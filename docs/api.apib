@@ -286,6 +286,44 @@ Not found.
 
     + message (string, required) - Message of which part goes wrong.
 
+## Restore a public key behind a proof signature [POST /v1/proof/restore_pubkey]
+
++ Request (application/json)
+
+  + Attributes (object)
+
+    + action (string, required) - Action (`create` / `delete`)
+    + platform (string, required) - Target platform. See table above for all available platforms. See table above for all available values.
+    + identity (string, required) - Identity in target platform to proof. Usually a "username" or "screen name". See [README.md](./README.md).
+    + uuid (string, required) - UUID of this chain link. Use the exact value from `POST /v1/proof/payload`.
+    + created_at (string, required) - Creation time of this chain link (UNIX timestamp, unit: second). Use the exact value from `POST /v1/proof/payload`.
+    + previous (string, required) - Last chain link signature before this proof signature is generated. Should be a bae64 or empty string.
+    + signature (string, required) - Signature signed by Avatar private key, BASE64-ed.
+
+  + Body
+
+        {
+          "action": "create",
+          "platform": "twitter",
+          "identity": "yeiwb",
+          "uuid": "f26593f3-3b05-4979-934a-f823a7380d05",
+          "created_at": "1647332405",
+          "previous": "0aF+vdyS8bU0eA/beKVjrPgAIqeWwD6a6wvb3xLYz/lO4IfYATztpJTggoqUco0C9pI4lNJ5Vd9DNbNmuD9DUgE=",
+          "signature": "cakVrOig6RCA5U8iffo7D6BXkeIpELvzY/H7m6V+Vw0qSlSGOnbhyvE+J54Cmwv/9S/6QwU41MwSY8nRwtqM6Rs="
+        }
+
++ Response 201 (application/json)
+
+  + Attributes (object)
+
+    + public_key (string, required) - Public key of NextID Avatar in compressed format (`/^0x[0-9a-f]{65}$/`).
+
+  + Body
+
+        {
+          "public_key": "0x020d2ee3a597c24c66717dba01d7d14cb55e307834fe23428bd85c64249111f08a"
+        }
+
 ## Get one single ProofChain under an Avatar [GET /v1/proofchain]
 
 + Request
