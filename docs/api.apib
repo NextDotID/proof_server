@@ -485,48 +485,60 @@ Internal error.
 
 # Group Subkey
 
-Format of `subkey_public_key` field:
+Format of `public_key` field:
 
-- for `algorighm: "rs256"` : TODO
-- for `algorighm: "rs256"` : TODO
-- for `algorighm: "secp256k1"` : TODO
+- for `algorighm: "rs256"` : CBOR encoded public key structure (hashed with Base64, see below)
+- for `algorighm: "es256"` : CBOR encoded public key structure (hashed with Base64, see below)
+- for `algorighm: "secp256k1"` : `0xCOMPRESSED_PUBKEY_HEXSTRING` or `0xUNCOMPRESSED_PUBKEY_HEXSTRING`
 
 Format of `signature` field:
 
 - for `algorighm: "rs256"` : TODO
-- for `algorighm: "rs256"` : TODO
+- for `algorighm: "es256"` : TODO
 - for `algorighm: "secp256k1"` : TODO
+
+**About CBOR encoded public key structure**
+
+Original struct:
+
+```js
+{
+  // TODO
+}
+```
 
 ## Query an existed subkey with subkey or Avatar public key [GET /v1/subkey]
 
 + Request
 
+NOTICE: One and only one of field `subkey` and `avatar` should appear.
+
     + Parameters
 
-      + type (string, required) - `avatar` or `subkey` , determines which type this public key is.
-      + public_key (string, required) - Public key to query. See format above for what this field should be.
+      + subkey (string, optional) - Public key of an subkey to query. See format above for what this field should be.
+      + avatar (string, optional) - Public key of an avatar to query. Should be `0xCOMPRESSED_PUBKEY_HEXSTRING` or `0xUNCOMPRESSED_PUBKEY_HEXSTRING`.
 
 + Response 200 (application/json)
 
   + Attributes (object)
 
-    + subkeys (array[object], required) - All subkeys queried
-      + public_key (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
-      + algorithm (string, required) - Algorithm of this subkey (now supporting `rs256`, `ES256` and `secp256k1`)
-      + subkey_public_key (string, required) - Public key of this subkey. See description above for format.
+    + subkeys (array[object], required) - All subkeys found.
+      + avatar (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
+      + algorithm (string, required) - Algorithm of this subkey (now supporting `RS256`, `ES256` and `secp256k1`)
+      + public_key (string, required) - Public key of this subkey. See description above for format.
       + name (string, required) - Name of this subkey. Usually named by user.
-      + issuer (string, required) - Issuer of this key. Usually it is the website domain / application name which needs this binding
-      + device_name (string, required) - Device name which provides this key. Usually it is device model name (like `iPhone 15 Pro`), OS name (like `Linux`, not hostname) or browser name (like `User-Agent`).
+      + rp_id (string, required) - Relying Party Identifier. Usually it is the website domain / application name which needs this binding like `mastodon.org`. [W3C doc](https://www.w3.org/TR/webauthn-2/#rp-id)
       + created_at (number, required) - Timestamp of when this subkey binding is created.
 
   + Body
 
         {
           "subkeys": [{
-            "public_key": "0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3",
-            "algorighm": "secp256k1",
-            "subkey_public_key": "TODO",
+            "avatar": "0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3",
+            "algorighm": "RS256",
+            "public_key": "TODO",
             "name": "My YubiKey",
+            "rp_id": "mastodon.org",
             "created_at": 1697377298
           }]
         }
