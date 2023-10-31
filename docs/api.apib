@@ -487,23 +487,77 @@ Internal error.
 
 Format of `public_key` field:
 
-- for `algorighm: "rs256"` : CBOR encoded public key structure (hashed with Base64, see below)
-- for `algorighm: "es256"` : CBOR encoded public key structure (hashed with Base64, see below)
+- for `algorighm: "rs256"` : TODO
+- for `algorighm: "es256"` : `0xX_CONCAT_Y_64BYTES_HEXSTRING`
 - for `algorighm: "secp256k1"` : `0xCOMPRESSED_PUBKEY_HEXSTRING` or `0xUNCOMPRESSED_PUBKEY_HEXSTRING`
 
 Format of `signature` field:
 
 - for `algorighm: "rs256"` : TODO
-- for `algorighm: "es256"` : TODO
-- for `algorighm: "secp256k1"` : TODO
+- for `algorighm: "es256"` : `0xR_CONCAT_S`
+- for `algorighm: "secp256k1"` : `0xR_CONCAT_S_CONCAT_V`
 
 **About CBOR encoded public key structure**
 
-Original struct:
+Example: struct given by web browser:
+
+```js
+// Here's a sample struct (ES256) BEFORE CBOR encode
+// Reference doc (IMPORTANT): https://www.iana.org/assignments/cose/cose.xhtml
+{
+  // COSE Key Types
+  // Key: refer to "COSE Key Common Parameters" paragraph
+  // Value: refer to "COSE Key Types" paragraph
+  // "kty" => "EC2" (Elliptic Curve Keys w/ x- and y-coordinate pair)
+  1: 2,
+  // COSE Algorithms
+  // Key: refer to "COSE Key Common Parameters" paragraph
+  // Value: refer to "COSE Algorithms" paragraph
+  // "alg" => "ES256" (ECDSA w/ SHA-256)
+  3: -7,
+  // COSE Elliptic Curves
+  // Key: refer to "COSE Key Type Parameters" paragraph
+  // Value: refer to "COSE Elliptic Curves" paragraph
+  // "crv" => "P-256" (NIST P-256 also known as secp256r1)
+  // (Notice: this is secp256**R**1, not secp256**K**1)
+  -1: 1,
+  // COSE Key Type Parameters
+  // Key refer to "COSE Key Type Parameters" paragraph
+  // "x" => X cordinate of this public key
+  -2: Uint8Array(32),
+  // "y" => Y cordinate of this public key
+  -3: Uint8Array(32),
+}
+```
+
+What ProofService wants (typical flow) for `es256`:
+
+1. Guide user to login with their passkey
+2. Get public key structure (like above) from browser / OS (you may need CBOR decode)
+3. extract `X` and `Y` from the struct
+4. Format into `0xX_CONCAT_Y_64_BYTES_HEXSTRING`, or in other word `/^0x[0-9a-f]{128}/`
+like `0x1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF`
+
+**About CBOR encoded signature struct**
+
+Response after calling `await navigator.credentials.get()` should be like:
 
 ```js
 {
-  // TODO
+
+  authenticatorData: Uint8Array,
+  // Literal string of clientData, see below
+  clientDataJSON: Uint8Array,
+  signature: Uint8Array,
+}
+
+// Struct of clientDataJSON:
+{
+  "type": "webauthn.get",
+  // Base64-encoded 32-byte sign payload. Usually it is `base64.encode(sha256(original_payload))`
+  "challenge": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+  "origin": "http://localhost:3000",
+  "crossOrigin": false
 }
 ```
 
@@ -524,7 +578,7 @@ NOTICE: One and only one of field `subkey` and `avatar` should appear.
 
     + subkeys (array[object], required) - All subkeys found.
       + avatar (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
-      + algorithm (string, required) - Algorithm of this subkey (now supporting `RS256`, `ES256` and `secp256k1`)
+      + algorithm (string, required) - Algorithm of this subkey (now supporting `ES256` and `secp256k1`)
       + public_key (string, required) - Public key of this subkey. See description above for format.
       + name (string, required) - Name of this subkey. Usually named by user.
       + rp_id (string, required) - Relying Party Identifier. Usually it is the website domain / application name which needs this binding like `mastodon.org`. [W3C doc](https://www.w3.org/TR/webauthn-2/#rp-id)
@@ -535,8 +589,8 @@ NOTICE: One and only one of field `subkey` and `avatar` should appear.
         {
           "subkeys": [{
             "avatar": "0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3",
-            "algorighm": "RS256",
-            "public_key": "TODO",
+            "algorighm": "ES256",
+            "public_key": "0x1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF",
             "name": "My YubiKey",
             "rp_id": "mastodon.org",
             "created_at": 1697377298
@@ -549,18 +603,37 @@ NOTICE: One and only one of field `subkey` and `avatar` should appear.
 
     + Attributes (object)
 
-      + public_key (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
+      + avatar (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
       + algorithm (string, required) - Algorithm of this subkey (now supporting `rs256`, `es256` and `secp256k1`)
-      + subkey_public_key (string, required) - Public key of this subkey. See description above for format.
-      + issuer (string, required) - Issuer of this key. Usually it is the website domain / application name which needs this binding
-      + device_name (string, required) - Device name which provides this key. Usually it is device model name (like `iPhone 15 Pro`), OS name (like `Linux`, not hostname) or browser name (like `User-Agent`).
+      + public_key (string, required) - Public key of this subkey. See description above for format.
+      + rp_id (string, required) - Relying Party Identifier. Usually it is the website domain / application name which needs this binding like `mastodon.org`. [W3C doc](https://www.w3.org/TR/webauthn-2/#rp-id)
       + name (string, required) - Name of this subkey. Usually named by user.
+
+  + Body
+
+        {
+          "avatar": "0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3",
+          "algorighm": "ES256",
+          "public_key": "0x1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF",
+          "name": "My YubiKey",
+          "rp_id": "mastodon.org",
+        }
 
 + Response 200 (application/json)
 
   + Attributes (object)
 
-    + sign_payload (string, required) - Payload subkey should sign on. TODO: define detail of this sign payload.
+    + sign_payload (string, required) - Payload subkey should sign
+      on. For `algorighm: es256` and `algorighm: secp256k1`, it should
+      be Base64 decoded into 32-bytes binary. The binary should be set
+      as "sign challenge".
+
+  + Body
+
+        {
+          // Sample: base64.encode(32_BYTE_ZEROES)
+          "sign_payload": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+       }
 
 + Response 400 (application/json)
 
@@ -575,11 +648,10 @@ NOTICE: One and only one of field `subkey` and `avatar` should appear.
 
     + Attributes (object)
 
-      + public_key (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
+      + avatar (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
       + algorithm (string, required) - Algorithm of this subkey (now supporting `rs256`, `es256` and `secp256k1`)
-      + subkey_public_key (string, required) - Public key of this subkey. See description above for format.
-      + issuer (string, required) - Issuer of this key. Usually it is the website domain / application name which needs this binding.
-      + device_name (string, required) - Device name which provides this key. Usually it is device model name (like `iPhone 15 Pro`), OS name (like `Linux`, not hostname) or browser name (like `User-Agent`).
+      + public_key (string, required) - Public key of this subkey. See description above for format.
+      + rp_id (string, required) - Relying Party Identifier. Usually it is the website domain / application name which needs this binding like `mastodon.org`. [W3C doc](https://www.w3.org/TR/webauthn-2/#rp-id)
       + name (string, required) - Name of this subkey. Usually named by user.
       + signature (string, required) - Signature created by this subkey with payload generated in `POST /v1/subkey/payload`.
 
