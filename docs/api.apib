@@ -288,6 +288,11 @@ Not found.
 
 ## Restore a public key behind a proof signature [POST /v1/proof/restore_pubkey]
 
+What you should provide in this API
+
+- `action`, `platform`, `identity`, `proof_post`. OR,
+- `action`, `platform`, `idnetity`, `uuid`, `created_at`, `previous`, `signature`
+
 + Request (application/json)
 
   + Attributes (object)
@@ -295,10 +300,11 @@ Not found.
     + action (string, required) - Action (`create` / `delete`)
     + platform (string, required) - Target platform. See table above for all available platforms. See table above for all available values.
     + identity (string, required) - Identity in target platform to proof. Usually a "username" or "screen name". See [README.md](./README.md).
-    + uuid (string, required) - UUID of this chain link. Use the exact value from `POST /v1/proof/payload`.
-    + created_at (string, required) - Creation time of this chain link (UNIX timestamp, unit: second). Use the exact value from `POST /v1/proof/payload`.
-    + previous (string, required) - Last chain link signature before this proof signature is generated. Should be a bae64 or empty string.
-    + signature (string, required) - Signature signed by Avatar private key, BASE64-ed.
+    + proof_post (string, optional) - Whole proof post content on target platfrom. Should not contains any of HTML tag.
+    + uuid (string, optional) - UUID of this chain link. Use the exact value from `POST /v1/proof/payload`.
+    + created_at (string, optional) - Creation time of this chain link (UNIX timestamp, unit: second). Use the exact value from `POST /v1/proof/payload`.
+    + previous (string, optional) - Last chain link signature before this proof signature is generated. Should be a bae64 or empty string.
+    + signature (string, optional) - Signature signed by Avatar private key, BASE64-ed.
 
   + Body
 
@@ -311,6 +317,14 @@ Not found.
           "previous": "0aF+vdyS8bU0eA/beKVjrPgAIqeWwD6a6wvb3xLYz/lO4IfYATztpJTggoqUco0C9pI4lNJ5Vd9DNbNmuD9DUgE=",
           "signature": "cakVrOig6RCA5U8iffo7D6BXkeIpELvzY/H7m6V+Vw0qSlSGOnbhyvE+J54Cmwv/9S/6QwU41MwSY8nRwtqM6Rs="
         }
+
+        {
+          "action": "create",
+          "platform": "twitter",
+          "identity": "yeiwb",
+          "proof_post": "🎭 Verify @yeiwb with @NextDotID .\nSig: cakVrOig6RCA5U8iffo7D6BXkeIpELvzY/H7m6V+Vw0qSlSGOnbhyvE+J54Cmwv/9S/6QwU41MwSY8nRwtqM6Rs=\nMisc: f26593f3-3b05-4979-934a-f823a7380d05|1694961172|0aF+vdyS8bU0eA/beKVjrPgAIqeWwD6a6wvb3xLYz/lO4IfYATztpJTggoqUco0C9pI4lNJ5Vd9DNbNmuD9DUgE="
+        }
+
 
 + Response 201 (application/json)
 
