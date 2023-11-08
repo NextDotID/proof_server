@@ -35,7 +35,7 @@ func proofExists(c *gin.Context) {
 		return
 	}
 
-	personaPubkey, err := crypto.StringToPubkey(req.PersonaPubkeyHex)
+	personaPubkey, err := crypto.StringToSecp256k1Pubkey(req.PersonaPubkeyHex)
 	if err != nil {
 		errorResp(c, http.StatusBadRequest, xerrors.Errorf("Public key unmarshal error"))
 		return

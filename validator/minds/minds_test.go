@@ -20,7 +20,7 @@ func before_each(t *testing.T) {
 }
 
 func generate() Minds {
-	pubkey, _ := crypto.StringToPubkey("0x0398a22485635ed2262094103cfdc1511b785011e32a2eb16e5b32fd8561ea6ad8")
+	pubkey, _ := crypto.StringToSecp256k1Pubkey("0x0398a22485635ed2262094103cfdc1511b785011e32a2eb16e5b32fd8561ea6ad8")
 	created_at, _ := util.TimestampStringToTime("1664179121")
 	uuid := uuid.MustParse("3d770975-5085-411b-91e4-661bcc407aa9")
 

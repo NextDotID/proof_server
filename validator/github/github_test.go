@@ -16,7 +16,7 @@ const (
 )
 
 func generate() Github {
-	pubkey, _ := crypto.StringToPubkey(test_pubkey)
+	pubkey, _ := crypto.StringToSecp256k1Pubkey(test_pubkey)
 	created_at, _ := util.TimestampStringToTime("1647329002")
 	return Github{
 		Base: &validator.Base{
@@ -33,7 +33,7 @@ func generate() Github {
 }
 
 func generate2() Github {
-	pubkey, _ := crypto.StringToPubkey("0x02d7c5e01bedf1c993f40ec302d9bf162620daea93a7155cd9a8019ae3a2c2a476")
+	pubkey, _ := crypto.StringToSecp256k1Pubkey("0x02d7c5e01bedf1c993f40ec302d9bf162620daea93a7155cd9a8019ae3a2c2a476")
 
 	created_at, _ := util.TimestampStringToTime("1649060702")
 	return Github{

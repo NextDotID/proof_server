@@ -19,7 +19,7 @@ func before_each() {
 }
 
 func generate() Discord {
-	pubkey, _ := crypto.StringToPubkey("0x02d7c5e01bedf1c993f40ec302d9bf162620daea93a7155cd9a8019ae3a2c2a476")
+	pubkey, _ := crypto.StringToSecp256k1Pubkey("0x02d7c5e01bedf1c993f40ec302d9bf162620daea93a7155cd9a8019ae3a2c2a476")
 	created_at, _ := util.TimestampStringToTime("1649299881")
 	return Discord{
 		Base: &validator.Base{

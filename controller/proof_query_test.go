@@ -21,7 +21,7 @@ const (
 )
 
 func insert_proof(t *testing.T) {
-	pubkey, _ := crypto.StringToPubkey(persona)
+	pubkey, _ := crypto.StringToSecp256k1Pubkey(persona)
 	validators := []validator.Base{
 		{
 			Platform:      types.Platforms.Twitter,
@@ -57,8 +57,8 @@ func insert_proof(t *testing.T) {
 }
 
 func insert_proof_exact(t *testing.T) {
-	pubkey, _ := crypto.StringToPubkey(persona)
-	personaPk, _ := crypto.GenerateKeypair()
+	pubkey, _ := crypto.StringToSecp256k1Pubkey(persona)
+	personaPk, _ := crypto.GenerateSecp256k1Keypair()
 	validators := []validator.Base{
 		{
 			Platform:      types.Platforms.Twitter,
@@ -106,7 +106,7 @@ func insert_proof_exact(t *testing.T) {
 
 // / Insert Random Persona <-> Given ETH public key binding.
 func insert_eth_proof(t *testing.T, eth_pub_key *ecdsa.PublicKey) {
-	personaPk, _ := crypto.GenerateKeypair()
+	personaPk, _ := crypto.GenerateSecp256k1Keypair()
 	validator := validator.Base{
 		Platform:         types.Platforms.Ethereum,
 		Previous:         "",
@@ -200,7 +200,7 @@ func Test_proofQuery(t *testing.T) {
 
 	t.Run("pagination", func(t *testing.T) {
 		before_each(t)
-		eth_pubkey, _ := crypto.GenerateKeypair()
+		eth_pubkey, _ := crypto.GenerateSecp256k1Keypair()
 		lo.Times(45, func(i int) int {
 			insert_eth_proof(t, eth_pubkey)
 			return 0

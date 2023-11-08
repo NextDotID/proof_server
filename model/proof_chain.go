@@ -74,7 +74,7 @@ func (ProofChain) TableName() string {
 }
 
 func (pc *ProofChain) Pubkey() *ecdsa.PublicKey {
-	pubkey, err := crypto.StringToPubkey(pc.Persona)
+	pubkey, err := crypto.StringToSecp256k1Pubkey(pc.Persona)
 	if err != nil {
 		return nil
 	}
@@ -235,7 +235,7 @@ func MarshalAvatar(persona any) string {
 	case *ecdsa.PublicKey:
 		return "0x" + crypto.CompressedPubkeyHex(p)
 	case string:
-		pubkey, err := crypto.StringToPubkey(p)
+		pubkey, err := crypto.StringToSecp256k1Pubkey(p)
 		if err != nil {
 			return ""
 		}

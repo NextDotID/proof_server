@@ -19,7 +19,7 @@ func before_each(t *testing.T) {
 }
 
 func generate() Keybase {
-	pubkey, _ := mycrypto.StringToPubkey("0x02a68c664d4165a7abbb0b4221831153c5f3b0ecb6f994ba95c696eb64ca37eebc")
+	pubkey, _ := mycrypto.StringToSecp256k1Pubkey("0x02a68c664d4165a7abbb0b4221831153c5f3b0ecb6f994ba95c696eb64ca37eebc")
 	created_at, _ := util.TimestampStringToTime("1647329002")
 
 	return Keybase{

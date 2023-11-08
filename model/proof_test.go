@@ -17,7 +17,7 @@ func Test_Proof_Revalidate(t *testing.T) {
 		before_each(t)
 		twitter.Init()
 
-		pk, _ := crypto.StringToPubkey("0x04666b700aeb6a6429f13cbb263e1bc566cd975a118b61bc796204109c1b351d19b7df23cc47f004e10fef41df82bad646b027578f8881f5f1d2f70c80dfcd8031")
+		pk, _ := crypto.StringToSecp256k1Pubkey("0x04666b700aeb6a6429f13cbb263e1bc566cd975a118b61bc796204109c1b351d19b7df23cc47f004e10fef41df82bad646b027578f8881f5f1d2f70c80dfcd8031")
 		orig_created_at, _ := util.TimestampStringToTime("1647503071")
 		pc := ProofChain{
 			Action:    types.Actions.Create,
@@ -76,7 +76,7 @@ func Test_FindAllProofByPersona(t *testing.T) {
 		before_each(t)
 		twitter.Init()
 
-		pk, _ := crypto.StringToPubkey("0x04666b700aeb6a6429f13cbb263e1bc566cd975a118b61bc796204109c1b351d19b7df23cc47f004e10fef41df82bad646b027578f8881f5f1d2f70c80dfcd8031")
+		pk, _ := crypto.StringToSecp256k1Pubkey("0x04666b700aeb6a6429f13cbb263e1bc566cd975a118b61bc796204109c1b351d19b7df23cc47f004e10fef41df82bad646b027578f8881f5f1d2f70c80dfcd8031")
 		orig_created_at, _ := util.TimestampStringToTime("1647503071")
 		pc := ProofChain{
 			Action:    types.Actions.Create,

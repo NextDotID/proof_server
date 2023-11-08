@@ -13,7 +13,7 @@ import (
 )
 
 func build() DNS {
-	pk, _ := crypto.StringToPubkey("0x028568e07ebf497b07a30f8a9d1731980736a4fac9d7c9c9b5682cb82dd3e774d7")
+	pk, _ := crypto.StringToSecp256k1Pubkey("0x028568e07ebf497b07a30f8a9d1731980736a4fac9d7c9c9b5682cb82dd3e774d7")
 	createdAt, _ := util.TimestampStringToTime("1664267795")
 	return DNS{
 		Base: &validator.Base{

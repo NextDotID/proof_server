@@ -45,7 +45,7 @@ func (nextID *NextID) GeneratePostPayload() (post map[string]string) {
 
 // GenerateSignPayload generates a string to be signed.  If empty, an error is occured internally.
 func (nextID *NextID) GenerateSignPayload() (payload string) {
-	targetAvatar, err := mycrypto.StringToPubkey(nextID.Identity)
+	targetAvatar, err := mycrypto.StringToSecp256k1Pubkey(nextID.Identity)
 	if err != nil {
 		return ""
 	}
@@ -79,7 +79,7 @@ func (nextID *NextID) Validate() (err error) {
 	targetSigParsed = strings.ToLower(targetSigParsed)
 	targetSigBytes := common.Hex2Bytes(targetSigParsed)
 
-	targetAvatar, err := mycrypto.StringToPubkey(nextID.Identity)
+	targetAvatar, err := mycrypto.StringToSecp256k1Pubkey(nextID.Identity)
 	if err != nil {
 		return xerrors.Errorf("Invalid target avatar: %s", nextID.Identity)
 	}

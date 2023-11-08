@@ -121,7 +121,7 @@ func (gh *Github) Validate() (err error) {
 		return xerrors.Errorf("error when parsing JSON: %w", err)
 	}
 
-	pubkey_recovered, err := crypto.StringToPubkey(payload.Persona)
+	pubkey_recovered, err := crypto.StringToSecp256k1Pubkey(payload.Persona)
 	if err != nil {
 		return xerrors.Errorf("error when recovering pubkey: %w", err)
 	}

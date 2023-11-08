@@ -26,7 +26,7 @@ func GenerateAliasTo(avatarPubkey any) string {
 
 func Test_FindAllAliasByAvatar(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		avatar, _ := crypto.GenerateKeypair()
+		avatar, _ := crypto.GenerateSecp256k1Keypair()
 		alias1 := GenerateAliasTo(avatar)
 		alias2 := GenerateAliasTo(alias1)
 		alias3 := GenerateAliasTo(alias1)

@@ -45,7 +45,7 @@ func proofPayload(c *gin.Context) {
 		return
 	}
 
-	parsed_pubkey, err := crypto.StringToPubkey(req.PublicKey)
+	parsed_pubkey, err := crypto.StringToSecp256k1Pubkey(req.PublicKey)
 	if err != nil {
 		errorResp(c, http.StatusBadRequest, xerrors.New("public key not recognized"))
 		return

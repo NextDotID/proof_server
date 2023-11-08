@@ -29,7 +29,7 @@ func getFileContent(t *testing.T, filename string) []byte {
 }
 
 func generate() Steam {
-	pk, _ := crypto.StringToPubkey("0x0392e26f86fd483265bc7ab39d20a0bd0a40d0079c4aba7dfbab11f591ff22bc3e")
+	pk, _ := crypto.StringToSecp256k1Pubkey("0x0392e26f86fd483265bc7ab39d20a0bd0a40d0079c4aba7dfbab11f591ff22bc3e")
 	createdAt, _ := util.TimestampStringToTime("1666257424")
 	return Steam{
 		Base: &validator.Base{
@@ -137,7 +137,7 @@ func Test_Validate(t *testing.T) {
 
 	t.Run("error if pubkey mismatch", func(t *testing.T) {
 		steam := generate()
-		pk, _ := crypto.GenerateKeypair()
+		pk, _ := crypto.GenerateSecp256k1Keypair()
 		steam.Pubkey = pk
 
 		err := steam.Validate()

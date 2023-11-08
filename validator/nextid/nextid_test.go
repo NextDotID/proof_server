@@ -14,8 +14,8 @@ import (
 )
 
 func GenerateNextIDTestData() (nextid *NextID, avatarSK, targetAvatarSK *ecdsa.PrivateKey) {
-	avatar, avatarSK := mycrypto.GenerateKeypair()
-	targetAvatar, targetAvatarSK := mycrypto.GenerateKeypair()
+	avatar, avatarSK := mycrypto.GenerateSecp256k1Keypair()
+	targetAvatar, targetAvatarSK := mycrypto.GenerateSecp256k1Keypair()
 	nextid = &NextID{
 		&validator.Base{
 			Platform:         types.Platforms.NextID,

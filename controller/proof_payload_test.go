@@ -37,7 +37,7 @@ func Test_proofPayload(t *testing.T) {
 
 	t.Run("with previous", func(t *testing.T) {
 		before_each(t)
-		pk, _ := crypto.StringToPubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
+		pk, _ := crypto.StringToSecp256k1Pubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
 
 		proof := model.ProofChain{
 			Persona:   "0x" + crypto.CompressedPubkeyHex(pk),

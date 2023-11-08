@@ -15,7 +15,7 @@ import (
 )
 
 func GenerateProofChain() *ProofChain {
-	pk, _ := crypto.GenerateKeypair()
+	pk, _ := crypto.GenerateSecp256k1Keypair()
 	pc := ProofChain{
 		Action:    types.Actions.Create,
 		Persona:   MarshalAvatar(pk),
@@ -35,7 +35,7 @@ func GenerateProofChain() *ProofChain {
 func Test_ProofChainFindLatest(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
-		pk, _ := crypto.StringToPubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
+		pk, _ := crypto.StringToSecp256k1Pubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
 
 		proof := ProofChain{
 			Persona:   "0x" + crypto.CompressedPubkeyHex(pk),
@@ -56,7 +56,7 @@ func Test_ProofChainFindLatest(t *testing.T) {
 func Test_ProofChainFindBySignature(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
-		pk, _ := crypto.StringToPubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
+		pk, _ := crypto.StringToSecp256k1Pubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
 
 		proof := ProofChain{
 			Persona:   "0x" + crypto.CompressedPubkeyHex(pk),
@@ -86,7 +86,7 @@ func Test_ProofChainFindBySignature(t *testing.T) {
 func Test_ProofChainCreateFromValidator(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
-		pk, _ := crypto.StringToPubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
+		pk, _ := crypto.StringToSecp256k1Pubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
 
 		v := validator.Base{
 			Platform:      types.Platforms.Twitter,
@@ -108,7 +108,7 @@ func Test_ProofChainCreateFromValidator(t *testing.T) {
 
 	t.Run("save extra", func(t *testing.T) {
 		before_each(t)
-		pk, _ := crypto.StringToPubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
+		pk, _ := crypto.StringToSecp256k1Pubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
 
 		v := validator.Base{
 			Platform:      types.Platforms.Ethereum,
@@ -130,7 +130,7 @@ func Test_ProofChainCreateFromValidator(t *testing.T) {
 
 	t.Run("with previous connected", func(t *testing.T) {
 		before_each(t)
-		pk, _ := crypto.StringToPubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
+		pk, _ := crypto.StringToSecp256k1Pubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
 		v := validator.Base{
 			Platform:      types.Platforms.Twitter,
 			Action:        types.Actions.Create,
@@ -162,7 +162,7 @@ func Test_ProofChainCreateFromValidator(t *testing.T) {
 	t.Run("cannot connect to previous", func(t *testing.T) {
 		before_each(t)
 
-		pk, _ := crypto.StringToPubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
+		pk, _ := crypto.StringToSecp256k1Pubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
 		v := validator.Base{
 			Previous:      MarshalSignature([]byte{1, 2, 3, 4}),
 			Platform:      types.Platforms.Twitter,
@@ -182,7 +182,7 @@ func Test_ProofChainCreateFromValidator(t *testing.T) {
 func Test_Apply(t *testing.T) {
 	t.Run("create and delete", func(t *testing.T) {
 		before_each(t)
-		pk, _ := crypto.StringToPubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
+		pk, _ := crypto.StringToSecp256k1Pubkey("0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3")
 
 		pc := ProofChain{
 			Action:    types.Actions.Create,
@@ -228,7 +228,7 @@ func Test_Apply(t *testing.T) {
 
 	t.Run("avoid duplicate", func(t *testing.T) {
 		before_each(t)
-		pk, _ := crypto.GenerateKeypair()
+		pk, _ := crypto.GenerateSecp256k1Keypair()
 		pc := ProofChain{
 			Action:    types.Actions.Create,
 			Persona:   MarshalAvatar(pk),
@@ -263,7 +263,7 @@ func Test_ProofChain_RestoreValidator(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		before_each(t)
 
-		pk, _ := crypto.StringToPubkey("0x04666b700aeb6a6429f13cbb263e1bc566cd975a118b61bc796204109c1b351d19b7df23cc47f004e10fef41df82bad646b027578f8881f5f1d2f70c80dfcd8031")
+		pk, _ := crypto.StringToSecp256k1Pubkey("0x04666b700aeb6a6429f13cbb263e1bc566cd975a118b61bc796204109c1b351d19b7df23cc47f004e10fef41df82bad646b027578f8881f5f1d2f70c80dfcd8031")
 		created_at, _ := util.TimestampStringToTime("1647503071")
 		pc := ProofChain{
 			Action:    types.Actions.Create,

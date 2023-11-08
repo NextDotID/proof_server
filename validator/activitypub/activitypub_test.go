@@ -12,7 +12,7 @@ import (
 )
 
 func GenerateMisskeyRecord() (ap *ActivityPub) {
-	pk, _ := crypto.StringToPubkey("03c683a83bdf0abae3c344855b55b5978fd22fbedae575bd1f540f919afbc19015")
+	pk, _ := crypto.StringToSecp256k1Pubkey("03c683a83bdf0abae3c344855b55b5978fd22fbedae575bd1f540f919afbc19015")
 	ca, _ := util.TimestampStringToTime("1671356397")
 	uuid := uuid.MustParse("4d89b36a-4e55-4c1f-93c8-c81b08f71b09")
 

@@ -19,7 +19,7 @@ func before_each(t *testing.T) {
 }
 
 func generate() Telegram {
-	pubkey, _ := mycrypto.StringToPubkey("0x04666b700aeb6a6429f13cbb263e1bc566cd975a118b61bc796204109c1b351d19b7df23cc47f004e10fef41df82bad646b027578f8881f5f1d2f70c80dfcd8031")
+	pubkey, _ := mycrypto.StringToSecp256k1Pubkey("0x04666b700aeb6a6429f13cbb263e1bc566cd975a118b61bc796204109c1b351d19b7df23cc47f004e10fef41df82bad646b027578f8881f5f1d2f70c80dfcd8031")
 	created_at, _ := util.TimestampStringToTime("1647503071")
 	return Telegram{
 		Base: &validator.Base{
@@ -37,7 +37,7 @@ func generate() Telegram {
 }
 
 func generateBase1024Encode() Telegram {
-	pubkey, _ := mycrypto.StringToPubkey("0x04d7c5e01bedf1c993f40ec302d9bf162620daea93a7155cd9a8019ae3a2c2a476873e66c7ab9c5dbf9a6bd24ef4432298e70c5c7e7b148a54724a1d7b59e06bd8")
+	pubkey, _ := mycrypto.StringToSecp256k1Pubkey("0x04d7c5e01bedf1c993f40ec302d9bf162620daea93a7155cd9a8019ae3a2c2a476873e66c7ab9c5dbf9a6bd24ef4432298e70c5c7e7b148a54724a1d7b59e06bd8")
 	created_at, _ := util.TimestampStringToTime("1650883741")
 	return Telegram{
 		Base: &validator.Base{

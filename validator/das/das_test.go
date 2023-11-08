@@ -18,7 +18,7 @@ func before_each(t *testing.T) {
 }
 
 func generate() Das {
-	pubkey, _ := mycrypto.StringToPubkey("0x03b0b5900f2106475027b9f80d249916baa3d0fb57071b9b41980a65868519f825")
+	pubkey, _ := mycrypto.StringToSecp256k1Pubkey("0x03b0b5900f2106475027b9f80d249916baa3d0fb57071b9b41980a65868519f825")
 	created_at, _ := util.TimestampStringToTime("1653842234")
 
 	return Das{

@@ -41,10 +41,10 @@ func generate() Ethereum {
 			Uuid:      uuid.New(),
 		},
 	}
-	_, persona_sk = mycrypto.GenerateKeypair()
+	_, persona_sk = mycrypto.GenerateSecp256k1Keypair()
 	eth.Pubkey = &persona_sk.PublicKey
 
-	_, wallet_sk = mycrypto.GenerateKeypair()
+	_, wallet_sk = mycrypto.GenerateSecp256k1Keypair()
 	eth.Identity = crypto.PubkeyToAddress(wallet_sk.PublicKey).Hex()
 
 	// Generate sig

@@ -41,7 +41,7 @@ func proofUpload(c *gin.Context) {
 	}
 
 	l.Infof("UPLOADING PROOF: %+v", req)
-	pubkey, err := mycrypto.StringToPubkey(req.PublicKey)
+	pubkey, err := mycrypto.StringToSecp256k1Pubkey(req.PublicKey)
 	if err != nil {
 		errorResp(c, 400, xerrors.Errorf("%w", err))
 		return

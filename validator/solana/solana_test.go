@@ -41,7 +41,7 @@ func generate() Solana {
 			Uuid:      uuid.New(),
 		},
 	}
-	_, personaPriv = mycrypto.GenerateKeypair()
+	_, personaPriv = mycrypto.GenerateSecp256k1Keypair()
 	sol.Pubkey = &personaPriv.PublicKey
 
 	walletPriv, _ = solana.NewRandomPrivateKey()

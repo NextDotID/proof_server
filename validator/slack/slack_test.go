@@ -20,7 +20,7 @@ func before_each(t *testing.T) {
 }
 
 func generate() Slack {
-	pubkey, _ := crypto.StringToPubkey("0x4ec73e36f64ea6e2aa28c101dcae56203e02bd56b4b08c7848b5e791c7bfb9ca2b30f657bd822756533731e201faf57a0aaf6af36bd51f921f7132c9830c6fdf")
+	pubkey, _ := crypto.StringToSecp256k1Pubkey("0x4ec73e36f64ea6e2aa28c101dcae56203e02bd56b4b08c7848b5e791c7bfb9ca2b30f657bd822756533731e201faf57a0aaf6af36bd51f921f7132c9830c6fdf")
 	created_at, _ := util.TimestampStringToTime("1677339048")
 	uuid := uuid.MustParse("5032b8b3-d91d-434e-be3f-f172267e4006")
 

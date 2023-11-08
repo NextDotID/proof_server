@@ -2,7 +2,9 @@ package crypto
 
 import (
 	"crypto/ecdsa"
+	"crypto/elliptic"
 	"fmt"
+	"math/big"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -47,9 +49,9 @@ func RecoverPubkeyFromPersonalSignature(payload string, signature []byte) (pubke
 	return pubkeyRecovered, nil
 }
 
-// GenerateKeypair generates a keypair.
+// GenerateSecp256k1Keypair generates a keypair.
 // For test purpose only.
-func GenerateKeypair() (publicKey *ecdsa.PublicKey, privateKey *ecdsa.PrivateKey) {
+func GenerateSecp256k1Keypair() (publicKey *ecdsa.PublicKey, privateKey *ecdsa.PrivateKey) {
 	privateKey, _ = crypto.GenerateKey()
 	publicKey = &privateKey.PublicKey
 	return publicKey, privateKey
@@ -72,32 +74,39 @@ func signPersonalHash(data []byte) []byte {
 	return crypto.Keccak256([]byte(messsage))
 }
 
-// StringToPubkey is compatible with comressed / uncompressed pubkey
+// StringToSecp256k1Pubkey is compatible with comressed / uncompressed pubkey
 // hex, and with / without '0x' head.
-func StringToPubkey(pk_str string) (*ecdsa.PublicKey, error) {
-	pk_str_parsed := strings.TrimPrefix(pk_str, "0x")
-	pk_str_parsed = strings.ToLower(pk_str_parsed)
-	pk_bytes := common.Hex2Bytes(pk_str_parsed)
-	return BytesToPubKey(pk_bytes)
+func StringToSecp256k1Pubkey(pkHex string) (*ecdsa.PublicKey, error) {
+	pkBytes := common.Hex2Bytes(strings.ToLower(strings.TrimPrefix(pkHex, "0x")))
+	return BytesToSecp256k1PubKey(pkBytes)
 }
 
-// BytesToPubKey is compatible with comressed / uncompressed pubkey
+// BytesToSecp256k1PubKey is compatible with comressed / uncompressed pubkey
 // bytes.
-func BytesToPubKey(pk_bytes []byte) (*ecdsa.PublicKey, error) {
-	var result *ecdsa.PublicKey
-	var err error
-	if len(pk_bytes) == 33 { // compressed
-		result, err = crypto.DecompressPubkey(pk_bytes)
+func BytesToSecp256k1PubKey(pkBytes []byte) (result *ecdsa.PublicKey, err error) {
+	if len(pkBytes) == 33 { // compressed
+		result, err = crypto.DecompressPubkey(pkBytes)
 	} else {
-		result, err = crypto.UnmarshalPubkey(pk_bytes)
+		result, err = crypto.UnmarshalPubkey(pkBytes)
 	}
-	if err != nil {
-		return nil, xerrors.Errorf("%w", err)
-	}
-	return result, nil
+	return
 }
 
 // CompressedPubkeyHex has no "0x".
 func CompressedPubkeyHex(pk *ecdsa.PublicKey) string {
 	return common.Bytes2Hex(crypto.CompressPubkey(pk))
+}
+
+// StringToSecp256r1Pubkey is compatible with
+// `X_CONCAT_Y_64_BYTES_HEXSTRING` public key representation.
+func StringToSecp256r1Pubkey(pkHex string) (*ecdsa.PublicKey, error) {
+	pkBinary := common.FromHex(strings.ToLower(strings.TrimPrefix(pkHex, "0x")))
+	if len(pkBinary) != 64 { // X:32 Y:32
+		return nil, xerrors.Errorf("wrong public key length: expect 64, got %d", len(pkBinary))
+	}
+	return &ecdsa.PublicKey{
+		Curve: elliptic.P256(),
+		X:     new(big.Int).SetBytes(pkBinary[:32]),
+		Y:     new(big.Int).SetBytes(pkBinary[32:]),
+	}, nil
 }
