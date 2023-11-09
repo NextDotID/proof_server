@@ -38,7 +38,7 @@ func (Subkey) TableName() string {
 }
 
 // `self` doesn't needed to be stored in DB.
-func (self *Subkey) GenerateSignPayload() (payload string, err error) {
+func (self *Subkey) SignPayload() (payload string, err error) {
 	if self.RP_ID == "" {
 		return "", xerrors.Errorf("rp_id is empty")
 	}
@@ -47,21 +47,23 @@ func (self *Subkey) GenerateSignPayload() (payload string, err error) {
 		return "", xerrors.Errorf("when parsing avatar public key: %w", err)
 	}
 	switch self.Algorithm {
-	case types.SubkeyAlgorithms.Secp256R1: {
-		_, err = crypto.StringToSecp256r1Pubkey(self.PublicKey)
-	}
-	case types.SubkeyAlgorithms.Secp256K1: {
-		_, err = crypto.StringToSecp256k1Pubkey(self.PublicKey)
-	}
+	case types.SubkeyAlgorithms.Secp256R1:
+		{
+			_, err = crypto.StringToSecp256r1Pubkey(self.PublicKey)
+		}
+	case types.SubkeyAlgorithms.Secp256K1:
+		{
+			_, err = crypto.StringToSecp256k1Pubkey(self.PublicKey)
+		}
 	}
 	if err != nil {
 		return "", xerrors.Errorf("when parsing subkey public key: %w", err)
 	}
-	payloadStruct := subkeySignPayload {
-		Avatar: crypto.CompressedPubkeyHex(avatarPK),
+	payloadStruct := subkeySignPayload{
+		Avatar:    crypto.CompressedPubkeyHex(avatarPK),
 		Algorithm: string(self.Algorithm),
 		PublicKey: self.PublicKey,
-		RP_ID: self.RP_ID,
+		RP_ID:     self.RP_ID,
 	}
 
 	payloadBytes, err := json.Marshal(payloadStruct)
@@ -71,17 +73,26 @@ func (self *Subkey) GenerateSignPayload() (payload string, err error) {
 	return string(payloadBytes), nil
 }
 
+// ValidateSignature validates Avatar signature made to sign payload.
+func (self *Subkey) ValidateSignature(payload string, signature []byte) error {
+	avatarPK, err := crypto.StringToSecp256k1Pubkey(self.Avatar)
+	if err != nil {
+		return xerrors.Errorf("when deserializing subkey: %w", err)
+	}
+	return crypto.ValidatePersonalSignature(payload, signature, avatarPK)
+}
+
 // For `Secp256K1` : signature should be made by `personal_sign()`.
 // For `Secp256R1` : signature should be made by ECDSA w/ SHA256 under P-256 curve
-func (self *Subkey) ValidateSignature(payload string, signature []byte) error {
+func (self *Subkey) ValidateSubkeySignature(payload string, signature []byte) error {
 	switch self.Algorithm {
 	case types.SubkeyAlgorithms.Secp256K1:
 		{
-			pk, err := crypto.StringToSecp256k1Pubkey(self.PublicKey)
+			subkeyPK, err := crypto.StringToSecp256k1Pubkey(self.PublicKey)
 			if err != nil {
 				return xerrors.Errorf("when deserializing subkey: %w", err)
 			}
-			return crypto.ValidatePersonalSignature(payload, signature, pk)
+			return crypto.ValidatePersonalSignature(payload, signature, subkeyPK)
 		}
 	case types.SubkeyAlgorithms.Secp256R1:
 		{
@@ -97,15 +108,15 @@ func (self *Subkey) ValidateSignature(payload string, signature []byte) error {
 			} else {
 				return xerrors.New("signature validation failed")
 			}
-
 		}
+
 	default:
 		return xerrors.Errorf("algorithm not supported: %s", self.Algorithm)
 	}
 }
 
 func (self *Subkey) Save(signature []byte) (id int64, err error) {
-	signPayload, err := self.GenerateSignPayload()
+	signPayload, err := self.SignPayload()
 	if err != nil {
 		return 0, xerrors.Errorf("when generationg sign payload: %w", err)
 	}
