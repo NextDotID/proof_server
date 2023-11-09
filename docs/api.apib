@@ -581,7 +581,6 @@ NOTICE: One and only one of field group (`algorithm`, `publickey`) or `avatar` s
       + algorithm (string, required) - Algorithm of this subkey (now supporting `rs256`, `es256` and `secp256k1`)
       + public_key (string, required) - Public key of this subkey. See description above for format.
       + rp_id (string, required) - Relying Party Identifier. Usually it is the website domain / application name which needs this binding like `mastodon.org`. [W3C doc](https://www.w3.org/TR/webauthn-2/#rp-id)
-      + name (string, required) - Name of this subkey. Usually named by user.
 
   + Body
 
@@ -589,7 +588,6 @@ NOTICE: One and only one of field group (`algorithm`, `publickey`) or `avatar` s
           "avatar": "0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3",
           "algorighm": "es256",
           "public_key": "0x1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF",
-          "name": "My YubiKey",
           "rp_id": "mastodon.org",
         }
 
@@ -598,15 +596,12 @@ NOTICE: One and only one of field group (`algorithm`, `publickey`) or `avatar` s
   + Attributes (object)
 
     + sign_payload (string, required) - Payload subkey should sign
-      on. For `algorighm: es256` and `algorighm: secp256k1`, it should
-      be Base64 decoded into 32-bytes binary. The binary should be set
-      as "sign challenge".
+      on. You should sign this with avatar secret key using `personal_sign()` method.
 
   + Body
 
         {
-          // Sample: base64.encode(32_BYTE_ZEROES)
-          "sign_payload": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+          "sign_payload": "{\"avatar\":\"0x028c3cda474361179d653c41a62f6bbb07265d535121e19aedf660da2924d0b1e3\",...}"
        }
 
 + Response 400 (application/json)
