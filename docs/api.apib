@@ -538,11 +538,12 @@ like `0x1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF12345678
 
 + Request
 
-NOTICE: One and only one of field `subkey` and `avatar` should appear.
+NOTICE: One and only one of field group (`algorithm`, `publickey`) or `avatar` should appear.
 
     + Parameters
 
-      + subkey (string, optional) - Public key of an subkey to query. See format above for what this field should be.
+      + algorithm (string, optional) - Algorithm of the subkey. should be `es256` or `secp256k1`.
+      + public_key (string, optional) - Public key of an subkey to query. See format above for what this field should be.
       + avatar (string, optional) - Public key of an avatar to query. Should be `0xCOMPRESSED_PUBKEY_HEXSTRING` or `0xUNCOMPRESSED_PUBKEY_HEXSTRING`.
 
 + Response 200 (application/json)

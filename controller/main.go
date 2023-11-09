@@ -40,6 +40,8 @@ func Init() {
 	Engine.GET("/v1/proofchain/changes", proofChainChanges)
 	Engine.GET("/v1/proofchain", proofChainQuery)
 	Engine.POST("/v1/proof/restore_pubkey", proofRestorePubkey)
+
+	Engine.GET("/v1/subkey", subkeyQuery)
 }
 
 func errorResp(c *gin.Context, error_code int, err error) {
