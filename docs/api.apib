@@ -577,10 +577,16 @@ NOTICE: One and only one of field group (`algorithm`, `publickey`) or `avatar` s
 
     + Attributes (object)
 
-      + avatar (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
-      + algorithm (string, required) - Algorithm of this subkey (now supporting `rs256`, `es256` and `secp256k1`)
-      + public_key (string, required) - Public key of this subkey. See description above for format.
-      + rp_id (string, required) - Relying Party Identifier. Usually it is the website domain / application name which needs this binding like `mastodon.org`. [W3C doc](https://www.w3.org/TR/webauthn-2/#rp-id)
+      + avatar (string, required) - Public key of NextID Avatar to connect to.
+        Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed)
+        and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
+      + algorithm (string, required) - Algorithm of this subkey
+        (now supporting `rs256`, `es256` and `secp256k1`)
+      + public_key (string, required) - Public key of this subkey.
+        See description above for format.
+      + rp_id (string, required) - Relying Party Identifier.
+        Usually it is the website domain / application name which needs this binding like `mastodon.org`.
+        [W3C doc](https://www.w3.org/TR/webauthn-2/#rp-id)
 
   + Body
 
@@ -595,8 +601,8 @@ NOTICE: One and only one of field group (`algorithm`, `publickey`) or `avatar` s
 
   + Attributes (object)
 
-    + sign_payload (string, required) - Payload subkey should sign
-      on. You should sign this with avatar secret key using `personal_sign()` method.
+    + sign_payload (string, required) - Payload subkey should sign on.
+      You should sign this with avatar secret key using `personal_sign()` method.
 
   + Body
 
@@ -617,12 +623,20 @@ NOTICE: One and only one of field group (`algorithm`, `publickey`) or `avatar` s
 
     + Attributes (object)
 
-      + avatar (string, required) - Public key of NextID Avatar to connect to. Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed) and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
-      + algorithm (string, required) - Algorithm of this subkey (now supporting `rs256`, `es256` and `secp256k1`)
-      + public_key (string, required) - Public key of this subkey. See description above for format.
-      + rp_id (string, required) - Relying Party Identifier. Usually it is the website domain / application name which needs this binding like `mastodon.org`. [W3C doc](https://www.w3.org/TR/webauthn-2/#rp-id)
-      + name (string, required) - Name of this subkey. Usually named by user.
-      + signature (string, required) - Signature created by this Avatar (using `personal_sign()`), Base64-ed with payload generated in `POST /v1/subkey/payload`.
+      + avatar (string, required) - Public key of NextID Avatar to connect to.
+        Should be secp256k1 curve (for now), 65-bytes or 33-bytes long (uncompressed / compressed)
+        and stringified into hex form (`/^0x[0-9a-f]{65,130}$/`).
+      + algorithm (string, required) - Algorithm of this subkey
+        (now supporting `es256` and `secp256k1`)
+      + public_key (string, required) - Public key of this subkey.
+        See description above for format.
+      + rp_id (string, required) - Relying Party Identifier.
+        Usually it is the website domain / application name which needs this binding like `mastodon.org`.
+        [W3C doc](https://www.w3.org/TR/webauthn-2/#rp-id)
+      + name (string, required) - Name of this subkey.
+        Usually named by the user.
+      + signature (string, required) - Signature created by this Avatar (using `personal_sign()`),
+        Base64-ed with payload generated in `POST /v1/subkey/payload`.
 
 + Response 200 (application/json)
 

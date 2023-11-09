@@ -43,6 +43,7 @@ func Init() {
 
 	Engine.GET("/v1/subkey", subkeyQuery)
 	Engine.POST("/v1/subkey/payload", subkeyPayload)
+	Engine.POST("/v1/subkey", subkeySubmit)
 }
 
 func errorResp(c *gin.Context, error_code int, err error) {
