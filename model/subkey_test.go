@@ -25,7 +25,7 @@ func generateK1Subkey() (subkey *Subkey, avatarSK *ecdsa.PrivateKey, subkeySK *e
 
 func Test_SignPayload(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		subkey, _, _ :=generateK1Subkey()
+		subkey, _, _ := generateK1Subkey()
 		payload, err := subkey.SignPayload()
 		require.NoError(t, err)
 		require.Contains(t, payload, subkey.Avatar)

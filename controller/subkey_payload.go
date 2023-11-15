@@ -7,10 +7,10 @@ import (
 )
 
 type subkeyPayloadRequest struct {
-	Avatar    string `json:"avatar"`
+	Avatar    string                `json:"avatar"`
 	Algorithm types.SubkeyAlgorithm `json:"algorithm"`
-	PublicKey string `json:"public_key"`
-	RP_ID     string `json:"rp_id"`
+	PublicKey string                `json:"public_key"`
+	RP_ID     string                `json:"rp_id"`
 }
 
 type subkeyPayloadResponse struct {
@@ -27,9 +27,9 @@ func subkeyPayload(c *gin.Context) {
 
 	subkey := model.Subkey{
 		Algorithm: req.Algorithm,
-		Avatar: req.Avatar,
+		Avatar:    req.Avatar,
 		PublicKey: req.PublicKey,
-		RP_ID: req.RP_ID,
+		RP_ID:     req.RP_ID,
 	}
 	payload, err := subkey.SignPayload()
 	if err != nil {
