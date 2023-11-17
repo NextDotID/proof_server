@@ -36,6 +36,7 @@ func Init(autoMigrate bool) {
 			&Proof{},
 			&ProofChain{},
 			&AvatarAlias{},
+			&Subkey{},
 		)
 		if err != nil {
 			panic(err)
