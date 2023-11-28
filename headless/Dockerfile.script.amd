@@ -1,0 +1,35 @@
+FROM debian:stretch AS runner
+USER root
+ARG TARGETARCH
+ENV GRAAL_VERSION=22.3.0
+ENV JAVA_VERSION=11
+# Install chromedriver
+RUN apt-get update && apt install chromium-driver curl -y
+
+# Install script interpreter
+RUN curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install
+RUN chmod a+x install
+RUN ["/bin/bash", "./install", "--static"]
+
+# Install JVM (for loading jsoup pod and other java deps)
+RUN cd / && mkdir graal
+WORKDIR /graal
+
+RUN curl -sLO https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-${GRAAL_VERSION}/graalvm-ce-java${JAVA_VERSION}-linux-amd64-${GRAAL_VERSION}.tar.gz
+RUN tar -xzf graalvm-ce-java${JAVA_VERSION}-linux-amd64-${GRAAL_VERSION}.tar.gz
+
+RUN cd / && mkdir babashka
+WORKDIR /babashka
+
+COPY dist/jar/pod-jaydeesimon-jsoup-0.1-standalone.jar dist/jar/pod-jaydeesimon-jsoup-0.1-standalone.jar
+COPY bb.edn bb.edn
+COPY deps.edn deps.edn
+
+RUN apt-get install -y git
+ENV PATH="/graal/graalvm-ce-java${JAVA_VERSION}-${GRAAL_VERSION}/bin:${PATH}"
+ENV JAVA_HOME="/graal/graalvm-ce-java${JAVA_VERSION}-${GRAAL_VERSION}"
+RUN bb prepare
+
+COPY src/headless/find.cljc src/headless/find.cljc
+
+ENTRYPOINT ["bb", "./src/headless/find.cljc"]

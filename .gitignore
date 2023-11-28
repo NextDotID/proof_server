@@ -12,3 +12,12 @@ config/*.toml
 
 .idea
 .vscode/
+ 
+temp/
+.holy-lambda/
+?/
+.cpcache/
+.clj-kondo/
+.lsp/
+.DS_Store
+native-configuration/

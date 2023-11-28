@@ -1,0 +1,19 @@
+
+{:deps {etaoin/etaoin {:mvn/version "1.0.38"}
+        nrepl/bencode {:mvn/version "1.1.0"}
+        org.jsoup/jsoup {:mvn/version "1.15.3"}
+        org.clojars.askonomm/ruuter {:mvn/version "1.3.2"}
+        http-kit/http-kit {:mvn/version "2.6.0"}
+        org.clojure/core.match {:mvn/version "1.0.0"} 
+        org.babashka/cli {:mvn/version "0.5.40"}
+        babashka/babashka.pods {:mvn/version "0.1.0"}
+        org.clojure/clojure                  {:mvn/version "1.10.3"}
+        io.github.FieryCod/holy-lambda       {:mvn/version "0.6.6"}
+        com.github.clj-easy/graal-build-time {:mvn/version "0.1.4"}}
+
+ :paths  ["src" "resources" "jsoup"]
+ :aliases
+ {:build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.3" :git/sha "0d20256"}}
+          :ns-default build
+          :exec-fn build/uber
+          :jvm-opts ["-Dclojure.compiler.direct-linking=true" "-Dclojure.spec.skip-macros=true"]}}}
