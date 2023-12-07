@@ -37,7 +37,7 @@ func proofPayload(c *gin.Context) {
 	req := &ProofPayloadRequest{}
 	err := c.BindJSON(req)
 	if err != nil {
-		errorResp(c, http.StatusBadRequest, err)
+		errorResp(c, http.StatusBadRequest, xerrors.Errorf("when parsing body: %w", err))
 		return
 	}
 	if !proofPayloadCheckRequest(req) {

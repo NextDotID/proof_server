@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -35,6 +34,7 @@ type HeadlessConfig struct {
 type PlatformConfig struct {
 	Twitter  TwitterPlatformConfig  `json:"twitter"`
 	Telegram TelegramPlatformConfig `json:"telegram"`
+	TikTok   TikTokPlatformConfig   `json:"tiktok"`
 	Ethereum EthereumPlatformConfig `json:"ethereum"`
 	Discord  DiscordPlatformConfig  `json:"discord"`
 	Slack    SlackPlatformConfig    `json:"slack"`
@@ -59,6 +59,12 @@ type TelegramPlatformConfig struct {
 	ApiHash           string `json:"api_hash"`
 	BotToken          string `json:"bot_token"`
 	PublicChannelName string `json:"public_channel_name"`
+}
+
+type TikTokPlatformConfig struct {
+	AppID        string `json:"app_id"`
+	ClientKey    string `json:"client_key"`
+	ClientSecret string `json:"client_secret"`
 }
 
 type SlackPlatformConfig struct {
@@ -90,7 +96,7 @@ func Init(configPath string) {
 	if C.DB.Host != "" { // Initialized
 		return
 	}
-	configContent, err := ioutil.ReadFile(configPath)
+	configContent, err := os.ReadFile(configPath)
 	if err != nil {
 		logrus.Fatalf("Error during opening config file! %v", err)
 	}
