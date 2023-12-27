@@ -12,8 +12,9 @@ import (
 
 const (
 	FINAL_URL_TEMPLATE = "^https://www\\.tiktok\\.com/@(.+?)/video/(\\d+)"
-	OEMBED_URL_BASE = "https://www.tiktok.com/oembed?url=https://www.tiktok.com/@%s/video/%s"
+	OEMBED_URL_BASE    = "https://www.tiktok.com/oembed?url=https://www.tiktok.com/@%s/video/%s"
 )
+
 var (
 	finalUrlRegexp = regexp.MustCompile(FINAL_URL_TEMPLATE)
 )
@@ -47,7 +48,8 @@ type OEmbedInfo struct {
 	ProviderName string `json:"provider_name"`
 }
 
-/// fetchOembedInfo fetches OEmbed card info from TikTok.
+// fetchOembedInfo fetches OEmbed card info from TikTok.
+// Sample: `https://www.tiktok.com/oembed?url=https://www.tiktok.com/@scout2015/video/6718335390845095173`
 func fetchOembedInfo(url string) (*OEmbedInfo, error) {
 	username, videoID, err := redirectToFinalURL(url, 0)
 	if err != nil {
@@ -64,8 +66,8 @@ func fetchOembedInfo(url string) (*OEmbedInfo, error) {
 		return nil, xerrors.Errorf("tiktok: error when reading oembed body: %w", err)
 	}
 	oembed := OEmbedInfo{}
-	err = json.Unmarshal(body, &oembed)
-	if err != nil {
+
+	if err = json.Unmarshal(body, &oembed); err != nil {
 		return nil, xerrors.Errorf("tiktok: error when parsing oembed body: %w", err)
 	}
 
@@ -98,7 +100,7 @@ func redirectToFinalURL(url string, redirectCount int) (username, videoID string
 
 	redirectLocation, err := resp.Location()
 	if redirectLocation != nil {
-		return redirectToFinalURL(redirectLocation.String(), redirectCount + 1)
+		return redirectToFinalURL(redirectLocation.String(), redirectCount+1)
 	}
 	return "", "", xerrors.Errorf("tiktok: not a valid URL")
 }
