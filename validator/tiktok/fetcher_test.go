@@ -15,3 +15,23 @@ func Test_finalURLmatching(t *testing.T) {
 		require.Equal(t, "6718335390845095173", result[2])
 	})
 }
+
+
+func Test_redirectToFinalURL(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		url := "https://www.tiktok.com/t/ZPRv3FPg5/"
+		username, videoID, err := redirectToFinalURL(url, 0)
+		require.NoError(t, err)
+		require.Equal(t, "realwolfiesmom", username)
+		require.Equal(t, "7287329983805197614", videoID)
+	})
+}
+
+func Test_fetchOembedInfo(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		url := "https://www.tiktok.com/@scout2015/video/6718335390845095173"
+		result, err := fetchOembedInfo(url)
+		require.NoError(t, err)
+		require.Contains(t, result.Title, "Scramble up ur name")
+	})
+}
