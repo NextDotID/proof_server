@@ -16,7 +16,6 @@ func Test_finalURLmatching(t *testing.T) {
 	})
 }
 
-
 func Test_redirectToFinalURL(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		url := "https://www.tiktok.com/t/ZPRv3FPg5/"

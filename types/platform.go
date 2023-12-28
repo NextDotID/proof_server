@@ -8,6 +8,7 @@ var Platforms = struct {
 	NextID      Platform
 	Twitter     Platform
 	Telegram    Platform
+	TikTok      Platform
 	Keybase     Platform
 	Ethereum    Platform
 	Discord     Platform
@@ -24,6 +25,7 @@ var Platforms = struct {
 	NextID:      "nextid",
 	Twitter:     "twitter",
 	Telegram:    "telegram",
+	TikTok:      "tiktok",
 	Keybase:     "keybase",
 	Ethereum:    "ethereum",
 	Discord:     "discord",
