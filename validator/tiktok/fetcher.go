@@ -12,7 +12,7 @@ import (
 
 const (
 	FINAL_URL_TEMPLATE = "^https://www\\.tiktok\\.com/@(.+?)/video/(\\d+)"
-	OEMBED_URL_BASE    = "https://www.tiktok.com/oembed?url=https://www.tiktok.com/@%s/video/%s"
+	OEMBED_URL_BASE    = "https://www.tiktok.com/oembed?url=%s"
 )
 
 var (
@@ -26,10 +26,12 @@ type OEmbedInfo struct {
 	Type string `json:"type"`
 	// "title": "Scramble up ur name & I’ll try to guess it😍❤️ #foryoupage #petsoftiktok #aesthetic",
 	Title string `json:"title"`
-	// "author_url": "https://www.tiktok.com/@scout2015",
+	// "author_url": "https://www.tiktok.com/@menyki",
 	AuthorURL string `json:"author_url"`
 	// "author_name": "Scout & Suki",
 	AuthorName string `json:"author_name"`
+	// author_unique_id : "menyki"
+	AuthorUniqueID string `json:"author_unique_id"`
 	// "width": "100%",
 	Width string `json:"width"`
 	// "height": "100%",
@@ -46,17 +48,29 @@ type OEmbedInfo struct {
 	ProviderUrl string `json:"provider_url"`
 	// "provider_name": "TikTok"
 	ProviderName string `json:"provider_name"`
+	// embed_type : "video"
+	EmbedType string `json:"embed_type"`
+	// embed_product_id : "7287329983805197614"
+	EmbedProductID string `json:"embed_product_id"`
+}
+
+type ErrorMessage struct {
+	// "Something went wrong"
+	Message string `json:"message"`
+	// 400
+	Code    int    `json:"code"`
 }
 
 // fetchOembedInfo fetches OEmbed card info from TikTok.
 // Sample: `https://www.tiktok.com/oembed?url=https://www.tiktok.com/@scout2015/video/6718335390845095173`
 func fetchOembedInfo(url string) (*OEmbedInfo, error) {
-	username, videoID, err := redirectToFinalURL(url, 0)
-	if err != nil {
-		return nil, err
-	}
+	// FIXME: no need to marshal url manually, tiktok supports both full and shortened link.
+	// username, videoID, err := redirectToFinalURL(url, 0)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	oembedURL := fmt.Sprintf(OEMBED_URL_BASE, username, videoID)
+	oembedURL := fmt.Sprintf(OEMBED_URL_BASE, url)
 	resp, err := http.Get(oembedURL)
 	if err != nil {
 		return nil, xerrors.Errorf("tiktok: error when fetching oembed info: %w", err)
@@ -65,12 +79,15 @@ func fetchOembedInfo(url string) (*OEmbedInfo, error) {
 	if err != nil {
 		return nil, xerrors.Errorf("tiktok: error when reading oembed body: %w", err)
 	}
+
 	oembed := OEmbedInfo{}
-
 	if err = json.Unmarshal(body, &oembed); err != nil {
-		return nil, xerrors.Errorf("tiktok: error when parsing oembed body: %w", err)
+		errorMessage := ErrorMessage{}
+		if err = json.Unmarshal(body, &errorMessage); err != nil {
+			return nil, xerrors.Errorf("tiktok: error when parsing oembed body: %w", err)
+		}
+		return nil, xerrors.Errorf("tiktok: fail to fetch video info: [%d] %s", errorMessage.Code, errorMessage.Message)
 	}
-
 	return &oembed, nil
 }
 

@@ -79,14 +79,15 @@ func (tt *TikTok) Validate() (err error) {
 	if err != nil {
 		return xerrors.Errorf("error when fetching tiktok proof: %w", err)
 	}
-	if fmt.Sprintf("https://www.tiktok.com/@%s", tt.Identity) != oembedInfo.AuthorURL {
-		return xerrors.New("tiktok user mismatch")
+	if  tt.Identity != oembedInfo.AuthorUniqueID {
+		return xerrors.Errorf("tiktok user mismatch: %s instead of %s", oembedInfo.AuthorUniqueID, tt.Identity)
 	}
 	signature, err := extractSignatureFromTitle(oembedInfo.Title)
 	if err != nil {
 		return err
 	}
 	tt.Signature = signature
+	tt.ProofLocation = oembedInfo.EmbedProductID
 	return mycrypto.ValidatePersonalSignature(tt.GenerateSignPayload(), tt.Signature, tt.Pubkey)
 }
 

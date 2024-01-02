@@ -27,10 +27,17 @@ func Test_redirectToFinalURL(t *testing.T) {
 }
 
 func Test_fetchOembedInfo(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
+	t.Run("full URL", func(t *testing.T) {
 		url := "https://www.tiktok.com/@scout2015/video/6718335390845095173"
 		result, err := fetchOembedInfo(url)
 		require.NoError(t, err)
 		require.Contains(t, result.Title, "Scramble up ur name")
+	})
+
+	t.Run("shortened URL", func(t *testing.T) {
+		url := "https://www.tiktok.com/t/ZPRv3FPg5"
+		result, err := fetchOembedInfo(url)
+		require.NoError(t, err)
+		require.Contains(t, result.EmbedProductID, "7287329983805197614")
 	})
 }
