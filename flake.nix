@@ -3,7 +3,7 @@
 
   # Nixpkgs / NixOS version to use.
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/*.tar.gz";
     utils.url = "github:numtide/flake-utils";
   };
 

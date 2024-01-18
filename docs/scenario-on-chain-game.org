@@ -1,0 +1,21 @@
+* Full on-chain game
+:PROPERTIES:
+:ID:       7bc04e38-459b-4e06-a466-431d5923f9e2
+:END:
+
+** Preseq
+:PROPERTIES:
+:ID:       f97801a4-29fa-47e9-a53f-3cf42df5e628
+:END:
+
+*** Cross-Device identities
+:PROPERTIES:
+:ID:       a659b334-b3d5-4394-8400-8eaab0bec1e2
+:END:
+
+Merge all separate device key into 1 individual to sync game progress.
+
+**** Potential solution: Subkey
+:PROPERTIES:
+:ID:       a1614d5d-f015-418a-8de6-51001f99678e
+:END:
