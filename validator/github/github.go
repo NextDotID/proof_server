@@ -125,11 +125,18 @@ func (gh *Github) Validate() (err error) {
 	if err != nil {
 		return xerrors.Errorf("error when recovering pubkey: %w", err)
 	}
+	if crypto.CompressedPubkeyHex(pubkey_recovered) != crypto.CompressedPubkeyHex(gh.Pubkey) {
+		return xerrors.Errorf(
+			"persona in gist (%s) does not match supplied public key (%s)",
+			crypto.CompressedPubkeyHex(pubkey_recovered),
+			crypto.CompressedPubkeyHex(gh.Pubkey),
+		)
+	}
 	signature, err := util.DecodeString(payload.Signature)
 	if err != nil {
 		return xerrors.Errorf("error when decoding signature: %w", err)
 	}
-	return crypto.ValidatePersonalSignature(payload.SignPayload, signature, pubkey_recovered)
+	return crypto.ValidatePersonalSignature(gh.SignaturePayload, signature, pubkey_recovered)
 }
 
 func (gh *Github) GetAltID() string {
