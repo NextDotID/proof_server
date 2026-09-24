@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -100,6 +101,22 @@ func (ap *ActivityPub) DetectServerSoftware() (server ServerSoftware, err error)
 		// TODO: maybe no need to be this strict?
 		if link.Rel != "http://nodeinfo.diaspora.software/ns/schema/2.0" {
 			continue
+		}
+		parsedHref, err := url.Parse(link.Href)
+		if err != nil {
+			return "", e(xerrors.Errorf("invalid nodeinfo link href: %w", err))
+		}
+		if parsedHref.Scheme != "https" {
+			return "", xerrors.Errorf(
+				"nodeinfo link scheme mismatch: got %s, expected https",
+				parsedHref.Scheme,
+			)
+		}
+		if parsedHref.Hostname() != serverURL {
+			return "", xerrors.Errorf(
+				"nodeinfo link host mismatch: got %s, expected %s",
+				parsedHref.Hostname(), serverURL,
+			)
 		}
 		resp, err := http.Get(link.Href)
 		if err != nil {
